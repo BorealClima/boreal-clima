@@ -283,24 +283,30 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 
   </section>
 
   <section class="card">
-    <h2><span class="n">2</span>Equipamentos<button class="btn ghost small right addEq" type="button">+ Equipamento</button></h2>
+    <h2><span class="n">2</span>Relato do cliente</h2>
+    <p class="hint">Anote aqui, do jeito que o cliente contar, o que está acontecendo com o aparelho.</p>
+    <label class="f wide"><textarea data-k="relato" style="min-height:120px" placeholder="Ex.: O ar do quarto liga, mas não gela. Começou a pingar água na parede faz uma semana e tem um barulho estranho quando liga à noite."></textarea></label>
+  </section>
+
+  <section class="card">
+    <h2><span class="n">3</span>Equipamentos<button class="btn ghost small right addEq" type="button">+ Equipamento</button></h2>
     <div class="eqList"></div>
   </section>
 
   <section class="card">
-    <h2><span class="n">3</span>Tipo de serviço</h2>
+    <h2><span class="n">4</span>Tipo de serviço</h2>
     <div class="chips svcChips"></div>
   </section>
 
   <section class="card">
-    <h2><span class="n">4</span>Peças e materiais<span class="right hbtns"><button class="btn ghost small addGrp" type="button">+ Grupo</button><button class="btn ghost small addMat" type="button">+ Item</button></span></h2>
+    <h2><span class="n">5</span>Peças e materiais<span class="right hbtns"><button class="btn ghost small addGrp" type="button">+ Grupo</button><button class="btn ghost small addMat" type="button">+ Item</button></span></h2>
     <p class="hint">Digite o nome do material: se ele estiver na sua tabela (⚙️ Configurações), o valor entra sozinho. Use <b>+ Grupo</b> para colocar um kit inteiro de uma vez.</p>
     <div class="matList"></div>
     <div class="mtot"><span>Total de materiais</span><b class="matTotal">R$ 0,00</b></div>
   </section>
 
   <section class="card">
-    <h2><span class="n">5</span>Valores</h2>
+    <h2><span class="n">6</span>Valores</h2>
     <div class="grid">
       <label class="f">Mão de obra / serviço (R$)<input type="text" inputmode="decimal" data-k="valor" placeholder="0,00"></label>
       <label class="f">Garantia do serviço<select data-k="garantia"><option>90 dias</option><option>30 dias</option><option>180 dias</option><option>1 ano</option><option>Sem garantia</option></select></label>
@@ -310,7 +316,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 
   </section>
 
   <section class="card">
-    <h2><span class="n">6</span>Assinatura</h2>
+    <h2><span class="n">7</span>Assinatura</h2>
     <div class="grid" style="margin-bottom:12px">
       <label class="f">Técnico responsável<input type="text" data-k="tecnico" placeholder="Nome do técnico"></label>
     </div>
@@ -1049,6 +1055,7 @@ async function renderPDF(D){
   if(isOS){cli.push(["Já é cliente?",f.cliAnt],["Técnico",f.tecnico]);if(D.refOrc)cli.push(["Orçamento de origem","Nº "+pad(D.refOrc,4)])}
   else cli.push(["Data do orçamento",br(f.data)],["Técnico",f.tecnico]);
   d.fields(cli,3);
+  if(!isOS&&f.relato)d.note("Relato do cliente",f.relato);
 
   pdfEquip(d,D.eq||[]);
   pdfServ(d,D.svc||[],isOS?"Serviço realizado":"Serviços orçados");
