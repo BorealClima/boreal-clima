@@ -146,6 +146,17 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 
 .ckgrp:first-child .ckh{margin-top:0}
 .sigdate{font-size:13px;color:var(--ok);font-weight:700}
 .hbtns{display:flex;gap:8px}
+.mcat{border:1.5px solid var(--line);border-radius:12px;margin-bottom:8px;background:#fff}
+.mcat>summary{list-style:none;display:flex;align-items:center;gap:10px;padding:13px 14px;cursor:pointer;font-weight:700;color:var(--navy)}
+.mcat>summary::-webkit-details-marker{display:none}
+.mcat>summary::before{content:"▸";color:var(--blue);transition:.15s}
+.mcat[open]>summary::before{transform:rotate(90deg)}
+.mcat .mcc{margin-left:auto;color:var(--muted);font-weight:600;font-size:13px}
+.mcbody{padding:0 12px 12px}
+.mchead{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+.mchead input{font-weight:700!important;min-height:44px!important}
+.crow-h{display:grid;grid-template-columns:minmax(0,1fr) 150px 44px;gap:10px;margin-bottom:4px;font-size:12px;font-weight:600;color:var(--muted)}
+.crow input{min-height:46px!important;font-size:16px!important}
 .grp{border:1.5px solid var(--line);border-radius:12px;padding:12px;margin-bottom:12px;background:#FAFCFE}
 .grph{display:flex;gap:8px;align-items:center;margin-bottom:10px}
 .grph input{font-weight:700!important}
@@ -533,10 +544,13 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 
   </div>
   <div style="margin-top:20px">
     <b style="color:var(--navy)">Tabela de materiais e preços</b>
-    <p class="hint">Cadastre uma vez. No orçamento e na OS, é só digitar o nome que o preço aparece.</p>
-    <div class="crow" style="margin-bottom:4px;font-size:13px;font-weight:600;color:var(--muted)"><span>Material / peça</span><span>Preço (R$)</span><span></span></div>
+    <p class="hint">Organizada por categoria, com cada medida numa linha. Toque numa categoria para abrir. Você pode mudar nomes e preços, apagar o que não usa (✕) e adicionar materiais ou categorias novas. No orçamento e na OS, é só digitar o nome que o preço aparece.</p>
+    <input type="search" id="cfgMatSearch" placeholder="Buscar material na tabela…" style="margin-bottom:10px">
     <div id="cfgMats"></div>
-    <button class="btn ghost small" type="button" id="cfgAddMat">+ Adicionar material</button>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+      <button class="btn ghost small" type="button" id="cfgAddCat">+ Nova categoria</button>
+      <button class="btn line small" type="button" id="cfgSeed">Repor itens da lista padrão</button>
+    </div>
   </div>
   <div style="margin-top:20px">
     <b style="color:var(--navy)">Grupos de materiais</b>
@@ -689,12 +703,54 @@ async function upsertClient(f){const key=norm(f.cliNome);if(!key)return null;con
   await DB.put("clients",rec);return rec}
 
 /* ---------- materials (settings) ---------- */
-function cfgMatRow(m){m=m||{};const r=document.createElement("div");r.className="crow";
+const CATALOGO=[
+ ["Tubulação de cobre e conexões",['Tubo de cobre 1/4" (m)','Tubo de cobre 3/8" (m)','Tubo de cobre 1/2" (m)','Tubo de cobre 5/8" (m)','Tubo de cobre 3/4" (m)','Porca flare 1/4"','Porca flare 3/8"','Porca flare 1/2"','Porca flare 5/8"','Porca flare 3/4"','Luva/união de cobre 1/4"','Luva/união de cobre 3/8"','Luva/união de cobre 1/2"','Luva/união de cobre 5/8"','Luva/união de cobre 3/4"','Curva de cobre 1/4"','Curva de cobre 3/8"','Curva de cobre 1/2"','Curva de cobre 5/8"','Curva de cobre 3/4"','Vareta de solda foscoper','Vareta de solda prata','Fluxo para solda','Isolamento térmico 1/4" (m)','Isolamento térmico 3/8" (m)','Isolamento térmico 1/2" (m)','Isolamento térmico 5/8" (m)','Isolamento térmico 3/4" (m)','Fita PVC de acabamento (rolo)']],
+ ["Gás e testes",['Gás R410A (kg)','Gás R32 (kg)','Gás R22 (kg)','Nitrogênio (carga)','Óleo para flange']],
+ ["Dreno",['Mangueira de dreno cristal (m)','Mangueira de dreno corrugada (m)','Tubo PVC 20 mm (m)','Tubo PVC 25 mm (m)','Joelho PVC 20 mm','Joelho PVC 25 mm','Luva PVC 20 mm','Luva PVC 25 mm','T PVC 20 mm','T PVC 25 mm','Adaptador PVC para dreno','Cola PVC','Mini bomba de dreno','Caixa de dreno embutida']],
+ ["Elétrica",['Cabo PP 3x1,5 (m)','Cabo PP 3x2,5 (m)','Cabo PP 4x1,5 (m)','Cabo PP 4x2,5 (m)','Cabo flexível 2,5 mm² (m)','Cabo flexível 4 mm² (m)','Cabo flexível 6 mm² (m)','Disjuntor monopolar 10 A','Disjuntor monopolar 16 A','Disjuntor monopolar 20 A','Disjuntor monopolar 25 A','Disjuntor monopolar 32 A','Disjuntor bipolar 10 A','Disjuntor bipolar 16 A','Disjuntor bipolar 20 A','Disjuntor bipolar 25 A','Disjuntor bipolar 32 A','Caixa para disjuntor','Tomada 20 A','Terminal pino','Terminal olhal','Terminal forquilha','Conector tipo Wago','Fita isolante','Fita de autofusão','Eletroduto/conduíte (m)','DPS (protetor contra surtos)']],
+ ["Fixação e suportes",['Suporte condensadora 400 mm','Suporte condensadora 450 mm','Suporte condensadora 500 mm','Suporte condensadora 600 mm','Base de piso/laje para condensadora','Coxim amortecedor de borracha (jogo)','Parafuso e bucha S6','Parafuso e bucha S8','Parafuso e bucha S10','Chumbador/parabolt','Abraçadeira de nylon (pacote)']],
+ ["Acabamento",['Canaleta (barra)','Curva para canaleta','Terminal para canaleta','Emenda para canaleta','Passa-parede para canaleta','Massa de calafetar','Espuma expansiva','Silicone','Bucha/luva de passagem de parede']],
+ ["Manutenção e higienização",['Limpador de serpentina','Desincrustante para condensadora','Bactericida/higienizador','Detergente neutro','Capa coletora para lavagem','Filtro de ar (reposição)','Filtro de carvão ativado','Filtro HEPA','Pastilha para bandeja de dreno','Pilhas para controle remoto (par)']],
+ ["Capacitores",['Capacitor compressor 20 µF','Capacitor compressor 25 µF','Capacitor compressor 30 µF','Capacitor compressor 35 µF','Capacitor compressor 40 µF','Capacitor compressor 45 µF','Capacitor compressor 50 µF','Capacitor ventilador 1,5 µF','Capacitor ventilador 2 µF','Capacitor ventilador 2,5 µF','Capacitor ventilador 3 µF','Capacitor ventilador 4 µF','Capacitor ventilador 5 µF','Capacitor duplo 25+2,5 µF','Capacitor duplo 30+2,5 µF','Capacitor duplo 35+2,5 µF','Capacitor duplo 40+2,5 µF']],
+ ["Elétrica e eletrônica (reparo)",['Contator','Relé','Placa eletrônica evaporadora','Placa eletrônica condensadora (inverter)','Módulo de potência IPM (inverter)','Sensor de temperatura ambiente','Sensor de temperatura da serpentina','Fusível da placa','Varistor','Transformador da placa','Receptor infravermelho/display','Controle remoto original','Controle remoto universal','Protetor térmico (klixon)','Termostato (janela)']],
+ ["Motores e ventilação",['Motor ventilador evaporadora (AC)','Motor ventilador evaporadora (DC/BLDC)','Motor ventilador condensadora','Motor de passo (swing)','Turbina/ventoinha evaporadora','Hélice condensadora','Bucha/rolamento eixo da turbina','Coxim do motor']],
+ ["Circuito de refrigeração",['Compressor','Válvula de serviço 1/4"','Válvula de serviço 3/8"','Válvula de serviço 1/2"','Válvula de serviço 5/8"','Válvula de expansão eletrônica (EEV)','Bobina da EEV','Válvula reversora 4 vias','Bobina da válvula reversora','Tubo capilar (m)','Filtro secador','Pressostato','Obus/válvula schrader','Óleo POE (litro)','Óleo mineral (litro)']],
+ ["Estrutura",['Aleta direcionadora (flap)','Bandeja de dreno','Frontal/carenagem evaporadora','Grade de proteção condensadora','Pés de borracha (jogo)']]
+];
+const CAT_OUTROS="Meus materiais";
+function mergeCatalog(list){list=(list||[]).map(m=>Object.assign({},m));const by=new Map();list.forEach(m=>{const k=norm(m.nome);if(k&&!by.has(k))by.set(k,m)});let added=0;
+  const out=[],used=new Set();
+  CATALOGO.forEach(([cat,items])=>{items.forEach(n=>{const k=norm(n);let m=by.get(k);if(m){if(!m.cat)m.cat=cat}else{m={nome:n,preco:0,cat};added++}if(m.cat===cat&&!used.has(m)){out.push(m);used.add(m)}});
+    list.forEach(m=>{if(m.cat===cat&&!used.has(m)){out.push(m);used.add(m)}})});
+  list.forEach(m=>{if(!used.has(m)){if(!m.cat)m.cat=CAT_OUTROS;out.push(m);used.add(m)}});
+  return{list:out,added}}
+function seedCatalog(){const r=mergeCatalog(cfg.materiais);cfg.materiais=r.list;cfg.catalogoV1=true;cfg.atualizadoEm=Date.now();LS.set("boreal_cfg",cfg);DB.mark("cfg","main");return r.added}
+
+function cfgMatRow(m,box){m=m||{};box=box||$("#cfgMats .mitems");const r=document.createElement("div");r.className="crow";
   r.innerHTML='<input type="text" data-cm="nome" placeholder="Ex.: Gás R410A (kg)"><input type="text" data-cm="preco" inputmode="decimal" placeholder="0,00"><button class="mrm" type="button" aria-label="Remover">✕</button>';
-  r.querySelector('[data-cm=nome]').value=m.nome||"";r.querySelector('[data-cm=preco]').value=m.preco!=null&&m.preco!==""?fmt(m.preco):"";
+  r.querySelector('[data-cm=nome]').value=m.nome||"";r.querySelector('[data-cm=preco]').value=m.preco?fmt(m.preco):"";
   const pr=r.querySelector('[data-cm=preco]');pr.addEventListener("blur",()=>{if(pr.value.trim())pr.value=fmt(parseMoney(pr.value))});
-  r.querySelector(".mrm").onclick=()=>r.remove();$("#cfgMats").appendChild(r);return r}
-$("#cfgAddMat").onclick=()=>cfgMatRow().querySelector("input").focus();
+  r.querySelector(".mrm").onclick=()=>{const c=r.closest(".mcat");r.remove();catCount(c)};box.appendChild(r);catCount(r.closest(".mcat"));return r}
+function catCount(c){if(!c)return;const n=c.querySelectorAll(".mitems .crow").length;c.querySelector(".mcc").textContent=n+" ite"+(n===1?"m":"ns")}
+function cfgCatBox(name,items,open){const el=document.createElement("details");el.className="mcat";if(open)el.open=true;
+  el.innerHTML='<summary><span class="mcn"></span><span class="mcc"></span></summary><div class="mcbody"><div class="mchead"><input type="text" data-catname placeholder="Nome da categoria"><button class="rm" type="button" data-delcat>Excluir categoria</button></div>'+
+    '<div class="crow-h"><span>Material / peça</span><span>Preço (R$)</span><span></span></div><div class="mitems"></div><button class="btn ghost small" type="button" data-addmat>+ Adicionar material</button></div>';
+  const ni=el.querySelector("[data-catname]");ni.value=name;el.querySelector(".mcn").textContent=name;ni.addEventListener("input",()=>{el.querySelector(".mcn").textContent=ni.value||"Sem nome"});
+  const box=el.querySelector(".mitems");(items||[]).forEach(m=>cfgMatRow(m,box));
+  el.querySelector("[data-addmat]").onclick=()=>cfgMatRow({},box).querySelector("input").focus();
+  el.querySelector("[data-delcat]").onclick=async()=>{const n=box.querySelectorAll(".crow").length;if(await ask("Excluir a categoria "+(ni.value||"")+"?",n?"Os "+n+" materiais dela também saem da tabela quando você tocar em Salvar.":"Ela sai da tabela quando você tocar em Salvar.","Excluir"))el.remove()};
+  $("#cfgMats").appendChild(el);catCount(el);return el}
+function renderCfgMats(list){$("#cfgMats").innerHTML="";const order=[],map={};
+  (list||[]).forEach(m=>{const c=m.cat||CAT_OUTROS;if(!map[c]){map[c]=[];order.push(c)}map[c].push(m)});
+  if(!order.length){order.push(CAT_OUTROS);map[CAT_OUTROS]=[{}]}
+  order.forEach(c=>cfgCatBox(c,map[c],false));$("#cfgMatSearch").value=""}
+function readCfgMats(){return $$("#cfgMats .mcat").flatMap(el=>{const cat=el.querySelector("[data-catname]").value.trim()||CAT_OUTROS;
+  return Array.from(el.querySelectorAll(".mitems .crow")).map(r=>({nome:r.querySelector("[data-cm=nome]").value.trim(),preco:parseMoney(r.querySelector("[data-cm=preco]").value),cat}))}).filter(m=>m.nome)}
+$("#cfgAddCat").onclick=()=>{const el=cfgCatBox("Nova categoria",[{}],true);const i=el.querySelector("[data-catname]");i.focus();i.select();el.scrollIntoView({behavior:"smooth",block:"center"})};
+$("#cfgSeed").onclick=()=>{const r=mergeCatalog(readCfgMats());renderCfgMats(r.list);toast(r.added?(r.added===1?"1 item da lista padrão voltou":r.added+" itens da lista padrão voltaram")+". Toque em Salvar para guardar.":"Todos os itens da lista padrão já estão na tabela")};
+$("#cfgMatSearch").addEventListener("input",e=>{const q=norm(e.target.value);$$("#cfgMats .mcat").forEach(el=>{let any=false;
+  el.querySelectorAll(".mitems .crow").forEach(r=>{const ok=!q||norm(r.querySelector("[data-cm=nome]").value).includes(q);r.hidden=!ok;if(ok)any=true});
+  el.hidden=!!q&&!any;el.open=!!q&&any})});
 function cfgMatNames(){$("#matNames").innerHTML=$$("#cfgMats .crow").map(r=>r.querySelector("[data-cm=nome]").value.trim()).filter(Boolean).map(n=>'<option value="'+esc(n)+'">').join("")}
 function cfgLookup(name){const n=norm(name);if(!n)return null;for(const r of $$("#cfgMats .crow")){if(norm(r.querySelector("[data-cm=nome]").value)===n)return parseMoney(r.querySelector("[data-cm=preco]").value)}return null}
 function grpTotal(el){if(!el)return;let t=0,n=0;el.querySelectorAll(".gitems .grow").forEach(r=>{const q=Number(String(r.querySelector("[data-gi=qtd]").value||"1").replace(",","."))||0;t+=q*parseMoney(r.querySelector("[data-gi=preco]").value);if(r.querySelector("[data-gi=nome]").value.trim())n++});
@@ -705,7 +761,7 @@ function cfgGroupItem(box,it){it=it||{};const r=document.createElement("div");r.
   n.value=it.nome||"";qn.value=it.qtd!=null&&it.qtd!==""?it.qtd:"1";p.value=it.preco?fmt(it.preco):"";
   const upd=()=>grpTotal(r.closest(".grp"));
   n.addEventListener("focus",cfgMatNames);
-  n.addEventListener("input",()=>{const v=cfgLookup(n.value);if(v!=null)p.value=fmt(v);upd()});
+  n.addEventListener("input",()=>{const v=cfgLookup(n.value);if(v)p.value=fmt(v);upd()});
   qn.addEventListener("input",upd);p.addEventListener("input",upd);p.addEventListener("blur",()=>{if(p.value.trim())p.value=fmt(parseMoney(p.value))});
   r.querySelector(".mrm").onclick=()=>{const g=r.closest(".grp");r.remove();grpTotal(g)};
   box.appendChild(r);return r}
@@ -786,12 +842,12 @@ function FormCtl(type){
     '<button class="mrm" type="button" aria-label="Remover item">✕</button>';
     const nome=el.querySelector('[data-m=nome]'),qtd=el.querySelector('[data-m=qtd]'),preco=el.querySelector('[data-m=preco]'),sug=el.querySelector(".sug");
     nome.value=d.nome||"";qtd.value=d.qtd!=null&&d.qtd!==""?String(d.qtd):"1";preco.value=typeof d.preco==="number"?(d.preco?fmt(d.preco):""):(d.preco||"");
-    function pick(m){nome.value=m.nome;preco.value=fmt(m.preco);sug.classList.remove("open");recalc();saveDraft();qtd.focus();qtd.select&&qtd.select()}
+    function pick(m){nome.value=m.nome;preco.value=m.preco?fmt(m.preco):"";sug.classList.remove("open");recalc();saveDraft();qtd.focus();qtd.select&&qtd.select()}
     function showSug(){const n=norm(nome.value);const list=(cfg.materiais||[]).filter(m=>!n||norm(m.nome).includes(n)).slice(0,8);
       if(!list.length||(list.length===1&&norm(list[0].nome)===n)){sug.classList.remove("open");return}
-      sug.innerHTML="";list.forEach(m=>{const b=document.createElement("button");b.type="button";b.innerHTML=esc(m.nome)+"<span>R$ "+fmt(m.preco)+"</span>";
+      sug.innerHTML="";list.forEach(m=>{const b=document.createElement("button");b.type="button";b.innerHTML=esc(m.nome)+"<span>"+(m.preco?"R$ "+fmt(m.preco):"sem preço")+"</span>";
         b.addEventListener("pointerdown",e=>{e.preventDefault();pick(m)});b.addEventListener("click",e=>{e.preventDefault();pick(m)});sug.appendChild(b)});sug.classList.add("open")}
-    nome.addEventListener("input",()=>{const m=findMat(nome.value);if(m){preco.value=fmt(m.preco);recalc()}showSug()});
+    nome.addEventListener("input",()=>{const m=findMat(nome.value);if(m&&m.preco){preco.value=fmt(m.preco);recalc()}showSug()});
     nome.addEventListener("focus",showSug);
     nome.addEventListener("blur",()=>{const m=findMat(nome.value);if(m&&nome.value!==m.nome){nome.value=m.nome;saveDraft()}setTimeout(()=>sug.classList.remove("open"),180)});
     qtd.addEventListener("input",recalc);preco.addEventListener("input",recalc);
@@ -1324,12 +1380,12 @@ $("#cliMSave").onclick=async()=>{
 let pendingLogo="";
 function showLogo(){$("#logoPrev").innerHTML='<img alt="Logo" src="'+(pendingLogo||LOGO_LOCK)+'">';$("#logoPrev").style.background=pendingLogo?"#fff":"#000"}
 $("#btnCfg").onclick=()=>{$$("[data-c]").forEach(i=>i.value=cfg[i.dataset.c]||"");if(!$('[data-c="meses"]').value)$('[data-c="meses"]').value="6";pendingLogo=cfg.logo||"";showLogo();
-  $("#cfgMats").innerHTML="";(cfg.materiais&&cfg.materiais.length?cfg.materiais:[{}]).forEach(cfgMatRow);$("#cfgGroups").innerHTML="";(cfg.grupos||[]).forEach(cfgGroupCard);renderWaChips();openM("#mCfg");requestAnimationFrame(()=>cfgPad.load(cfg.sig))};
+  renderCfgMats(cfg.materiais);$("#cfgGroups").innerHTML="";(cfg.grupos||[]).forEach(cfgGroupCard);renderWaChips();openM("#mCfg");requestAnimationFrame(()=>cfgPad.load(cfg.sig))};
 $("#logoIn").onchange=async e=>{const f=e.target.files[0];if(!f)return;const url=URL.createObjectURL(f);try{const im=await loadImg(url);const s=Math.min(1,600/Math.max(im.width,im.height));
   const c=document.createElement("canvas");c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext("2d").drawImage(im,0,0,c.width,c.height);pendingLogo=c.toDataURL("image/png");showLogo()}catch(_){toast("Não consegui abrir a imagem")}finally{URL.revokeObjectURL(url)}e.target.value=""};
 $("#logoRm").onclick=()=>{pendingLogo="";showLogo()};
 $("#cfgSave").onclick=()=>{$$("[data-c]").forEach(i=>cfg[i.dataset.c]=i.value.trim());cfg.logo=pendingLogo||"";cfg.sig=cfgPad.toDataURL();
-  cfg.materiais=$$("#cfgMats .crow").map(r=>({nome:r.querySelector("[data-cm=nome]").value.trim(),preco:parseMoney(r.querySelector("[data-cm=preco]").value)})).filter(m=>m.nome).sort((a,b)=>a.nome.localeCompare(b.nome,"pt-BR"));
+  cfg.materiais=readCfgMats();
   cfg.grupos=readGroups();cfg.atualizadoEm=Date.now();
   const ok=LS.set("boreal_cfg",cfg);DB.mark("cfg","main");
   Object.values(ctl).forEach(c=>{const tf=c.st&&document.querySelector("#pg-"+c.type+' [data-k="tecnico"]');if(tf&&!tf.value)tf.value=cfg.tecnico;if(cfg.sig){c.pads.sigTec.load(cfg.sig);c.flush()}c.refreshTexts();c.recalc();c.updateProg()});
@@ -1392,7 +1448,7 @@ const Sync=(()=>{
     if(!sb||!user)return;
     if(!navigator.onLine){const n=await pendingCount();setState("offline",n?"Sem internet · "+n+" para enviar":"Sem internet · salvo no aparelho");return}
     if(busy){again=true;return}busy=true;setState("busy","Sincronizando…");
-    try{await push();await pull();const n=await pendingCount();setState(n?"busy":"ok",n?n+" para enviar":"Salvo na nuvem");if(n)again=true}
+    try{await push();await pull();if(!cfg.catalogoV1){const a=seedCatalog();if(a)toast("Lista padrão de materiais adicionada: "+a+" itens em ⚙️ Configurações")}const n=await pendingCount();setState(n?"busy":"ok",n?n+" para enviar":"Salvo na nuvem");if(n)again=true}
     catch(e){console.warn("sync",e);const off=!navigator.onLine||/fetch|network|Failed/i.test(String(e&&e.message));
       setState(off?"offline":"err",off?"Sem internet · salvo no aparelho":"Erro ao sincronizar")}
     finally{busy=false;if(again){again=false;kick(1500)}}}
