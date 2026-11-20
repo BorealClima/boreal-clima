@@ -742,6 +742,10 @@ const OBS_ORC="Orçamento válido por 30 dias a partir da data de emissão. Apó
 
 let cfg=Object.assign({nome:"Boreal Clima",cnpj:"",tel:"",email:"",end:"",site:"",tecnico:"",meses:"6",logo:"",sig:"",materiais:[],grupos:[]},LS.get("boreal_cfg",{}));
 const seqs={os:Number(LS.get("boreal_seq",1))||1,orc:Number(LS.get("boreal_seq_orc",1))||1};
+function orcHolds(d){return d.type==="orc"&&(d.status==="aprovado"||(d.status==="pendente"&&!isExpired(d)))}
+function orcReleased(d){return d.type==="orc"&&!orcHolds(d)}
+function usedNums(){const s=new Set();(typeof docs!=="undefined"?docs:[]).forEach(d=>{if(d.type==="os"||orcHolds(d))s.add(Number(d.num))});return s}
+function nextFree(){const s=usedNums();let n=1;while(s.has(n))n++;return n}
 function bumpSeq(type,num){const n=Number(num)||0;if(n>=seqs[type]){seqs[type]=n+1;LS.set(type==="os"?"boreal_seq":"boreal_seq_orc",seqs[type])}}
 
 /* ---------- helpers ---------- */
@@ -803,7 +807,7 @@ const DB=(()=>{
 })();
 let clients=[],docs=[],fechs=[];const STORE_OF={client:"clients",doc:"docs",fech:"fech",nota:"notas"};let notas=[];
 async function refresh(){try{clients=await DB.all("clients");docs=await DB.all("docs");fechs=await DB.all("fech");notas=await DB.all("notas")}catch(e){console.error(e);toast("Erro ao ler os clientes salvos")}
-  $("#cntCli").textContent=clients.length;renderClientes();Object.values(ctl).forEach(c=>c.clientMatch());if(typeof tab!=="undefined"&&tab==="fin")renderFin()}
+  $("#cntCli").textContent=clients.length;renderClientes();Object.values(ctl).forEach(c=>{c.clientMatch();c.syncNum()});if(typeof tab!=="undefined"&&tab==="fin")renderFin()}
 async function upsertClient(f){const key=norm(f.cliNome);if(!key)return null;const ex=clients.find(c=>c.key===key);
   const rec=Object.assign({key,criadoEm:Date.now()},ex||{});CLI_KEYS.forEach(k=>{if(f[k]&&!(k==="cliNome"&&ex))rec[k]=k==="cliUf"?f[k].toUpperCase():f[k]});rec.atualizadoEm=Date.now();
   await DB.put("clients",rec);return rec}
@@ -933,7 +937,7 @@ $("#sigCfgClear").onclick=()=>cfgPad.clear();
 function FormCtl(type){
   const root=$("#pg-"+type),q=s=>root.querySelector(s),qq=s=>Array.from(root.querySelectorAll(s));
   const isOS=type==="os";
-  const st={sigCliEm:null,docId:null,num:seqs[type],refOrc:null,refOrcId:null,services:new Set(),checks:{},photos:{antes:[],depois:[]},assinadoEm:null,criadoEm:null,dirty:false};
+  const st={sigCliEm:null,docId:null,num:1,numFixed:false,refOrc:null,refOrcId:null,services:new Set(),checks:{},photos:{antes:[],depois:[]},assinadoEm:null,criadoEm:null,dirty:false};
   const pads={};qq("canvas[data-pad]").forEach(c=>{pads[c.dataset.pad]=Pad(c);c.addEventListener("signed",saveDraft)});
   qq("[data-clear]").forEach(b=>b.onclick=()=>pads[b.dataset.clear].clear());
   if(pads.sigCli)q('[data-pad="sigCli"]').addEventListener("signed",()=>{st.sigCliEm=pads.sigCli.isEmpty()?null:Date.now();showSigDate()});
@@ -1043,7 +1047,7 @@ function FormCtl(type){
   /* draft */
   let tmr=null;
   function draftObj(){return{type,f:collect(),eq:rawEq(),svc:[...st.services],ck:st.checks,mats:qq(".mrow").map(r=>{const o={};r.querySelectorAll("[data-m]").forEach(i=>o[i.dataset.m]=i.value);if(r.dataset.custo!=null)o.custo=r.dataset.custo;return o}),
-    photos:st.photos,sigCli:pads.sigCli?pads.sigCli.toDataURL():"",sigTec:pads.sigTec.toDataURL(),sigCliEm:st.sigCliEm,docId:st.docId,num:st.num,refOrc:st.refOrc,refOrcId:st.refOrcId,assinadoEm:st.assinadoEm,criadoEm:st.criadoEm,dirty:st.dirty}}
+    photos:st.photos,sigCli:pads.sigCli?pads.sigCli.toDataURL():"",sigTec:pads.sigTec.toDataURL(),sigCliEm:st.sigCliEm,docId:st.docId,num:st.num,numFixed:st.numFixed,refOrc:st.refOrc,refOrcId:st.refOrcId,assinadoEm:st.assinadoEm,criadoEm:st.criadoEm,dirty:st.dirty}}
   function flush(){clearTimeout(tmr);tmr=null;DB.put("drafts",draftObj()).catch(()=>{})}
   function writeDraft(){clearTimeout(tmr);tmr=setTimeout(flush,500)}
   function saveDraft(){st.dirty=true;writeDraft();updateProg()}
@@ -1057,7 +1061,7 @@ function FormCtl(type){
     q(".matList").innerHTML="";(d.mats&&d.mats.length?d.mats:[{}]).forEach(addMat);
     st.services=new Set(d.svc||[]);st.checks=JSON.parse(JSON.stringify(d.ck||{}));if(Object.keys(st.checks).some(k=>/^\d+$/.test(k)))st.checks={};
     st.photos={antes:((d.photos||{}).antes||[]).slice(),depois:((d.photos||{}).depois||[]).slice()};
-    st.docId=d.docId||null;st.num=d.num||seqs[type];st.refOrc=d.refOrc||null;st.refOrcId=d.refOrcId||null;st.assinadoEm=d.assinadoEm||null;st.criadoEm=d.criadoEm||null;
+    st.docId=d.docId||null;st.numFixed=d.numFixed!=null?!!d.numFixed:!!d.docId;st.num=st.numFixed&&d.num?d.num:nextFree();st.refOrc=d.refOrc||null;st.refOrcId=d.refOrcId||null;st.assinadoEm=d.assinadoEm||null;st.criadoEm=d.criadoEm||null;
     renderChips();renderChecks();renderPhotos("antes");renderPhotos("depois");
     if(pads.sigCli)pads.sigCli.load(d.sigCli||"");st.sigCliEm=d.sigCli?(d.sigCliEm||d.assinadoEm||null):null;showSigDate();
     pads.sigTec.load(d.sigTec||cfg.sig||"");
@@ -1066,7 +1070,7 @@ function FormCtl(type){
   function fresh(prefill){prefill=prefill||{};const t=today();
     const f=isOS?{data:t,hIni:nowTime(),tecnico:cfg.tecnico||"",proxManut:addMonths(t,Number(cfg.meses||6)),garantia:"90 dias"}
                :{data:t,tecnico:cfg.tecnico||"",validade:addDays(t,30),obsOrc:OBS_ORC,garantia:"90 dias"};
-    const d=Object.assign({},prefill,{f:Object.assign(f,prefill.f||{}),num:seqs[type],docId:null,assinadoEm:null,criadoEm:null});
+    const d=Object.assign({},prefill,{f:Object.assign(f,prefill.f||{}),num:prefill.num||null,numFixed:!!prefill.numFixed,docId:null,assinadoEm:null,criadoEm:null});
     applyData(d);st.dirty=false;flush()}
   function hasUnsaved(){return st.dirty&&!!collect().cliNome}
   async function newDoc(confirmFirst,prefill){
@@ -1101,11 +1105,11 @@ function FormCtl(type){
     const total=D.mats.reduce((s,m)=>s+m.sub,0)+parseMoney(D.f.valor);
     D.docId=id;D.criadoEm=D.criadoEm||Date.now();
     const rec={id,type,num:st.num,cli:key,cliNome:D.f.cliNome,data:D.f.data||today(),total,svc:D.svc,
-      status:isOS?(D.f.pgSit||""):(ex&&ex.status?ex.status:"pendente"),osNum:ex?ex.osNum:null,refOrc:D.refOrc||null,refOrcId:D.refOrcId||null,
+      status:isOS?(D.f.pgSit||""):(ex&&ex.status==="aprovado"?"aprovado":"pendente"),osNum:ex?ex.osNum:null,refOrc:D.refOrc||null,refOrcId:D.refOrcId||null,
       criadoEm:D.criadoEm,atualizadoEm:Date.now(),payload:D};
     await DB.put("docs",rec);
     if(isOS&&D.refOrcId){const o=docs.find(x=>x.id===D.refOrcId);if(o){o.status="aprovado";o.osNum=st.num;o.atualizadoEm=Date.now();await DB.put("docs",o)}}
-    st.docId=id;st.criadoEm=D.criadoEm;bumpSeq(type,st.num);st.dirty=false;flush();refreshTexts();await refresh();return rec}
+    st.docId=id;st.numFixed=true;st.criadoEm=D.criadoEm;st.dirty=false;flush();refreshTexts();await refresh();return rec}
 
   async function generate(){
     const f=collect();root.querySelectorAll(".invalid").forEach(e=>e.classList.remove("invalid"));
@@ -1115,15 +1119,16 @@ function FormCtl(type){
     if(isOS&&!f.hFim){setField("hFim",nowTime())}
     const btn=$("#btnGen");btn.disabled=true;btn.textContent="Gerando…";
     try{
-      const D=snapshot();if(!D.assinadoEm)D.assinadoEm=Date.now();st.assinadoEm=D.assinadoEm;
+      if(!st.numFixed)st.num=nextFree();const D=snapshot();if(!D.assinadoEm)D.assinadoEm=Date.now();st.assinadoEm=D.assinadoEm;
       const rec=await record(D);
       await showDocPdf(rec,type);
       msg("✓ Salvo na ficha de "+rec.cliNome+" (aba Clientes).","ok");
     }catch(e){console.error(e);toast("Erro ao gerar o PDF: "+e.message)}
     finally{btn.disabled=false;setDockLabel()}
   }
-  function onShow(){Object.values(pads).forEach(p=>p.setup());refreshTexts();updateProg()}
-  const api={type,st,pads,fresh,newDoc,applyData,generate,hasUnsaved,numStr,refreshTexts,updateProg,onShow,clientMatch,flush,setField,recalc,addGroup,matCount:()=>getMats().length};
+  function syncNum(){if(!st.numFixed){const n=nextFree();if(n!==st.num){st.num=n;writeDraft()}}refreshTexts()}
+  function onShow(){Object.values(pads).forEach(p=>p.setup());syncNum();updateProg()}
+  const api={syncNum,type,st,pads,fresh,newDoc,applyData,generate,hasUnsaved,numStr,refreshTexts,updateProg,onShow,clientMatch,flush,setField,recalc,addGroup,matCount:()=>getMats().length};
   return api;
 }
 
@@ -1428,12 +1433,13 @@ function renderDetail(){
   '<div class="filt">'+[["all","Todos ("+s.ds.length+")"],["orc","Orçamentos ("+s.orc.length+")"],["os","Ordens de serviço ("+s.os.length+")"]].map(([k,l])=>'<button class="chip" type="button" data-filt="'+k+'" aria-pressed="'+(docFilter===k)+'">'+l+"</button>").join("")+"</div>"+
   (list.length?list.map(d=>{const P=d.payload||{},f=P.f||{};const sub=[(d.svc||[]).join(" · ")||"Serviço não informado"];
       if(d.type==="orc"&&validadeOf(d))sub.push((isExpired(d)?"venceu em ":"válido até ")+br(validadeOf(d)));if(d.type==="os"&&d.refOrc)sub.push("do orçamento Nº "+pad(d.refOrc,4));
-      const canConv=d.type==="orc"&&d.status!=="aprovado";
-      return'<div class="doc '+d.type+(isExpired(d)?" expired":"")+'"><div class="dh"><span class="pill '+d.type+'">'+(d.type==="os"?"OS":"ORÇAMENTO")+'</span><span class="dt">Nº '+pad(d.num,4)+'</span><span class="dd">'+br(d.data)+"</span>"+statusPill(d)+'<span class="dv">R$ '+fmt(d.total)+'</span></div><div class="ds">'+esc(sub.join(" — "))+'</div><div class="da">'+
+      const rel=orcReleased(d),canConv=d.type==="orc"&&orcHolds(d)&&d.status!=="aprovado";
+      if(rel)sub.push(d.status==="recusado"?"não fechou: o número "+pad(d.num,4)+" foi liberado":"o número "+pad(d.num,4)+" foi liberado");
+      return'<div class="doc '+d.type+(isExpired(d)?" expired":"")+'"><div class="dh"><span class="pill '+d.type+'">'+(d.type==="os"?"OS":"ORÇAMENTO")+'</span><span class="dt">'+(rel?"Sem nº":"Nº "+pad(d.num,4))+'</span><span class="dd">'+br(d.data)+"</span>"+statusPill(d)+'<span class="dv">R$ '+fmt(d.total)+'</span></div><div class="ds">'+esc(sub.join(" — "))+'</div><div class="da">'+
         '<button class="btn ghost small" data-act="pdf" data-id="'+d.id+'">📄 Ver PDF</button>'+
         (canConv?'<button class="btn primary small" data-act="conv" data-id="'+d.id+'">✓ Cliente fechou: virar OS</button>':"")+
-        '<button class="btn line small" data-act="open" data-id="'+d.id+'">✎ Editar</button>'+
-        (d.type==="orc"&&d.status!=="aprovado"?'<button class="btn line small" data-act="refuse" data-id="'+d.id+'">'+(d.status==="recusado"?"Reabrir":"Recusado")+"</button>":"")+
+        (rel?'<button class="btn primary small" data-act="redo" data-id="'+d.id+'">🔁 Refazer orçamento</button>':'<button class="btn line small" data-act="open" data-id="'+d.id+'">✎ Editar</button>')+
+        (canConv?'<button class="btn line small" data-act="refuse" data-id="'+d.id+'">Não fechou</button>':"")+
         '<button class="btn danger small" data-act="del" data-id="'+d.id+'">Excluir</button></div></div>'}).join("")
     :'<div class="empty"><b>Nenhum documento aqui</b>Use os botões acima para criar um orçamento ou uma OS para este cliente.</div>')+
   '<div style="margin-top:24px;text-align:center"><button class="btn danger small" data-act="delCli">Excluir cliente</button></div>';
@@ -1455,17 +1461,24 @@ $("#cliDetail").addEventListener("click",async e=>{
   if(act==="open"){await ensurePhotos(d);const C2=ctl[d.type];if(C2.hasUnsaved()&&C2.st.docId!==d.id&&!(await ask("Substituir o que está na tela?","Há "+(d.type==="os"?"uma OS":"um orçamento")+" em andamento que ainda não foi gerado. Ele será descartado.","Substituir")))return;
     C2.applyData(Object.assign({},d.payload,{docId:d.id,num:d.num}));C2.st.dirty=false;C2.flush();showTab(d.type);toast("Editando "+(d.type==="os"?"OS":"orçamento")+" Nº "+pad(d.num,4));return}
   if(act==="conv")return convertToOS(d);
-  if(act==="refuse"){d.status=d.status==="recusado"?"pendente":"recusado";d.atualizadoEm=Date.now();await DB.put("docs",d);await refresh();return}
+  if(act==="refuse"){if(!(await ask("Orçamento Nº "+pad(d.num,4)+" não fechou?","O orçamento fica na ficha do cliente sem número e o Nº "+pad(d.num,4)+" volta a ficar livre para o próximo orçamento ou OS. Se o cliente decidir fechar depois, use Refazer orçamento.","Confirmar")))return;
+    d.status="recusado";d.atualizadoEm=Date.now();await DB.put("docs",d);await refresh();toast("Nº "+pad(d.num,4)+" liberado");return}
+  if(act==="redo")return redoOrc(d);
   if(act==="del"){if(!(await ask("Excluir "+(d.type==="os"?"OS":"orçamento")+" Nº "+pad(d.num,4)+"?","Ele sai da ficha de "+c.cliNome+". Isso não pode ser desfeito.","Excluir")))return;
     await DB.del("docs",d.id);const C2=ctl[d.type];if(C2.st.docId===d.id){C2.st.docId=null;C2.refreshTexts();C2.flush()}await refresh();toast("Documento excluído");return}
 });
 
+async function redoOrc(d){const C2=ctl.orc;
+  if(C2.hasUnsaved()&&C2.st.docId!==d.id&&!(await ask("Substituir o orçamento que está na tela?","O orçamento em andamento ainda não foi gerado e será descartado.","Substituir")))return;
+  const P=JSON.parse(JSON.stringify(d.payload||{}));const t0=today();const f=Object.assign({},P.f||{},{data:t0,validade:addDays(t0,30)});
+  C2.applyData(Object.assign({},P,{f,docId:d.id,numFixed:false,num:null,assinadoEm:null,criadoEm:d.criadoEm,refOrc:null,refOrcId:null}));C2.st.dirty=true;C2.flush();
+  showTab("orc");toast("Orçamento refeito com o Nº "+C2.numStr()+", válido até "+br(f.validade)+". Confira e toque em Gerar orçamento.")}
 async function convertToOS(orc){
   const o=ctl.os,P=orc.payload||{},pf=P.f||{};
   if(o.hasUnsaved()&&!(await ask("Substituir a OS que está na tela?","A OS em andamento ainda não foi gerada e será descartada para abrir o orçamento Nº "+pad(orc.num,4)+".","Substituir")))return;
   const f={};CLI_KEYS.forEach(k=>{if(pf[k])f[k]=pf[k]});f.cliAnt="Sim";if(pf.valor)f.valor=fmt(parseMoney(pf.valor));if(pf.garantia)f.garantia=pf.garantia;if(pf.tecnico)f.tecnico=pf.tecnico;
   const mats=(P.mats||[]).map(m=>({nome:m.nome,qtd:m.qtd,preco:typeof m.preco==="number"?m.preco:parseMoney(m.preco),custo:m.custo}));
-  o.fresh({f,eq:(P.eq||[]).map(e=>Object.assign({},e)),svc:(P.svc||[]).slice(),mats,refOrc:orc.num,refOrcId:orc.id,sigTec:cfg.sig||P.sigTec||""});
+  o.fresh({f,eq:(P.eq||[]).map(e=>Object.assign({},e)),svc:(P.svc||[]).slice(),mats,refOrc:orc.num,refOrcId:orc.id,num:orc.num,numFixed:true,sigTec:cfg.sig||P.sigTec||""});
   orc.status="aprovado";orc.osNum=o.st.num;orc.atualizadoEm=Date.now();await DB.put("docs",orc);await refresh();
   showTab("os");const nm=o.matCount();toast("Orçamento Nº "+pad(orc.num,4)+" virou a OS Nº "+o.numStr()+": "+nm+" ite"+(nm===1?"m":"ns")+" de material, total R$ "+fmt(o.recalc()));
 }
@@ -1704,7 +1717,7 @@ async function showFinPdf(r){const pages=await renderFinPDF(r);const name="Fecha
 /* ============================================================
    NUVEM (Supabase): login + sincronização
    ============================================================ */
-const APP_VERSION="Versão 8 · 20/11/2026 · Notas fiscais";
+const APP_VERSION="Versão 9 · 20/11/2026 · Numeração única orçamento/OS";
 const SB_URL="https://xipiemiyvrwfxosbfpvl.supabase.co",SB_KEY="sb_publishable_RtUvyM---ErVKDlMnonTVg_AEy9yL5I";
 let sb=null,appStarted=false;
 function fnv(s){let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(36)+s.length.toString(36)}
