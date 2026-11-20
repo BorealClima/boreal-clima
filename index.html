@@ -168,6 +168,13 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 
 .fwrap{overflow-x:auto}
 .rep{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:8px}
 .rep .ri{flex:1;min-width:200px}.rep .ri b{color:var(--navy);font-size:16px}.rep .ri span{display:block;color:var(--muted);font-size:13px}
+.nrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid var(--line)}
+.nrow:last-child{border-bottom:0}
+.nrow .nic{font-size:22px}.nrow .ni{flex:1;min-width:160px}.nrow .ni b{display:block;color:var(--navy)}.nrow .ni span{color:var(--muted);font-size:13px}
+.nrow .nv{font-weight:800;color:var(--navy);white-space:nowrap}.nrow .na{display:flex;gap:6px}
+#nPrev img{max-height:110px;border-radius:8px;border:1px solid var(--line)}
+#verBody img{max-width:100%;max-height:70vh;display:block;margin:0 auto;border-radius:8px}
+#notaAdd{margin-top:4px}
 .savedtag{font-size:13px;font-weight:600;color:var(--ok)}
 .crow .mv{min-height:46px;display:flex;align-items:center;justify-content:flex-end;font-weight:700;color:var(--navy);font-size:15px;padding-right:4px;white-space:nowrap}
 .mcat{border:1.5px solid var(--line);border-radius:12px;margin-bottom:8px;background:#fff}
@@ -181,7 +188,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 
 .mchead input{font-weight:700!important;min-height:44px!important}
 .crow-h{display:grid;grid-template-columns:minmax(0,1fr) 120px 110px 44px;gap:10px;margin-bottom:4px;font-size:12px;font-weight:600;color:var(--muted)}
 .crow input{min-height:46px!important;font-size:16px!important}
-.grp{border:1.5px solid var(--line);border-radius:12px;padding:12px;margin-bottom:12px;background:#FAFCFE}
+.grp .mcbody{background:#FAFCFE;border-radius:0 0 12px 12px;padding-top:4px}
 .grph{display:flex;gap:8px;align-items:center;margin-bottom:10px}
 .grph input{font-weight:700!important}
 .grow{display:grid;grid-template-columns:minmax(0,1fr) 80px 130px 44px;gap:8px;margin-bottom:8px}
@@ -523,6 +530,16 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 
   </section>
 
   <section class="card">
+    <h2>Notas fiscais de compras</h2>
+    <p class="hint">Guarde aqui as fotos ou PDFs das notas dos produtos que você comprou. Elas aparecem pelo mês escolhido lá em cima.</p>
+    <details class="mcat" id="notasBox">
+      <summary><span class="mcn" id="notasTitle">Notas do mês</span><span class="mcc" id="notasSum"></span></summary>
+      <div class="mcbody"><div id="notasList"></div></div>
+    </details>
+    <button class="btn primary small" type="button" id="notaAdd">🧾 + Anexar nota fiscal</button>
+  </section>
+
+  <section class="card">
     <h2>Materiais e preço de custo<span class="right savedtag" id="finSaved"></span></h2>
     <div class="grid" style="margin-bottom:6px"><label class="f">Margem sobre os materiais (%)<input type="number" id="finMargem" inputmode="decimal" step="1" min="0"></label></div>
     <p class="hint">Coloque o <b>valor real que você paga</b> em cada material. No orçamento e na OS ele entra sozinho com a margem a mais (coluna Venda). Toque numa categoria para abrir; dá para mudar nomes e custos, apagar (✕) e adicionar materiais ou categorias. Tudo é salvo sozinho.</p>
@@ -536,7 +553,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 
 
   <section class="card">
     <h2>Grupos de materiais</h2>
-    <p class="hint">Monte kits, como "Instalação 9.000 BTUs". No orçamento ou na OS, toque em <b>+ Grupo</b> e todos os itens entram na lista, um por um, com quantidade e valor de venda.</p>
+    <p class="hint">Monte kits, como "Instalação 9.000 BTUs". Toque no nome do grupo para abrir e editar. No orçamento ou na OS, toque em <b>+ Grupo</b> e todos os itens entram na lista, um por um, com quantidade e valor de venda.</p>
     <div id="cfgGroups"></div>
     <button class="btn ghost small" type="button" id="cfgAddGrp">+ Adicionar grupo</button>
     <datalist id="matNames"></datalist>
@@ -636,6 +653,32 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 
     <button class="btn line" data-close>Cancelar</button>
     <button class="btn dark" id="cfgSave">Salvar</button>
   </div>
+</div></div>
+
+<!-- Nota fiscal -->
+<div class="modal" id="mNota"><div class="sheet" style="max-width:560px">
+  <h3 id="notaT">Anexar nota fiscal</h3>
+  <p class="hint">Tire uma foto da nota ou escolha uma foto/PDF já salvo.</p>
+  <div class="grid" style="margin-top:10px">
+    <label class="f">Data da compra<input type="date" id="nData"></label>
+    <label class="f">Valor total (R$)<input type="text" inputmode="decimal" id="nValor" placeholder="0,00"></label>
+    <label class="f wide">Fornecedor / loja<input type="text" id="nForn" placeholder="Ex.: loja de refrigeração, atacado"></label>
+    <label class="f wide">Observação<input type="text" id="nObs" placeholder="Ex.: material da instalação da Maria"></label>
+  </div>
+  <div class="addph" style="margin-top:12px">
+    <label class="btn line small filebtn">📷 Tirar foto<input type="file" accept="image/*" capture="environment" id="nCam"></label>
+    <label class="btn line small filebtn">🖼️ Galeria ou PDF<input type="file" accept="image/*,application/pdf" id="nFile"></label>
+  </div>
+  <div id="nPrev" style="margin-top:10px"></div>
+  <div class="actions"><button class="btn line" data-close>Cancelar</button><button class="btn dark" id="nSave">Salvar nota</button></div>
+</div></div>
+
+<!-- Ver nota -->
+<div class="modal" id="mVer"><div class="sheet">
+  <h3 id="verT"></h3>
+  <div class="hint" id="verI"></div>
+  <div id="verBody" style="margin-top:12px"></div>
+  <div class="actions"><button class="btn line" data-close>Fechar</button><button class="btn primary" id="verSave">⬇️ Baixar / compartilhar</button></div>
 </div></div>
 
 <!-- Group picker -->
@@ -739,11 +782,11 @@ function first(n){return String(n||"").trim().split(/\s+/)[0]||""}
 
 /* ---------- database (IndexedDB, com reserva no localStorage) ---------- */
 const DB=(()=>{
-  let dbp=null,mem=null;const KP={clients:"key",docs:"id",drafts:"type",outbox:"key",fech:"id"};
-  function open(){if(dbp)return dbp;dbp=new Promise((res,rej)=>{try{const r=indexedDB.open("boreal_clima",3);
+  let dbp=null,mem=null;const KP={clients:"key",docs:"id",drafts:"type",outbox:"key",fech:"id",notas:"id"};
+  function open(){if(dbp)return dbp;dbp=new Promise((res,rej)=>{try{const r=indexedDB.open("boreal_clima",4);
       r.onupgradeneeded=()=>{const d=r.result;Object.entries(KP).forEach(([s,k])=>{if(!d.objectStoreNames.contains(s))d.createObjectStore(s,{keyPath:k})})};
       r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);r.onblocked=()=>rej(new Error("blocked"))}catch(e){rej(e)}})
-    .catch(e=>{console.warn("IndexedDB indisponível",e);mem=LS.get("boreal_db_mem",{clients:{},docs:{},drafts:{},outbox:{},fech:{}});return null});return dbp}
+    .catch(e=>{console.warn("IndexedDB indisponível",e);mem=LS.get("boreal_db_mem",{clients:{},docs:{},drafts:{},outbox:{},fech:{},notas:{}});return null});return dbp}
   function persist(){if(!LS.set("boreal_db_mem",mem))toast("Armazenamento cheio: exporte um backup em ⚙️")}
   async function run(store,op,arg){const d=await open();
     if(!d){const s=mem[store]||(mem[store]={});if(op==="all")return Object.values(s);if(op==="get")return s[arg]||null;
@@ -751,15 +794,15 @@ const DB=(()=>{
     return new Promise((res,rej)=>{const t=d.transaction(store,op==="all"||op==="get"?"readonly":"readwrite"),o=t.objectStore(store);let r;
       if(op==="all")r=o.getAll();else if(op==="get")r=o.get(arg);else if(op==="put")r=o.put(arg);else if(op==="del")r=o.delete(arg);else r=o.clear();
       t.oncomplete=()=>res(op==="get"?(r.result||null):r.result);t.onerror=()=>rej(t.error);t.onabort=()=>rej(t.error)})}
-  const KIND={clients:"client",docs:"doc",fech:"fech"};
+  const KIND={clients:"client",docs:"doc",fech:"fech",notas:"nota"};
   async function mark(kind,id){await run("outbox","put",{key:kind+":"+id,kind,id,ts:Date.now()+Math.random()});if(window.__syncKick)window.__syncKick()}
   return{all:s=>run(s,"all"),get:(s,k)=>run(s,"get",k),
     put:async(s,v,silent)=>{await run(s,"put",v);if(!silent&&KIND[s])await mark(KIND[s],v[KP[s]])},
     del:async(s,k,silent)=>{await run(s,"del",k);if(!silent&&KIND[s])await mark(KIND[s],k)},
     clear:s=>run(s,"clear"),mark};
 })();
-let clients=[],docs=[],fechs=[];const STORE_OF={client:"clients",doc:"docs",fech:"fech"};
-async function refresh(){try{clients=await DB.all("clients");docs=await DB.all("docs");fechs=await DB.all("fech")}catch(e){console.error(e);toast("Erro ao ler os clientes salvos")}
+let clients=[],docs=[],fechs=[];const STORE_OF={client:"clients",doc:"docs",fech:"fech",nota:"notas"};let notas=[];
+async function refresh(){try{clients=await DB.all("clients");docs=await DB.all("docs");fechs=await DB.all("fech");notas=await DB.all("notas")}catch(e){console.error(e);toast("Erro ao ler os clientes salvos")}
   $("#cntCli").textContent=clients.length;renderClientes();Object.values(ctl).forEach(c=>c.clientMatch());if(typeof tab!=="undefined"&&tab==="fin")renderFin()}
 async function upsertClient(f){const key=norm(f.cliNome);if(!key)return null;const ex=clients.find(c=>c.key===key);
   const rec=Object.assign({key,criadoEm:Date.now()},ex||{});CLI_KEYS.forEach(k=>{if(f[k]&&!(k==="cliNome"&&ex))rec[k]=k==="cliUf"?f[k].toUpperCase():f[k]});rec.atualizadoEm=Date.now();
@@ -818,7 +861,8 @@ $("#cfgMatSearch").addEventListener("input",e=>{const q=norm(e.target.value);$$(
 function cfgMatNames(){$("#matNames").innerHTML=$$("#cfgMats .crow").map(r=>r.querySelector("[data-cm=nome]").value.trim()).filter(Boolean).map(n=>'<option value="'+esc(n)+'">').join("")}
 function cfgLookup(name){const n=norm(name);if(!n)return null;for(const r of $$("#cfgMats .crow")){if(norm(r.querySelector("[data-cm=nome]").value)===n)return parseMoney(r.querySelector("[data-cm=custo]").value)}return null}
 function grpTotal(el){if(!el)return;let t=0,n=0;el.querySelectorAll(".gitems .grow").forEach(r=>{const q=Number(String(r.querySelector("[data-gi=qtd]").value||"1").replace(",","."))||0;t+=q*parseMoney(r.querySelector("[data-gi=custo]").value);if(r.querySelector("[data-gi=nome]").value.trim())n++});
-  el.querySelector(".gtot").textContent=n+" ite"+(n===1?"m":"ns")+" · Custo R$ "+fmt(t)+" · Venda R$ "+fmt(venda(t))}
+  el.querySelector(".gtot").textContent=n+" ite"+(n===1?"m":"ns")+" · Custo R$ "+fmt(t)+" · Venda R$ "+fmt(venda(t));
+  const mc=el.querySelector(".mcc");if(mc)mc.textContent=n+" ite"+(n===1?"m":"ns")+" · R$ "+fmt(venda(t))}
 function cfgGroupItem(box,it){it=it||{};const r=document.createElement("div");r.className="grow";
   r.innerHTML='<input type="text" data-gi="nome" list="matNames" placeholder="Material / peça" autocomplete="off"><input type="number" data-gi="qtd" min="0" step="1" inputmode="decimal"><input type="text" data-gi="custo" inputmode="decimal" placeholder="0,00"><button class="mrm" type="button" aria-label="Remover">✕</button>';
   const n=r.querySelector("[data-gi=nome]"),qn=r.querySelector("[data-gi=qtd]"),p=r.querySelector("[data-gi=custo]");
@@ -829,16 +873,16 @@ function cfgGroupItem(box,it){it=it||{};const r=document.createElement("div");r.
   qn.addEventListener("input",upd);p.addEventListener("input",upd);p.addEventListener("blur",()=>{if(p.value.trim())p.value=fmt(parseMoney(p.value))});
   r.querySelector(".mrm").onclick=()=>{const g=r.closest(".grp");r.remove();grpTotal(g)};
   box.appendChild(r);return r}
-function cfgGroupCard(g){g=g||{};const el=document.createElement("div");el.className="grp";
-  el.innerHTML='<div class="grph"><input type="text" data-g="nome" placeholder="Nome do grupo (ex.: Instalação 9.000 BTUs)"><button class="rm" type="button">Excluir</button></div>'+
+function cfgGroupCard(g,open){g=g||{};const el=document.createElement("details");el.className="mcat grp";if(open)el.open=true;
+  el.innerHTML='<summary><span class="mcn"></span><span class="mcc"></span></summary><div class="mcbody"><div class="grph"><input type="text" data-g="nome" placeholder="Nome do grupo (ex.: Instalação 9.000 BTUs)"><button class="rm" type="button">Excluir</button></div>'+
     '<div class="grow head"><span>Material / peça</span><span>Qtd</span><span>Custo unit. (R$)</span><span></span></div><div class="gitems"></div>'+
-    '<div class="gfoot"><button class="btn ghost small gadd" type="button">+ Item no grupo</button><span class="gtot"></span></div>';
-  el.querySelector("[data-g=nome]").value=g.nome||"";const box=el.querySelector(".gitems");
+    '<div class="gfoot"><button class="btn ghost small gadd" type="button">+ Item no grupo</button><span class="gtot"></span></div></div>';
+  const gn=el.querySelector("[data-g=nome]");gn.value=g.nome||"";el.querySelector(".mcn").textContent=g.nome||"Novo grupo";gn.addEventListener("input",()=>{el.querySelector(".mcn").textContent=gn.value||"Novo grupo"});const box=el.querySelector(".gitems");
   (g.itens&&g.itens.length?g.itens:[{}]).forEach(it=>cfgGroupItem(box,it));
   el.querySelector(".gadd").onclick=()=>cfgGroupItem(box).querySelector("input").focus();
   el.querySelector(".grph .rm").onclick=async()=>{if(await ask("Excluir este grupo?","O grupo "+(el.querySelector("[data-g=nome]").value||"sem nome")+" será apagado.","Excluir"))el.remove()};
   $("#cfgGroups").appendChild(el);grpTotal(el);return el}
-$("#cfgAddGrp").onclick=()=>cfgGroupCard().querySelector("[data-g=nome]").focus();
+$("#cfgAddGrp").onclick=()=>{const el=cfgGroupCard({},true);el.querySelector("[data-g=nome]").focus();el.scrollIntoView({behavior:"smooth",block:"center"})};
 function readGroups(){return $$("#cfgGroups .grp").map((el,i)=>({nome:el.querySelector("[data-g=nome]").value.trim()||"Grupo "+(i+1),
   itens:Array.from(el.querySelectorAll(".gitems .grow")).map(r=>({nome:r.querySelector("[data-gi=nome]").value.trim(),qtd:Number(String(r.querySelector("[data-gi=qtd]").value||"1").replace(",","."))||1,custo:parseMoney(r.querySelector("[data-gi=custo]").value)})).filter(x=>x.nome)})).filter(g=>g.itens.length)}
 
@@ -1538,6 +1582,7 @@ function renderFin(){
     r.os.map(o=>'<tr><td><b>'+pad(o.num,4)+'</b></td><td>'+br(o.data).slice(0,5)+'</td><td>'+esc(o.cliente)+(o.pg==="Pendente"||o.pg==="Parcial"?' <span class="pill warn">'+esc(o.pg)+"</span>":"")+'</td><td class="n">R$ '+fmt(o.bruto)+'</td><td class="n hm">R$ '+fmt(o.custo)+(o.est?"*":"")+'</td><td class="n hm">R$ '+fmt(o.markup)+"</td></tr>").join("")+
     '</tbody><tfoot><tr><td colspan="3">Total</td><td class="n">R$ '+fmt(r.bruto)+'</td><td class="n hm">R$ '+fmt(r.custo)+'</td><td class="n hm">R$ '+fmt(r.markup)+"</td></tr></tfoot></table></div>"
     :'<div class="empty" style="padding:24px"><b>Nenhuma OS concluída neste mês</b>Quando o cliente assina a OS e você gera o PDF, ela entra aqui.</div>';
+  renderNotas();
   const reps=fechs.slice().sort((a,b)=>b.id.localeCompare(a.id));
   $("#finReps").innerHTML=reps.length?reps.map(f=>{const stale=finSig(finMonth(f.id))!==finSig(f);const parcial=f.parcial&&f.id>=cur;
       return'<div class="rep"><div class="ri"><b>'+ymLabel(f.id)+(parcial?' <span class="pill warn">parcial</span>':"")+(stale?' <span class="pill bad">desatualizado</span>':"")+'</b><span>Bruto R$ '+fmt(f.bruto)+' · Lucro R$ '+fmt(f.lucro)+' · '+f.os.length+' OS · gerado em '+new Date(f.atualizadoEm||f.geradoEm).toLocaleDateString("pt-BR")+'</span></div>'+
@@ -1550,6 +1595,48 @@ $("#finReport").onclick=async()=>{const b=$("#finReport");b.disabled=true;try{co
 $("#finReps").addEventListener("click",async e=>{const v=e.target.closest("[data-rep]"),u=e.target.closest("[data-repup]");
   if(v){const f=fechs.find(x=>x.id===v.dataset.rep);if(f)await showFinPdf(f)}
   if(u){await saveClosing(u.dataset.repup);renderFin();toast("Relatório de "+ymLabel(u.dataset.repup)+" atualizado")}});
+
+
+/* notas fiscais */
+let notaEdit=null,notaFile=null;
+function notasDoMes(ym){return notas.filter(n=>String(n.data||"").slice(0,7)===ym).sort((a,b)=>(b.data||"").localeCompare(a.data||"")||(b.criadoEm||0)-(a.criadoEm||0))}
+function renderNotas(){const list=notasDoMes(finYM),tot=list.reduce((s,n)=>s+(Number(n.valor)||0),0);
+  $("#notasTitle").textContent="🧾 Notas de "+MESES[+finYM.slice(5)-1].toLowerCase()+" de "+finYM.slice(0,4);
+  $("#notasSum").textContent=list.length?list.length+" nota"+(list.length>1?"s":"")+" · R$ "+fmt(tot):"nenhuma";
+  $("#notasList").innerHTML=list.length?list.map(n=>'<div class="nrow"><div class="nic">'+(n.mime==="application/pdf"?"📄":"🧾")+'</div><div class="ni"><b>'+esc(n.fornecedor||"Nota fiscal")+'</b><span>'+br(n.data)+(n.obs?" · "+esc(n.obs):"")+'</span></div><div class="nv">R$ '+fmt(n.valor)+'</div><div class="na">'+
+    '<button class="btn ghost small" type="button" data-nver="'+n.id+'">Ver</button><button class="btn line small" type="button" data-nedit="'+n.id+'">Editar</button><button class="btn danger small" type="button" data-ndel="'+n.id+'" aria-label="Excluir">✕</button></div></div>').join("")
+    :'<p class="hint" style="margin:6px 0">Nenhuma nota anexada neste mês.</p>'}
+async function imgToData(file,max,q){const url=URL.createObjectURL(file);try{const im=await loadImg(url);const s=Math.min(1,max/Math.max(im.width,im.height));const c=document.createElement("canvas");
+  c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);const g=c.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,c.width,c.height);g.drawImage(im,0,0,c.width,c.height);return c.toDataURL("image/jpeg",q)}finally{URL.revokeObjectURL(url)}}
+function readAsData(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)})}
+function notaPreview(){const p=$("#nPrev");if(!notaFile){p.innerHTML='<p class="hint" style="margin:0">Nenhum arquivo anexado ainda.</p>';return}
+  p.innerHTML=notaFile.startsWith("data:application/pdf")?'<span class="sigok">📄 PDF anexado</span>':notaFile.startsWith("sb:")?'<span class="sigok">✓ Arquivo já salvo</span>':'<img alt="Nota" src="'+notaFile+'">'}
+function openNota(n){notaEdit=n||null;notaFile=n?n.file:null;$("#notaT").textContent=n?"Editar nota fiscal":"Anexar nota fiscal";
+  $("#nData").value=n?n.data:(finYM===ymNow()?today():finYM+"-01");$("#nValor").value=n&&n.valor?fmt(n.valor):"";$("#nForn").value=n?n.fornecedor||"":"";$("#nObs").value=n?n.obs||"":"";notaPreview();openM("#mNota")}
+$("#notaAdd").onclick=()=>openNota(null);
+async function pickNota(inp){const f=inp.files&&inp.files[0];inp.value="";if(!f)return;
+  try{if(f.type==="application/pdf"){if(f.size>8*1024*1024){toast("PDF muito grande (máx. 8 MB)");return}notaFile=await readAsData(f)}else notaFile=await imgToData(f,1800,0.8);notaPreview()}
+  catch(_){toast("Não consegui abrir esse arquivo")}}
+$("#nCam").onchange=e=>pickNota(e.target);$("#nFile").onchange=e=>pickNota(e.target);
+$("#nValor").addEventListener("blur",e=>{if(e.target.value.trim())e.target.value=fmt(parseMoney(e.target.value))});
+$("#nSave").onclick=async()=>{const data=$("#nData").value;if(!data){toast("Coloque a data da compra");return}if(!notaFile){toast("Anexe a foto ou o PDF da nota");return}
+  const n=Object.assign({},notaEdit||{id:uid(),criadoEm:Date.now()},{data,valor:parseMoney($("#nValor").value),fornecedor:$("#nForn").value.trim(),obs:$("#nObs").value.trim(),file:notaFile,
+    mime:notaFile.startsWith("data:")?(notaFile.match(/^data:(.*?);/)||[])[1]:(notaEdit&&notaEdit.mime)||"image/jpeg",atualizadoEm:Date.now()});
+  const b=$("#nSave");b.disabled=true;try{await DB.put("notas",n);notas=await DB.all("notas");closeM($("#mNota"));
+    if(data.slice(0,7)!==finYM){finYM=data.slice(0,7)>ymNow()?ymNow():data.slice(0,7);renderFin()}else renderNotas();$("#notasBox").open=true;toast("Nota salva")}
+  catch(e){console.error(e);toast("Não consegui salvar a nota")}finally{b.disabled=false}};
+let verCur=null;
+async function ensureNotaFile(n){if(n&&typeof n.file==="string"&&n.file.startsWith("sb:")){const d=await Sync.fetchPhoto(n.file.slice(3));if(d){n.file=d;try{await DB.put("notas",n,true)}catch(_){}}}return n}
+async function verNota(n){await ensureNotaFile(n);if(!n.file||n.file.startsWith("sb:")){toast("Sem internet para baixar essa nota agora");return}verCur=n;
+  $("#verT").textContent=n.fornecedor||"Nota fiscal";$("#verI").textContent=br(n.data)+" · R$ "+fmt(n.valor)+(n.obs?" · "+n.obs:"");
+  if(n.file.startsWith("data:application/pdf")){const url=URL.createObjectURL(dataURLtoBlob(n.file));$("#verBody").innerHTML='<p class="hint">Se o PDF não aparecer abaixo, toque em <b>Baixar / compartilhar</b> para abrir.</p><iframe src="'+url+'" style="width:100%;height:65vh;border:1px solid var(--line);border-radius:8px"></iframe>'}
+  else $("#verBody").innerHTML='<img alt="Nota fiscal" src="'+n.file+'">';openM("#mVer")}
+$("#verSave").onclick=async()=>{if(!verCur)return;const isPdf=verCur.file.startsWith("data:application/pdf");const name="Nota-"+(verCur.data||"")+"-"+slug(verCur.fornecedor||"compra")+(isPdf?".pdf":".jpg");
+  try{await saveFile(dataURLtoBlob(verCur.file),name)}catch(e){toast("Não consegui salvar o arquivo")}};
+$("#notasList").addEventListener("click",async e=>{const v=e.target.closest("[data-nver]"),ed=e.target.closest("[data-nedit]"),d=e.target.closest("[data-ndel]");
+  if(v){const n=notas.find(x=>x.id===v.dataset.nver);if(n){v.disabled=true;try{await verNota(n)}finally{v.disabled=false}}}
+  if(ed){const n=notas.find(x=>x.id===ed.dataset.nedit);if(n)openNota(n)}
+  if(d){const n=notas.find(x=>x.id===d.dataset.ndel);if(n&&await ask("Excluir esta nota?",(n.fornecedor||"Nota fiscal")+" de "+br(n.data)+" será apagada de todos os aparelhos.","Excluir")){await DB.del("notas",n.id);notas=await DB.all("notas");renderNotas();toast("Nota excluída")}}});
 
 /* editores (materiais e grupos) com salvamento automático */
 let finSuspend=false,finTmr=null;
@@ -1617,7 +1704,7 @@ async function showFinPdf(r){const pages=await renderFinPDF(r);const name="Fecha
 /* ============================================================
    NUVEM (Supabase): login + sincronização
    ============================================================ */
-const APP_VERSION="Versão 7 · 20/11/2026 · Financeiro + lista completa";
+const APP_VERSION="Versão 8 · 20/11/2026 · Notas fiscais";
 const SB_URL="https://xipiemiyvrwfxosbfpvl.supabase.co",SB_KEY="sb_publishable_RtUvyM---ErVKDlMnonTVg_AEy9yL5I";
 let sb=null,appStarted=false;
 function fnv(s){let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(36)+s.length.toString(36)}
@@ -1646,14 +1733,20 @@ const Sync=(()=>{
       if(!up.has(path)){const {error}=await sb.storage.from("fotos").upload(path,dataURLtoBlob(s),{upsert:true,contentType:"image/jpeg"});if(error&&!/exist|duplicate/i.test(error.message))throw error;up.add(path);ch=true}
       a[i]="sb:"+path}}
     if(ch)LS.set(upKey(),[...up]);return out}
+  async function removeFolder(pre){try{const {data}=await sb.storage.from("fotos").list(pre);if(data&&data.length)await sb.storage.from("fotos").remove(data.map(f=>pre+"/"+f.name))}catch(_){}}
+  async function uploadNota(rec){const out=Object.assign({},rec);const s=rec.file;
+    if(typeof s==="string"&&s.startsWith("data:")){const mime=(s.match(/^data:(.*?);/)||[])[1]||"application/octet-stream";const ext=mime==="application/pdf"?"pdf":mime==="image/png"?"png":"jpg";
+      const path=user.id+"/notas/"+rec.id+"/"+fnv(s)+"."+ext;const up=new Set(LS.get(upKey(),[]));
+      if(!up.has(path)){const {error}=await sb.storage.from("fotos").upload(path,dataURLtoBlob(s),{upsert:true,contentType:mime});if(error&&!/exist|duplicate/i.test(error.message))throw error;up.add(path);LS.set(upKey(),[...up])}
+      out.file="sb:"+path}return out}
   async function removePhotos(id){try{const {data}=await sb.storage.from("fotos").list(user.id+"/"+id);if(data&&data.length)await sb.storage.from("fotos").remove(data.map(f=>user.id+"/"+id+"/"+f.name))}catch(_){}}
   async function push(){
     const items=(await DB.all("outbox")).sort((a,b)=>a.ts-b.ts);
     for(const it of items){let row;
       if(it.kind==="cfg")row={user_id:user.id,kind:"cfg",id:"main",data:cfg,deleted:false};
       else{const store=STORE_OF[it.kind];if(!store){await DB.del("outbox",it.key,true);continue}const rec=await DB.get(store,it.id);
-        if(rec)row={user_id:user.id,kind:it.kind,id:it.id,data:it.kind==="doc"?await uploadPhotos(rec):rec,deleted:false};
-        else{row={user_id:user.id,kind:it.kind,id:it.id,data:null,deleted:true};if(it.kind==="doc")await removePhotos(it.id)}}
+        if(rec)row={user_id:user.id,kind:it.kind,id:it.id,data:it.kind==="doc"?await uploadPhotos(rec):it.kind==="nota"?await uploadNota(rec):rec,deleted:false};
+        else{row={user_id:user.id,kind:it.kind,id:it.id,data:null,deleted:true};if(it.kind==="doc")await removePhotos(it.id);if(it.kind==="nota")await removeFolder(user.id+"/notas/"+it.id)}}
       const {error}=await sb.from("registros").upsert(row,{onConflict:"user_id,kind,id"});if(error)throw error;
       const cur=await DB.get("outbox",it.key);if(cur&&cur.ts===it.ts)await DB.del("outbox",it.key,true)}}
   async function pull(){
@@ -1672,6 +1765,7 @@ const Sync=(()=>{
       if(r.kind==="doc"){bumpSeq(rd.type,rd.num);
         if(loc&&loc.payload&&loc.payload.photos&&rd.payload&&rd.payload.photos){const map={};["antes","depois"].forEach(x=>(loc.payload.photos[x]||[]).forEach(s=>{if(typeof s==="string"&&s.startsWith("data:"))map[fnv(s)]=s}));
           ["antes","depois"].forEach(x=>{const a=rd.payload.photos[x]||[];a.forEach((s,i)=>{if(typeof s==="string"&&s.startsWith("sb:")){const h=s.split("/").pop().replace(".jpg","");if(map[h])a[i]=map[h]}})})}}
+      if(r.kind==="nota"&&loc&&typeof loc.file==="string"&&loc.file.startsWith("data:")&&typeof rd.file==="string"&&rd.file.startsWith("sb:")&&rd.file.includes("/"+fnv(loc.file)+"."))rd.file=loc.file;
       await DB.put(store,rd,true);changed=true}
     LS.set(k,max);
     if(cfgCh){renderBrand();Object.values(ctl).forEach(c=>{c.refreshTexts();c.recalc();c.updateProg()});if(tab==="fin"&&!finEditing())renderFinEditors()}
@@ -1726,7 +1820,7 @@ $("#lgGo").onclick=async()=>{
     else if(lgMode==="newpass"){const {data,error}=await sb.auth.updateUser({password:pass});if(error)throw error;toast("Senha alterada");await onSignedIn(data.user)}
   }catch(e){lgMsg(trErr(e))}finally{b.disabled=false}};
 
-async function wipeLocal(){for(const s of ["clients","docs","outbox","drafts","fech"]){try{await DB.clear(s)}catch(_){}}
+async function wipeLocal(){for(const s of ["clients","docs","outbox","drafts","fech","notas"]){try{await DB.clear(s)}catch(_){}}
   Object.keys(localStorage).filter(k=>/^boreal_(pull|up)_/.test(k)||["boreal_cfg","boreal_seq","boreal_seq_orc","boreal_draft","boreal_db_mem"].includes(k)).forEach(k=>LS.del(k))}
 async function onSignedIn(user){
   if(!user)return;const prev=LS.get("boreal_uid",null);
