@@ -238,6 +238,11 @@ body.func .adm{display:none!important}
 .ctc details summary{cursor:pointer;color:var(--blue);font-weight:600;font-size:13px;margin-top:6px}
 .hbar{display:flex;align-items:center;gap:10px;margin:8px 0}.hbar span{width:42%;font-size:14px;color:var(--text)}.hbar i{display:block;height:12px;border-radius:6px;background:var(--blue)}.hbar b{font-size:13px;color:var(--navy);white-space:nowrap}
 .sx{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}.sx.neg{color:var(--danger)}
+.leg{margin-top:16px}.leg .mcbody{padding-top:4px}
+.lg{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px;color:var(--text)}
+.lg:last-child{border-bottom:0}.lg>i{flex:none;width:46px;height:28px;border-radius:8px;border:1px solid var(--line);display:block}
+.lg>span.pill{flex:none;min-width:46px;text-align:center}.lg b{color:var(--navy)}
+.legh{font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin:12px 0 2px}
 .banner{background:var(--ice);border:1px solid var(--ice2);color:var(--navy);border-radius:12px;padding:12px 16px;margin-bottom:16px;font-weight:600;font-size:15px}
 
 /* ---------- clientes ---------- */
@@ -324,6 +329,7 @@ body.func .adm{display:none!important}
     <div class="stats" id="cliStats"></div>
     <div class="filt" id="cliFilt"></div>
     <div id="cliList"></div>
+    <div class="legwrap"></div>
   </div>
   <div id="cliDetail" hidden></div>
 </main>
@@ -1520,16 +1526,32 @@ let listFilter="all";
 function validadeOf(d){const f=(d.payload||{}).f||{};return f.validade||(f.data?addDays(f.data,30):"")}
 function isExpired(d){const v=validadeOf(d);return d.type==="orc"&&d.status==="pendente"&&!!v&&v<today()}
 function statusPill(d){
-  if(d.type==="orc"){if(d.status==="aprovado")return'<span class="pill ok">Aprovado'+(d.osNum?" → OS "+pad(d.osNum,4):"")+"</span>";
+  if(d.type==="orc"){if(d.status==="aprovado"){if(d.osNum)return'<span class="pill ok">Aprovado → OS '+pad(d.osNum,4)+"</span>";const ag=agenda.find(a=>a.orcId===d.id&&a.status!=="cancelado");return'<span class="pill ok">Aceito'+(ag?" · agendado "+br(ag.data).slice(0,5)+(ag.hora?" "+ag.hora:""):"")+"</span>"}
     if(d.status==="recusado")return'<span class="pill bad">Recusado</span>';if(isExpired(d))return'<span class="pill bad">Vencido em '+br(validadeOf(d))+"</span>";return'<span class="pill warn">Aguardando cliente</span>'}
   if(d.status==="Pago")return'<span class="pill ok">Pago</span>';if(d.status==="Pendente"||d.status==="Parcial")return'<span class="pill warn">'+esc(d.status)+"</span>";return""}
 function renderClientes(){if(cliView&&clients.find(c=>c.key===cliView))renderDetail();else{cliView=null;renderList()}}
+function legendaHTML(){return'<details class="mcat leg"><summary><span class="mcn">🎨 O que cada cor significa</span><span class="mcc">legenda</span></summary><div class="mcbody">'+
+  '<div class="legh">Lista de clientes</div>'+
+  '<div class="lg"><i style="background:#fff"></i><span><b>Branco</b>: cliente em dia.</span></div>'+
+  '<div class="lg"><i style="background:#FFF4C7;border-color:#EBC94F"></i><span><b>Amarelo</b>: 6 meses ou mais sem serviço. Ofereça uma manutenção (botão 📲 Enviar lembrete).</span></div>'+
+  '<div class="legh">Dentro da ficha do cliente</div>'+
+  '<div class="lg"><i style="background:#fff;border-left:6px solid #4C9BFF"></i><span><b>Borda azul clara</b>: orçamento.</span></div>'+
+  '<div class="lg"><i style="background:#fff;border-left:6px solid #0B1B33"></i><span><b>Borda azul escura</b>: ordem de serviço.</span></div>'+
+  '<div class="lg"><i style="background:#FFF1F1;border-color:#EDB1B1;border-left:6px solid #C23B3B"></i><span><b>Fundo vermelho</b>: orçamento vencido ou que não fechou. Fica sem número; use 🔁 Refazer orçamento.</span></div>'+
+  '<div class="lg"><i style="background:#E3F5EC;border-color:#BFE6D2"></i><span><b>Faixa verde</b>: serviço dentro da garantia (mostra até quando).</span></div>'+
+  '<div class="lg"><i style="background:#EEF1F4"></i><span><b>Faixa cinza</b>: a garantia da última OS já venceu.</span></div>'+
+  '<div class="legh">Etiquetas</div>'+
+  '<div class="lg"><span class="pill ok">verde</span><span>Deu certo: aceito, aprovado, pago, confirmado, em garantia, avaliação pedida.</span></div>'+
+  '<div class="lg"><span class="pill warn">amarela</span><span>Esperando algo: aguardando o cliente, pagamento pendente ou parcial, confirmar o agendamento hoje.</span></div>'+
+  '<div class="lg"><span class="pill bad">vermelha</span><span>Precisa de atenção: orçamento vencido, não fechou, agendamento atrasado.</span></div>'+
+  '<div class="lg"><span class="pill na">cinza</span><span>Informativo ou encerrado: garantia vencida, agendado, cancelado.</span></div>'+
+  "</div></details>"}
 function renderAgHoje(){const el=$("#agHoje");if(!el)return;const t=today(),tm=addDays(t,1);
   const hj=agenda.filter(a=>a.data===t&&agActive(a)).sort(byDT),am=agenda.filter(a=>a.data===tm&&a.status==="agendado");
   if(!hj.length&&!am.length){el.innerHTML="";return}
   el.innerHTML='<div class="hoje"><b>📅 '+(hj.length?"Hoje você tem "+hj.length+" serviço"+(hj.length>1?"s":""):"Nenhum serviço hoje")+'</b>'+(hj.length?"<ul>"+hj.map(a=>"<li>"+(a.hora||"--:--")+" · "+esc(a.cliNome)+" · "+esc(a.svc||"")+"</li>").join("")+"</ul>":"<br>")+
     (am.length?'<div style="margin:4px 0 10px;opacity:.9">⏰ Amanhã: '+am.length+' agendamento'+(am.length>1?"s":"")+' para confirmar</div>':"")+'<button class="btn small" type="button" data-goag>Abrir agenda</button></div>'}
-function renderList(){renderAgHoje();
+function renderList(){renderAgHoje();const lw=$("#cliListView .legwrap");if(lw&&!lw.firstChild)lw.innerHTML=legendaHTML();
   $("#cliListView").hidden=false;$("#cliDetail").hidden=true;
   const n=norm($("#cliSearch").value);
   const list=clients.map(c=>({c,s:stats(c.key)})).filter(({c})=>!n||norm([c.cliNome,c.cliTel,c.cliCidade,c.cliBairro,c.cliDoc].join(" ")).includes(n)||String(c.cliTel||"").replace(/\D/g,"").includes(n.replace(/\D/g,"")||"#"))
@@ -1569,17 +1591,18 @@ function renderDetail(){
   '<div class="filt">'+[["all","Todos ("+s.ds.length+")"],["orc","Orçamentos ("+s.orc.length+")"],["os","Ordens de serviço ("+s.os.length+")"]].map(([k,l])=>'<button class="chip" type="button" data-filt="'+k+'" aria-pressed="'+(docFilter===k)+'">'+l+"</button>").join("")+"</div>"+
   (list.length?list.map(d=>{const P=d.payload||{},f=P.f||{};const sub=[(d.svc||[]).join(" · ")||"Serviço não informado"];
       if(d.type==="orc"&&validadeOf(d))sub.push((isExpired(d)?"venceu em ":"válido até ")+br(validadeOf(d)));if(d.type==="os"&&d.refOrc)sub.push("do orçamento Nº "+pad(d.refOrc,4));
-      const rel=orcReleased(d),canConv=d.type==="orc"&&orcHolds(d)&&d.status!=="aprovado";
+      const rel=orcReleased(d),canConv=d.type==="orc"&&orcHolds(d)&&d.status!=="aprovado",aceitoSemOS=d.type==="orc"&&d.status==="aprovado"&&!d.osNum;
       if(rel)sub.push(d.status==="recusado"?"não fechou: o número "+pad(d.num,4)+" foi liberado":"o número "+pad(d.num,4)+" foi liberado");
       return'<div class="doc '+d.type+(isExpired(d)?" expired":"")+'"><div class="dh"><span class="pill '+d.type+'">'+(d.type==="os"?"OS":"ORÇAMENTO")+'</span><span class="dt">'+(rel?"Sem nº":"Nº "+pad(d.num,4))+'</span><span class="dd">'+br(d.data)+"</span>"+statusPill(d)+garPill(d)+(d.avalEm?'<span class="pill ok">⭐ avaliação pedida</span>':"")+'<span class="dv">R$ '+fmt(d.total)+'</span></div><div class="ds">'+esc(sub.join(" — "))+'</div><div class="da">'+
         '<button class="btn ghost small" data-act="pdf" data-id="'+d.id+'">📄 Ver PDF</button>'+
-        (canConv?'<button class="btn primary small" data-act="conv" data-id="'+d.id+'">✓ Cliente fechou: virar OS</button>':"")+
+        (canConv?'<button class="btn primary small" data-act="fechar" data-id="'+d.id+'">📅 Cliente fechou: agendar</button><button class="btn line small" data-act="conv" data-id="'+d.id+'">🔧 Virar OS agora</button>':"")+
+        (aceitoSemOS?'<button class="btn dark small" data-act="conv" data-id="'+d.id+'">🔧 Virar OS</button>':"")+
         (rel?'<button class="btn primary small" data-act="redo" data-id="'+d.id+'">🔁 Refazer orçamento</button>':'<button class="btn line small" data-act="open" data-id="'+d.id+'">✎ Editar</button>')+
         (canConv?'<button class="btn line small" data-act="refuse" data-id="'+d.id+'">Não fechou</button>':"")+
         (d.type==="os"&&cfg.googleLink&&waNum(c.cliTel||f.cliTel)?'<button class="btn line small" data-act="aval" data-id="'+d.id+'">⭐ Avaliação</button>':"")+
         '<button class="btn danger small" data-act="del" data-id="'+d.id+'">Excluir</button></div></div>'}).join("")
     :'<div class="empty"><b>Nenhum documento aqui</b>Use os botões acima para criar um orçamento ou uma OS para este cliente.</div>')+
-  '<div style="margin-top:24px;text-align:center"><button class="btn danger small" data-act="delCli">Excluir cliente</button></div>';
+  '<div style="margin-top:24px;text-align:center"><button class="btn danger small" data-act="delCli">Excluir cliente</button></div>'+legendaHTML();
 }
 $("#cliDetail").addEventListener("click",async e=>{
   const f=e.target.closest("[data-filt]");if(f){docFilter=f.dataset.filt;renderDetail();return}
@@ -1599,7 +1622,8 @@ $("#cliDetail").addEventListener("click",async e=>{
   if(act==="pdf"){b.disabled=true;try{await showDocPdf(d,null)}catch(err){console.error(err);toast("Erro ao gerar o PDF")}finally{b.disabled=false}return}
   if(act==="open"){await ensurePhotos(d);const C2=ctl[d.type];if(C2.hasUnsaved()&&C2.st.docId!==d.id&&!(await ask("Substituir o que está na tela?","Há "+(d.type==="os"?"uma OS":"um orçamento")+" em andamento que ainda não foi gerado. Ele será descartado.","Substituir")))return;
     C2.applyData(Object.assign({},d.payload,{docId:d.id,num:d.num}));C2.st.dirty=false;C2.flush();showTab(d.type);toast("Editando "+(d.type==="os"?"OS":"orçamento")+" Nº "+pad(d.num,4));return}
-  if(act==="conv")return convertToOS(d);
+  if(act==="conv")return convertToOS(d,agenda.find(a=>a.orcId===d.id&&agActive(a)));
+  if(act==="fechar")return fecharOrc(d);
   if(act==="refuse"){if(!(await ask("Orçamento Nº "+pad(d.num,4)+" não fechou?","O orçamento fica na ficha do cliente sem número e o Nº "+pad(d.num,4)+" volta a ficar livre para o próximo orçamento ou OS. Se o cliente decidir fechar depois, use Refazer orçamento.","Confirmar")))return;
     d.status="recusado";d.atualizadoEm=Date.now();await DB.put("docs",d);await refresh();toast("Nº "+pad(d.num,4)+" liberado");return}
   if(act==="redo")return redoOrc(d);
@@ -1613,12 +1637,12 @@ async function redoOrc(d){const C2=ctl.orc;
   const P=JSON.parse(JSON.stringify(d.payload||{}));const t0=today();const f=Object.assign({},P.f||{},{data:t0,validade:addDays(t0,30)});
   C2.applyData(Object.assign({},P,{f,docId:d.id,numFixed:false,num:null,assinadoEm:null,criadoEm:d.criadoEm,refOrc:null,refOrcId:null}));C2.st.dirty=true;C2.flush();
   showTab("orc");toast("Orçamento refeito com o Nº "+C2.numStr()+", válido até "+br(f.validade)+". Confira e toque em Gerar orçamento.")}
-async function convertToOS(orc){
+async function convertToOS(orc,ag){
   const o=ctl.os,P=orc.payload||{},pf=P.f||{};
   if(o.hasUnsaved()&&!(await ask("Substituir a OS que está na tela?","A OS em andamento ainda não foi gerada e será descartada para abrir o orçamento Nº "+pad(orc.num,4)+".","Substituir")))return;
-  const f={};CLI_KEYS.forEach(k=>{if(pf[k])f[k]=pf[k]});f.cliAnt="Sim";if(pf.valor)f.valor=fmt(parseMoney(pf.valor));if(pf.garantia)f.garantia=pf.garantia;if(pf.tecnico)f.tecnico=pf.tecnico;
+  const f={};CLI_KEYS.forEach(k=>{if(pf[k])f[k]=pf[k]});f.cliAnt="Sim";if(pf.valor)f.valor=fmt(parseMoney(pf.valor));if(pf.garantia)f.garantia=pf.garantia;if(pf.tecnico)f.tecnico=pf.tecnico;if(ag&&ag.hora)f.hIni=ag.hora;
   const mats=(P.mats||[]).map(m=>({nome:m.nome,qtd:m.qtd,preco:typeof m.preco==="number"?m.preco:parseMoney(m.preco),custo:m.custo}));
-  o.fresh({f,eq:(P.eq||[]).map(e=>Object.assign({},e)),svc:(P.svc||[]).slice(),mats,refOrc:orc.num,refOrcId:orc.id,num:orc.num,numFixed:true,sigTec:cfg.sig||P.sigTec||""});
+  o.fresh({f,eq:(P.eq||[]).map(e=>Object.assign({},e)),svc:(P.svc||[]).slice(),mats,refOrc:orc.num,refOrcId:orc.id,refAg:ag?ag.id:null,num:orc.num,numFixed:true,sigTec:cfg.sig||P.sigTec||""});
   orc.status="aprovado";orc.osNum=o.st.num;orc.atualizadoEm=Date.now();await DB.put("docs",orc);await refresh();
   showTab("os");const nm=o.matCount();toast("Orçamento Nº "+pad(orc.num,4)+" virou a OS Nº "+o.numStr()+": "+nm+" ite"+(nm===1?"m":"ns")+" de material, total R$ "+fmt(o.recalc()));
 }
@@ -1889,10 +1913,12 @@ function agMsg(a){const fn=first(a.cliNome),emp=cfg.nome||"Boreal Clima",t=today
 function agItem(a,late){const t=today(),tom=a.data===addDays(t,1);const tel=waNum(a.cliTel);
   const pill=a.status==="feito"?'<span class="pill ok">✓ Feito'+(a.osNum?" · OS "+pad(a.osNum,4):"")+"</span>":a.status==="confirmado"?'<span class="pill ok">Confirmado</span>':a.status==="cancelado"?'<span class="pill na">Cancelado</span>':late?'<span class="pill bad">Atrasado</span>':tom?'<span class="pill warn">Confirmar hoje</span>':'<span class="pill na">Agendado</span>';
   const act=agActive(a);
-  return'<div class="agi'+(a.status==="feito"?" done":"")+(late?" late":"")+(a.contratoId?" ct":"")+'"><div class="agt">'+(a.hora||"--:--")+'</div><div class="agm"><b>'+esc(a.cliNome)+'</b><span>'+esc(a.svc||"Serviço")+(a.contratoId?" · contrato":"")+'</span>'+
+  return'<div class="agi'+(a.status==="feito"?" done":"")+(late?" late":"")+(a.contratoId?" ct":"")+'"><div class="agt">'+(a.hora||"--:--")+'</div><div class="agm"><b>'+esc(a.cliNome)+'</b><span>'+esc(a.svc||"Serviço")+(a.contratoId?" · contrato":"")+'</span>'+(a.orcId?(()=>{const o=docs.find(x=>x.id===a.orcId);return'<span style="color:var(--blue);font-weight:600">📝 Orçamento Nº '+pad(a.orcNum,4)+(o?" · R$ "+fmt(o.total):"")+"</span>"})():"")+
     (a.end?'<a target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(a.end)+'">📍 '+esc(a.end)+"</a>":"")+(a.obs?"<span>"+esc(a.obs)+"</span>":"")+'<div class="pills" style="justify-content:flex-start;margin-top:6px">'+pill+'</div></div><div class="aga">'+
+    (a.end&&act?'<a class="btn primary small" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination='+encodeURIComponent(a.end)+'">🧭 Ir (Maps)</a><a class="btn line small" target="_blank" rel="noopener" href="https://waze.com/ul?navigate=yes&q='+encodeURIComponent(a.end)+'">Waze</a>':"")+
     (act&&tel&&a.status!=="confirmado"?'<button class="btn '+(tom?"wa":"line")+' small" type="button" data-act="agconf" data-agid="'+a.id+'">📲 Confirmar</button>':"")+
-    (act?'<button class="btn dark small" type="button" data-act="agos" data-agid="'+a.id+'">🔧 Abrir OS</button><button class="btn line small" type="button" data-act="agedit" data-agid="'+a.id+'">✎</button><button class="btn danger small" type="button" data-act="agcanc" data-agid="'+a.id+'" aria-label="Cancelar">✕</button>':"")+
+    (act?'<button class="btn dark small" type="button" data-act="agos" data-agid="'+a.id+'">🔧 Abrir OS</button><button class="btn line small" type="button" data-act="agedit" data-agid="'+a.id+'">✎</button>'+(a.contratoId?'<button class="btn danger small" type="button" data-act="agcanc" data-agid="'+a.id+'" aria-label="Cancelar visita">✕</button>':""):"")+
+    (!a.contratoId?'<button class="btn danger small" type="button" data-act="agdel" data-agid="'+a.id+'">🗑 Excluir</button>':"")+
     (a.status==="cancelado"?'<button class="btn line small" type="button" data-act="agreat" data-agid="'+a.id+'">Reativar</button>':"")+"</div></div>"}
 function renderAgenda(){const t=today(),until=addDays(t,60);
   const late=agenda.filter(a=>agActive(a)&&a.data<t).sort(byDT),fut=agenda.filter(a=>a.data>=t&&a.data<=until&&a.status!=="cancelado").sort(byDT);
@@ -1902,9 +1928,12 @@ function renderAgenda(){const t=today(),until=addDays(t,60);
   Object.keys(days).sort().forEach(d=>{const l=days[d];h+='<div class="agday">'+dLabel(d)+' <small>'+br(d)+" · "+l.length+" serviço"+(l.length>1?"s":"")+"</small></div>"+l.map(a=>agItem(a,false)).join("")});
   if(!fut.length&&!late.length)h+='<div class="empty"><b>Nada agendado</b>Toque em + Agendar serviço para marcar uma visita.</div>';
   $("#agList").innerHTML=h;renderContratos();renderAgBadge()}
-let agEdit=null;
+let agEdit=null,agPref=null;
+function fecharOrc(d){const P=d.payload||{},f=P.f||{},c=clients.find(x=>x.key===d.cli)||{};
+  openAg(null,{cliNome:f.cliNome||d.cliNome,cliTel:f.cliTel||c.cliTel||"",end:[f.cliEnd||c.cliEnd,f.cliBairro||c.cliBairro,f.cliCidade||c.cliCidade].filter(Boolean).join(", "),svc:(P.svc||[])[0]||"Instalação",
+    obs:(P.svc||[]).length>1?P.svc.join(", "):"",orcId:d.id,orcNum:d.num})}
 function cliNamesDL(){$("#cliNames").innerHTML=clients.map(c=>'<option value="'+esc(c.cliNome)+'">').join("")}
-function openAg(a,pref){agEdit=a||null;pref=pref||{};cliNamesDL();$("#agT").textContent=a?"Editar agendamento":"Agendar serviço";
+function openAg(a,pref){agEdit=a||null;pref=pref||{};agPref=pref;cliNamesDL();$("#agT").textContent=a?"Editar agendamento":pref.orcId?"Agendar serviço do orçamento Nº "+pad(pref.orcNum,4):"Agendar serviço";
   $("#agSvc").innerHTML=SERVICES.map(s=>"<option>"+s+"</option>").join("");
   const v=a||pref;$("#agNome").value=v.cliNome||"";$("#agTel").value=v.cliTel||"";$("#agEnd").value=v.end||"";$("#agData").value=v.data||addDays(today(),1);$("#agHora").value=v.hora||"09:00";$("#agSvc").value=v.svc||"Limpeza / Higienização";$("#agObs").value=v.obs||"";openM("#mAg")}
 $("#agNome").addEventListener("change",()=>{const c=clients.find(x=>x.key===norm($("#agNome").value));if(c){$("#agNome").value=c.cliNome;if(!$("#agTel").value)$("#agTel").value=c.cliTel||"";if(!$("#agEnd").value)$("#agEnd").value=[c.cliEnd,c.cliBairro,c.cliCidade].filter(Boolean).join(", ")}});
@@ -1912,13 +1941,18 @@ $("#agNew").onclick=()=>openAg(null);
 $("#agSave").onclick=async()=>{const nome=$("#agNome").value.trim(),data=$("#agData").value;if(!nome){toast("Coloque o nome do cliente");return}if(!data){toast("Escolha a data");return}
   const old=agEdit;const a=Object.assign({},old||{id:uid(),status:"agendado",criadoEm:Date.now()},{cliNome:nome,cli:norm(nome),cliTel:$("#agTel").value.trim(),end:$("#agEnd").value.trim(),data,hora:$("#agHora").value,svc:$("#agSvc").value,obs:$("#agObs").value.trim(),atualizadoEm:Date.now()});
   if(old&&old.status==="confirmado"&&(old.data!==a.data||old.hora!==a.hora))a.status="agendado";
+  if(!old&&agPref&&agPref.orcId){a.orcId=agPref.orcId;a.orcNum=agPref.orcNum;const o=docs.find(x=>x.id===agPref.orcId);if(o&&o.status!=="aprovado"){o.status="aprovado";o.atualizadoEm=Date.now();await DB.put("docs",o)}}
   if(!clients.find(c=>c.key===a.cli))await upsertClient({cliNome:nome,cliTel:a.cliTel,cliEnd:a.end});
   await DB.put("agenda",a);agenda=await DB.all("agenda");closeM($("#mAg"));await refresh();if(tab==="ag")renderAgenda();toast("Agendado para "+dLabel(a.data).toLowerCase()+(a.hora?" às "+a.hora:""))};
+async function soltarOrc(a){if(!a.orcId||a.status==="feito")return;const o=docs.find(x=>x.id===a.orcId);if(o&&o.status==="aprovado"&&!o.osNum){o.status="pendente";o.atualizadoEm=Date.now();await DB.put("docs",o);await refresh()}}
 async function agAction(act,a){
   if(act==="agconf"){const n=waNum(a.cliTel);if(!n){toast("Esse agendamento não tem WhatsApp");return}window.open(waLink(n,agMsg(a)),waTarget());a.status="confirmado";a.confirmadoEm=Date.now();a.atualizadoEm=Date.now();await DB.put("agenda",a);agenda=await DB.all("agenda");renderAgenda();renderAgHoje();if(cliView)renderDetail();toast("Mensagem de confirmação aberta no WhatsApp");return}
   if(act==="agedit")return openAg(a);
-  if(act==="agcanc"){if(!(await ask("Cancelar este agendamento?",esc(a.cliNome)+" · "+br(a.data)+(a.hora?" às "+a.hora:""),"Cancelar agendamento")))return;a.status="cancelado";a.atualizadoEm=Date.now();await DB.put("agenda",a);agenda=await DB.all("agenda");renderAgenda();renderAgHoje();return}
+  if(act==="agcanc"){if(!(await ask("Cancelar este agendamento?",esc(a.cliNome)+" · "+br(a.data)+(a.hora?" às "+a.hora:""),"Cancelar agendamento")))return;await soltarOrc(a);a.status="cancelado";a.atualizadoEm=Date.now();await DB.put("agenda",a);agenda=await DB.all("agenda");renderAgenda();renderAgHoje();return}
+  if(act==="agdel"){if(!(await ask("Excluir este agendamento?",a.cliNome+" · "+br(a.data)+(a.hora?" às "+a.hora:"")+". Ele é apagado de vez da agenda. Nenhuma OS nem cliente é alterado.","Excluir")))return;
+    await soltarOrc(a);await DB.del("agenda",a.id);agenda=await DB.all("agenda");renderAgenda();renderAgHoje();if(cliView)renderDetail();toast("Agendamento excluído");return}
   if(act==="agreat"){a.status="agendado";a.atualizadoEm=Date.now();await DB.put("agenda",a);agenda=await DB.all("agenda");renderAgenda();return}
+  if(act==="agos"&&a.orcId){const o=docs.find(x=>x.id===a.orcId);if(o){if(o.osNum&&a.osId){toast("Esse orçamento já virou a OS Nº "+pad(o.osNum,4));return}return convertToOS(o,a)}}
   if(act==="agos"){const c=clients.find(x=>x.key===a.cli)||{};const f={};CLI_KEYS.forEach(k=>{if(c[k])f[k]=c[k]});f.cliNome=c.cliNome||a.cliNome;if(a.cliTel)f.cliTel=a.cliTel;if(a.end&&!f.cliEnd)f.cliEnd=a.end;if(c.key)f.cliAnt="Sim";if(a.hora)f.hIni=a.hora;
     const ct=a.contratoId&&contratos.find(x=>x.id===a.contratoId);const cv=ct?ct.valor:a.ctValor,cn=ct?ct.nome:a.ctNome;if(cv)f.valor=fmt(cv);
     if(await ctl.os.newDoc(true,{f,svc:a.svc?[a.svc]:[],refAg:a.id,contrato:a.contratoId?(cn||"Contrato"):null}))showTab("os");return}}
@@ -2021,7 +2055,7 @@ $("#teamList").addEventListener("click",async e=>{const b=e.target.closest("[dat
 /* ============================================================
    NUVEM (Supabase): login + sincronização
    ============================================================ */
-const APP_VERSION="Versão 11 · 20/11/2026 · Agenda também para funcionários";
+const APP_VERSION="Versão 15 · 20/11/2026 · Rota para o cliente";
 const SB_URL="https://xipiemiyvrwfxosbfpvl.supabase.co",SB_KEY="sb_publishable_RtUvyM---ErVKDlMnonTVg_AEy9yL5I";
 let sb=null,appStarted=false;
 function fnv(s){let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(36)+s.length.toString(36)}
