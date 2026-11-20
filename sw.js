@@ -1,5 +1,5 @@
 /* Boreal Clima · service worker: deixa o app abrir sem internet */
-const V = "boreal-v3";
+const V = "boreal-v4";
 const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
 
 self.addEventListener("install", e => {
@@ -16,7 +16,7 @@ self.addEventListener("fetch", e => {
   if (u.hostname.endsWith("supabase.co") || u.hostname.endsWith("supabase.in")) return; // dados: sempre direto
   if (r.mode === "navigate") {
     // página: tenta a versão mais nova; sem internet, usa a guardada
-    e.respondWith(Promise.race([fetch(r), timeout(5000)]).then(res => {
+    e.respondWith(Promise.race([fetch(r.url, { cache: "no-cache", credentials: "same-origin" }), timeout(6000)]).then(res => {
       if (res && res.ok) { const cp = res.clone(); caches.open(V).then(c => c.put("./index.html", cp)); }
       return res;
     }).catch(() => caches.match("./index.html").then(h => h || caches.match("./"))));
