@@ -440,14 +440,9 @@ body.func .adm{display:none!important}
     <div class="chips svcChips"></div>
   </section>
 
-  <section class="card">
-    <h2><span class="n">5</span>Checklist do serviço<button class="btn ghost small right allOk" type="button">Marcar tudo OK</button></h2>
-    <p class="hint">O checklist muda conforme o tipo de serviço marcado no item 4. Toque em <b>OK</b>, <b>Atenção</b> (problema encontrado) ou <b>N/A</b> (não se aplica).</p>
-    <div class="ckList"></div>
-  </section>
 
   <section class="card">
-    <h2><span class="n">6</span>Medições</h2>
+    <h2><span class="n">5</span>Medições</h2>
     <div class="grid">
       <label class="f">Temp. ambiente (°C)<input type="number" inputmode="decimal" step="0.1" data-k="mAmb"></label>
       <label class="f">Temp. de saída do ar (°C)<input type="number" inputmode="decimal" step="0.1" data-k="mIns"></label>
@@ -458,7 +453,7 @@ body.func .adm{display:none!important}
   </section>
 
   <section class="card">
-    <h2><span class="n">7</span>Fotos</h2>
+    <h2><span class="n">6</span>Fotos</h2>
     <div class="two">
       <div>
         <b style="color:var(--navy)">Antes</b>
@@ -480,14 +475,14 @@ body.func .adm{display:none!important}
   </section>
 
   <section class="card">
-    <h2><span class="n">8</span>Peças e materiais<span class="right hbtns"><button class="btn ghost small addGrp" type="button">+ Grupo</button><button class="btn ghost small addMat" type="button">+ Item</button></span></h2>
+    <h2><span class="n">7</span>Peças e materiais<span class="right hbtns"><button class="btn ghost small addGrp" type="button">+ Grupo</button><button class="btn ghost small addMat" type="button">+ Item</button></span></h2>
     <p class="hint">Digite o nome do material: se ele estiver na sua tabela (⚙️ Configurações), o valor entra sozinho. Use <b>+ Grupo</b> para colocar um kit inteiro de uma vez.</p>
     <div class="matList"></div>
     <div class="mtot"><span>Total de materiais</span><b class="matTotal">R$ 0,00</b></div>
   </section>
 
   <section class="card">
-    <h2><span class="n">9</span>Observações</h2>
+    <h2><span class="n">8</span>Observações</h2>
     <div class="grid">
       <label class="f wide">Problemas encontrados / serviço executado<textarea data-k="obs"></textarea></label>
       <label class="f wide">Recomendações ao cliente<textarea data-k="recom" style="min-height:70px"></textarea></label>
@@ -495,7 +490,7 @@ body.func .adm{display:none!important}
   </section>
 
   <section class="card">
-    <h2><span class="n">10</span>Valores e garantia</h2>
+    <h2><span class="n">9</span>Valores e garantia</h2>
     <div class="grid">
       <label class="f">Mão de obra / serviço (R$)<input type="text" inputmode="decimal" data-k="valor" placeholder="0,00"></label>
       <label class="f">Forma de pagamento<select data-k="pgto"><option value="">—</option><option>Pix</option><option>Dinheiro</option><option>Cartão de débito</option><option>Cartão de crédito</option><option>Boleto</option><option>Transferência</option><option>A combinar</option></select></label>
@@ -507,7 +502,7 @@ body.func .adm{display:none!important}
   </section>
 
   <section class="card">
-    <h2><span class="n">11</span>Assinaturas</h2>
+    <h2><span class="n">10</span>Assinaturas</h2>
     <div class="decl declTxt"></div>
     <div class="two">
       <div>
@@ -579,6 +574,13 @@ body.func .adm{display:none!important}
   </section>
 
   <section class="card">
+    <h2>Contratos de manutenção (PMOC)</h2>
+    <p class="hint">Para empresas, escritórios e comércios. Cada visita entra sozinha na agenda <b>1 dia antes</b>, para você confirmar com o cliente. A OS de cada visita é o relatório dela. O valor do contrato só aparece aqui.</p>
+    <div id="ctList"></div>
+    <button class="btn ghost small" type="button" id="ctNew">+ Novo contrato</button>
+  </section>
+
+  <section class="card">
     <h2>Materiais e preço de custo<span class="right savedtag" id="finSaved"></span></h2>
     <div class="grid" style="margin-bottom:6px"><label class="f">Margem sobre os materiais (%)<input type="number" id="finMargem" inputmode="decimal" step="1" min="0"></label></div>
     <p class="hint">Coloque o <b>valor real que você paga</b> em cada material. No orçamento e na OS ele entra sozinho com a margem a mais (coluna Venda). Toque numa categoria para abrir; dá para mudar nomes e custos, apagar (✕) e adicionar materiais ou categorias. Tudo é salvo sozinho.</p>
@@ -603,12 +605,6 @@ body.func .adm{display:none!important}
 <main class="page" id="pg-ag">
   <div class="cli-top"><button class="btn primary" id="agNew" type="button">+ Agendar serviço</button></div>
   <div id="agList"></div>
-  <section class="card adm" style="margin-top:16px">
-    <h2>Contratos de manutenção (PMOC)</h2>
-    <p class="hint">Para empresas, escritórios e comércios. As visitas entram sozinhas na agenda conforme a frequência. A OS de cada visita é o relatório dela.</p>
-    <div id="ctList"></div>
-    <button class="btn ghost small" type="button" id="ctNew">+ Novo contrato</button>
-  </section>
 </main>
 
 <!-- =================== PAINEL =================== -->
@@ -788,7 +784,13 @@ body.func .adm{display:none!important}
   <div class="grid" style="margin-top:10px">
     <label class="f wide">Nome / local do contrato<input type="text" id="ctNome" placeholder="Ex.: PMOC Loja Centro"></label>
     <label class="f wide">Cliente<input type="text" id="ctCli" list="cliNames" autocomplete="off"></label>
-    <label class="f wide">Endereço das visitas<input type="text" id="ctEnd"></label>
+    <label class="f">CPF / CNPJ<input type="text" id="ctDoc" inputmode="numeric"></label>
+    <label class="f">WhatsApp do cliente<input type="tel" id="ctTel" placeholder="(19) 99999-9999"></label>
+    <label class="f wide">Endereço das visitas (rua e número)<input type="text" id="ctEnd"></label>
+    <label class="f">Bairro<input type="text" id="ctBairro"></label>
+    <label class="f">Cidade<input type="text" id="ctCidade"></label>
+    <label class="f">UF<input type="text" id="ctUf" maxlength="2" style="text-transform:uppercase"></label>
+    <label class="f">CEP<input type="text" id="ctCep" inputmode="numeric" placeholder="00000-000"></label>
     <label class="f">Frequência<select id="ctMeses"><option value="1">Mensal</option><option value="2">Bimestral</option><option value="3">Trimestral</option><option value="6">Semestral</option></select></label>
     <label class="f">Valor por visita (R$)<input type="text" inputmode="decimal" id="ctValor" placeholder="0,00"></label>
     <label class="f">Primeira visita<input type="date" id="ctIni"></label>
@@ -1214,8 +1216,9 @@ function FormCtl(type){
     if(q(".declTxt"))q(".declTxt").innerHTML="Declaro que o(s) serviço(s) descrito(s) nesta ordem foi(ram) realizado(s) pela <b>"+nome+"</b> em minha presença, que o equipamento foi testado e entregue em funcionamento, e que estou de acordo com as informações acima.";
     q(".sigHint").innerHTML=cfg.sig?'<span class="sigok">✓ Sua assinatura salva já foi aplicada</span>':"Salve sua assinatura em ⚙️ Configurações e ela entra sozinha em "+(isOS?"toda OS.":"todo orçamento.");
     const bn=q("[data-banner]");const parts=[];
-    if(st.refOrc)parts.push("📝 OS gerada a partir do <b>Orçamento Nº "+pad(st.refOrc,4)+"</b>: cliente, equipamentos, serviços, materiais com valores e mão de obra já vieram preenchidos. Falta o checklist e a assinatura do cliente.");
-    if(st.contrato)parts.push("📋 Visita do contrato <b>"+esc(st.contrato)+"</b>. Esta OS é o relatório da visita.");
+    if(st.refOrc)parts.push("📝 OS gerada a partir do <b>Orçamento Nº "+pad(st.refOrc,4)+"</b>: cliente, equipamentos, serviços, materiais com valores e mão de obra já vieram preenchidos. Falta a assinatura do cliente.");
+    if(!isOS&&st.refAg)parts.push("📋 Orçamento da visita"+(st.contrato?" do contrato <b>"+esc(st.contrato)+"</b>":"")+". A mão de obra veio com o valor da visita: ajuste se precisar. Ao gerar, o orçamento fica ligado à visita e a OS sai com este mesmo número.");
+    else if(st.contrato)parts.push("📋 Visita do contrato <b>"+esc(st.contrato)+"</b>. Esta OS é o relatório da visita.");
     else if(st.refAg)parts.push("📅 OS aberta a partir da agenda. Quando gerar o PDF, o agendamento fica como feito.");
     if(st.docId)parts.push("✎ Você está editando "+(isOS?"a OS":"o orçamento")+" Nº "+numStr()+" já salvo. Ao gerar o PDF de novo, a ficha do cliente é atualizada.");
     bn.innerHTML=parts.join("<br>");bn.hidden=!parts.length;
@@ -1223,7 +1226,7 @@ function FormCtl(type){
   }
   function progress(){const f=collect();const steps=isOS?[
       [!!f.cliNome,"nome do cliente"],[getEquips().length>0,"equipamento"],[st.services.size>0,"tipo de serviço"],
-      [ckDone(),"checklist"],[!pads.sigCli.isEmpty(),"assinatura do cliente"]]
+      [!pads.sigCli.isEmpty(),"assinatura do cliente"]]
     :[[!!f.cliNome,"nome do cliente"],[getEquips().length>0,"equipamento"],[st.services.size>0,"tipo de serviço"],[recalc()>0,"valores"],[!pads.sigTec.isEmpty(),"sua assinatura"]];
     const done=steps.filter(s=>s[0]).length,miss=steps.filter(s=>!s[0]).map(s=>s[1]);
     return{pct:done/steps.length*100,txt:miss.length?"Falta: "+miss.join(", "):"Tudo pronto para gerar o PDF ✓"}}
@@ -1239,9 +1242,10 @@ function FormCtl(type){
     const total=D.mats.reduce((s,m)=>s+m.sub,0)+parseMoney(D.f.valor);
     D.docId=id;D.criadoEm=D.criadoEm||Date.now();
     const rec={id,type,num:st.num,cli:key,cliNome:D.f.cliNome,data:D.f.data||today(),total,svc:D.svc,
-      status:isOS?(D.f.pgSit||""):(ex&&ex.status==="aprovado"?"aprovado":"pendente"),osNum:ex?ex.osNum:null,refOrc:D.refOrc||null,refOrcId:D.refOrcId||null,
+      status:isOS?(D.f.pgSit||""):((ex&&ex.status==="aprovado")||D.refAg?"aprovado":"pendente"),osNum:ex?ex.osNum:null,refOrc:D.refOrc||null,refOrcId:D.refOrcId||null,
       criadoEm:D.criadoEm,atualizadoEm:Date.now(),payload:D};
     await DB.put("docs",rec);
+    if(!isOS&&D.refAg){const a=agenda.find(x=>x.id===D.refAg);if(a&&a.orcId!==id){a.orcId=id;a.orcNum=st.num;a.atualizadoEm=Date.now();await DB.put("agenda",a)}}
     if(isOS&&D.refAg){const a=agenda.find(x=>x.id===D.refAg);if(a){a.status="feito";a.osNum=st.num;a.osId=id;a.atualizadoEm=Date.now();await DB.put("agenda",a)}}
     if(isOS&&D.refOrcId){const o=docs.find(x=>x.id===D.refOrcId);if(o){o.status="aprovado";o.osNum=st.num;o.atualizadoEm=Date.now();await DB.put("docs",o)}}
     st.docId=id;st.numFixed=true;st.criadoEm=D.criadoEm;st.dirty=false;flush();refreshTexts();await refresh();return rec}
@@ -1380,7 +1384,7 @@ async function renderPDF(D){
 
   if(isOS){
     const ck=D.ck||{},legacy=Object.keys(ck).some(k=>/^\d+$/.test(k));const lab={ok:"OK",at:"ATENÇÃO",na:"N/A"},col={ok:C.ok,at:C.at,na:C.na};
-    const groups=legacy?[["",LEGACY_CHECKS,ck]]:(D.svc||[]).filter(s=>CHECKLISTS[s]).map(s=>[s,CHECKLISTS[s],ck[s]||{}]);
+    const groups=[];
     groups.forEach(([sv,list,vals])=>{
       d.ensure(110);d.text("CHECKLIST"+(sv?" · "+sv.toUpperCase():""),MX,d.y,"700",16,C.blue);d.y+=32;
       const ckRows=list.map((c,i)=>[c,vals[i]]);const half=Math.ceil(ckRows.length/2),cw=(CW-30)/2;
@@ -1586,7 +1590,7 @@ function renderDetail(){
   '<div class="cact"><button class="btn primary small" data-act="newOrc">+ Novo orçamento</button><button class="btn dark small" data-act="newOs">+ Nova OS</button>'+
   (waNum(c.cliTel)?'<a class="btn wa small" target="'+waTarget()+'" rel="noopener" href="'+waLink(waNum(c.cliTel),"")+'">WhatsApp</a>':"")+
   '<button class="btn line small" data-act="agendar">📅 Agendar</button><button class="btn line small" data-act="edit">Editar dados</button></div></section>'+
-  garBanner(s)+agCliBox(c)+ctCliBox(c)+
+  garBanner(s)+agCliBox(c)+
   '<div class="stats"><div>Ordens de serviço<b>'+s.os.length+'</b></div><div>Orçamentos<b>'+s.orc.length+'</b></div><div>Total em OS<b>R$ '+fmt(fat)+"</b></div></div>"+
   '<div class="filt">'+[["all","Todos ("+s.ds.length+")"],["orc","Orçamentos ("+s.orc.length+")"],["os","Ordens de serviço ("+s.os.length+")"]].map(([k,l])=>'<button class="chip" type="button" data-filt="'+k+'" aria-pressed="'+(docFilter===k)+'">'+l+"</button>").join("")+"</div>"+
   (list.length?list.map(d=>{const P=d.payload||{},f=P.f||{};const sub=[(d.svc||[]).join(" · ")||"Serviço não informado"];
@@ -1642,7 +1646,7 @@ async function convertToOS(orc,ag){
   if(o.hasUnsaved()&&!(await ask("Substituir a OS que está na tela?","A OS em andamento ainda não foi gerada e será descartada para abrir o orçamento Nº "+pad(orc.num,4)+".","Substituir")))return;
   const f={};CLI_KEYS.forEach(k=>{if(pf[k])f[k]=pf[k]});f.cliAnt="Sim";if(pf.valor)f.valor=fmt(parseMoney(pf.valor));if(pf.garantia)f.garantia=pf.garantia;if(pf.tecnico)f.tecnico=pf.tecnico;if(ag&&ag.hora)f.hIni=ag.hora;
   const mats=(P.mats||[]).map(m=>({nome:m.nome,qtd:m.qtd,preco:typeof m.preco==="number"?m.preco:parseMoney(m.preco),custo:m.custo}));
-  o.fresh({f,eq:(P.eq||[]).map(e=>Object.assign({},e)),svc:(P.svc||[]).slice(),mats,refOrc:orc.num,refOrcId:orc.id,refAg:ag?ag.id:null,num:orc.num,numFixed:true,sigTec:cfg.sig||P.sigTec||""});
+  o.fresh({f,eq:(P.eq||[]).map(e=>Object.assign({},e)),svc:(P.svc||[]).slice(),mats,refOrc:orc.num,refOrcId:orc.id,refAg:ag?ag.id:null,contrato:ag&&ag.contratoId?((contratos.find(x=>x.id===ag.contratoId)||{}).nome||ag.ctNome||"Contrato"):null,num:orc.num,numFixed:true,sigTec:cfg.sig||P.sigTec||""});
   orc.status="aprovado";orc.osNum=o.st.num;orc.atualizadoEm=Date.now();await DB.put("docs",orc);await refresh();
   showTab("os");const nm=o.matCount();toast("Orçamento Nº "+pad(orc.num,4)+" virou a OS Nº "+o.numStr()+": "+nm+" ite"+(nm===1?"m":"ns")+" de material, total R$ "+fmt(o.recalc()));
 }
@@ -1748,7 +1752,7 @@ function caixaAcum(ym){const ms=new Set([...docs.filter(osDone).map(osYM),...sai
   const A={mat:0,boreal:0,manut:0,lucro:0};ms.forEach(m=>{const r=finMonthBase(m),s=saiMonth(m).s;A.mat+=r.custo-s.mat;A.boreal+=r.boreal-s.boreal;A.manut+=r.manut-s.manut;A.lucro+=r.lucro-s.lucro});
   Object.keys(A).forEach(k=>A[k]=r2(A[k]));return A}
 function finMonth(ym){const r=finMonthBase(ym),sm=saiMonth(ym);r.sai=sm.s;r.compras=sm.nf;r.saidas=sm.list.map(x=>({data:x.data,caixa:x.caixa,valor:Number(x.valor)||0,desc:x.desc||""}));r.acum=caixaAcum(ym);return r}
-function finSig(r){return [r.bruto,r.custo,r.markup,r.os.map(o=>o.id+":"+o.bruto+":"+o.custo).join("|"),JSON.stringify(r.sai||{})].join("#")}
+function finSig(r){return [r.bruto,r.custo,r.markup,r.os.map(o=>o.id+":"+o.bruto+":"+o.custo).join("|"),JSON.stringify(r.sai||{}),JSON.stringify((r.saidas||[]).map(x=>[x.data,x.caixa,x.valor,x.desc])),r.compras||0].join("#")}
 async function saveClosing(ym){const r=finMonth(ym);r.geradoEm=Date.now();r.atualizadoEm=Date.now();r.parcial=ym>=ymNow();await DB.put("fech",r);fechs=await DB.all("fech");return r}
 async function autoClose(){let n=0;const cur=ymNow();const months=new Set(docs.filter(osDone).map(osYM).filter(m=>m&&m<cur));
   for(const ym of months){if(!fechs.find(f=>f.id===ym)){await saveClosing(ym);n++}}
@@ -1761,12 +1765,13 @@ function renderFin(){
   $("#finCards").innerHTML='<div class="big">Valor bruto dos serviços<b>R$ '+fmt(r.bruto)+'</b></div><div>Gasto com materiais (custo)<b>R$ '+fmt(r.custo)+'</b></div><div>'+fmt(r.margem).replace(",00","")+'% dos materiais<b>R$ '+fmt(r.markup)+'</b></div><div>OS concluídas<b>'+r.os.length+"</b></div>"+
     (r.aReceber?'<div>Ainda a receber<b style="color:#8A5800">R$ '+fmt(r.aReceber)+"</b></div>":"");
   const ent={mat:r.custo,boreal:r.boreal,manut:r.manut,lucro:r.lucro},S=r.sai||{},A=r.acum||{};
-  const mov=k=>'<span class="sx">− Saídas R$ '+fmt(S[k]||0)+(k==="mat"&&r.compras?" (notas R$ "+fmt(r.compras)+")":"")+'</span><span class="sx'+((ent[k]-(S[k]||0))<0?" neg":"")+'">= Saldo do mês R$ '+fmt(r2(ent[k]-(S[k]||0)))+'</span><span class="sx'+((A[k]||0)<0?" neg":"")+'"><b style="display:inline;font-size:12.5px;margin:0">Saldo acumulado R$ '+fmt(A[k]||0)+"</b></span>";
+  const sal=k=>r2(ent[k]-(S[k]||0)),big=k=>'<b'+(sal(k)<0?' style="color:#B42318"':"")+'>R$ '+fmt(sal(k))+"</b>";
+  const mov=k=>'<span class="sx">Entrou R$ '+fmt(ent[k])+'</span><span class="sx">− Saídas R$ '+fmt(S[k]||0)+(k==="mat"&&r.compras?" (notas R$ "+fmt(r.compras)+")":"")+'</span><span class="sx'+(sal(k)<0?" neg":"")+'">= Saldo do mês R$ '+fmt(sal(k))+'</span><span class="sx'+((A[k]||0)<0?" neg":"")+'"><b style="display:inline;font-size:12.5px;margin:0">Saldo acumulado R$ '+fmt(A[k]||0)+"</b></span>";
   $("#finSplit").innerHTML=
-    '<div style="--c:#7D8A98"><small>1 · Materiais</small><b>R$ '+fmt(r.custo)+'</b><span>Repor o material usado (sem a margem).</span>'+mov("mat")+'</div>'+
-    '<div style="--c:#1C6FE0"><small>2 · Caixa da Boreal</small><b>R$ '+fmt(r.boreal)+'</b><span>Documentos, gasolina e almoço.</span><em>1/3 do serviço R$ '+fmt(r.terco)+' + '+fmt(r.margem).replace(",00","")+'% dos materiais R$ '+fmt(r.markup)+' (ajuda na gasolina)</em>'+mov("boreal")+'</div>'+
-    '<div style="--c:#C27C00"><small>3 · Caixa de manutenção</small><b>R$ '+fmt(r.manut)+'</b><span>Depreciação do veículo e ferramentas.</span>'+mov("manut")+'</div>'+
-    '<div style="--c:#17905A"><small>4 · Lucro / Salário</small><b>R$ '+fmt(r.lucro)+'</b><span>Sua retirada do mês.</span>'+mov("lucro")+'</div>';
+    '<div style="--c:#7D8A98"><small>1 · Materiais · saldo</small>'+big("mat")+'<span>Repor o material usado (sem a margem).</span>'+mov("mat")+'</div>'+
+    '<div style="--c:#1C6FE0"><small>2 · Caixa da Boreal · saldo</small>'+big("boreal")+'<span>Documentos, gasolina e almoço.</span><em>1/3 do serviço R$ '+fmt(r.terco)+' + '+fmt(r.margem).replace(",00","")+'% dos materiais R$ '+fmt(r.markup)+' (ajuda na gasolina)</em>'+mov("boreal")+'</div>'+
+    '<div style="--c:#C27C00"><small>3 · Caixa de manutenção · saldo</small>'+big("manut")+'<span>Depreciação do veículo e ferramentas.</span>'+mov("manut")+'</div>'+
+    '<div style="--c:#17905A"><small>4 · Lucro / Salário · saldo</small>'+big("lucro")+'<span>Sua retirada do mês.</span>'+mov("lucro")+'</div>';
   $("#finFormula").textContent="Como é feita a conta: valor bruto R$ "+fmt(r.bruto)+" − materiais R$ "+fmt(r.custo)+" − margem dos materiais R$ "+fmt(r.markup)+" = R$ "+fmt(r.base)+", dividido em 3 partes iguais. A margem dos materiais vai inteira para o Caixa da Boreal."+(r.est?" * Algumas OS têm material sem custo cadastrado: o custo foi estimado tirando a margem do preço cobrado.":"");
   $("#finOsList").innerHTML=r.os.length?'<div class="fwrap"><table class="ftable"><thead><tr><th>Nº</th><th>Data</th><th>Cliente</th><th class="n">Bruto</th><th class="n hm">Materiais</th><th class="n hm">Margem</th></tr></thead><tbody>'+
     r.os.map(o=>'<tr><td><b>'+pad(o.num,4)+'</b></td><td>'+br(o.data).slice(0,5)+'</td><td>'+esc(o.cliente)+(o.pg==="Pendente"||o.pg==="Parcial"?' <span class="pill warn">'+esc(o.pg)+"</span>":"")+'</td><td class="n">R$ '+fmt(o.bruto)+'</td><td class="n hm">R$ '+fmt(o.custo)+(o.est?"*":"")+'</td><td class="n hm">R$ '+fmt(o.markup)+"</td></tr>").join("")+
@@ -1778,7 +1783,11 @@ function renderFin(){
       return'<div class="rep"><div class="ri"><b>'+ymLabel(f.id)+(parcial?' <span class="pill warn">parcial</span>':"")+(stale?' <span class="pill bad">desatualizado</span>':"")+'</b><span>Bruto R$ '+fmt(f.bruto)+' · Lucro R$ '+fmt(f.lucro)+' · '+f.os.length+' OS · gerado em '+new Date(f.atualizadoEm||f.geradoEm).toLocaleDateString("pt-BR")+'</span></div>'+
       '<button class="btn ghost small" type="button" data-rep="'+f.id+'">📄 Ver relatório</button>'+(stale||parcial?'<button class="btn line small" type="button" data-repup="'+f.id+'">↻ Atualizar</button>':"")+"</div>"}).join("")
     :'<div class="empty" style="padding:24px"><b>Nenhum relatório ainda</b>Os relatórios aparecem aqui no fim de cada mês, ou quando você toca em Gerar relatório do mês.</div>';
+  renderContratos();repAuto();
 }
+let repBusy=false;
+async function repAuto(){if(repBusy||isFunc())return;const st=fechs.filter(f=>finSig(finMonth(f.id))!==finSig(f));if(!st.length)return;repBusy=true;
+  try{for(const f of st)await saveClosing(f.id)}catch(e){console.warn(e)}finally{repBusy=false}if(tab==="fin")renderFin()}
 $("#finPrev").onclick=()=>{finYM=ymShift(finYM,-1);renderFin()};
 $("#finNext").onclick=()=>{if(finYM<ymNow()){finYM=ymShift(finYM,1);renderFin()}};
 $("#finReport").onclick=async()=>{const b=$("#finReport");b.disabled=true;try{const r=await saveClosing(finYM);renderFin();await showFinPdf(r)}catch(e){console.error(e);toast("Erro ao gerar o relatório")}finally{b.disabled=false}};
@@ -1857,12 +1866,13 @@ async function renderFinPDF(r){
   const bw=(CW-3*14)/4;boxes.forEach((b,i)=>{const x=MX+i*(bw+14);g.fillStyle=b[2]?C.navy:C.ice;d.rr(x,d.y,bw,96,12);g.fill();d.text(b[0].toUpperCase(),x+18,d.y+16,"700",15,b[2]?"rgba(255,255,255,.75)":C.muted);
     d.text(b[3]?String(b[1]):"R$ "+fmt(b[1]),x+18,d.y+44,"800",b[3]?34:28,b[2]?"#fff":C.navy)});d.y+=124;
   if(r.aReceber){d.text("Ainda a receber de OS com pagamento pendente: R$ "+fmt(r.aReceber),MX,d.y,"600",19,"#8A5800");d.y+=40}
-  d.section("Divisão do valor bruto");
+  d.section("Divisão do valor bruto (saldo de cada caixa, já descontadas as saídas)");
   const parts=[["1 · Materiais",r.custo,"Reposição do material usado (sem a margem)","#7D8A98"],
     ["2 · Caixa da Boreal",r.boreal,"Documentos, gasolina e almoço · 1/3 do serviço R$ "+fmt(r.terco)+" + "+mgTxt+" dos materiais R$ "+fmt(r.markup)+" (ajuda na gasolina)","#1C6FE0"],
     ["3 · Caixa de manutenção",r.manut,"Depreciação do veículo e ferramentas","#C27C00"],
     ["4 · Lucro / Salário",r.lucro,"Retirada do mês","#17905A"]];
-  parts.forEach(p=>{const ls=d.wrap(p[2],CW-360,"500",18);const h=Math.max(76,30+ls.length*24+16);d.ensure(h+10);
+  const pk=["mat","boreal","manut","lucro"],SS=r.sai||{};
+  parts.forEach((p,pi)=>{const k=pk[pi],sv=r2(p[1]-(SS[k]||0));p[2]="Entrou R$ "+fmt(p[1])+" − saídas R$ "+fmt(SS[k]||0)+" = saldo R$ "+fmt(sv)+" · "+p[2];p[1]=sv;const ls=d.wrap(p[2],CW-360,"500",18);const h=Math.max(76,30+ls.length*24+16);d.ensure(h+10);
     g.fillStyle="#fff";g.strokeStyle=C.line;g.lineWidth=2;d.rr(MX,d.y,CW,h,12);g.fill();g.stroke();g.fillStyle=p[3];d.rr(MX,d.y,8,h,4);g.fill();
     d.text(p[0],MX+28,d.y+16,"800",22,C.navy);ls.forEach((l,i)=>d.text(l,MX+28,d.y+46+i*24,"500",18,C.muted));
     d.text("R$ "+fmt(p[1]),PW-MX-24,d.y+(h-34)/2,"800",30,C.navy,"right");d.y+=h+12});
@@ -1917,17 +1927,17 @@ function agItem(a,late){const t=today(),tom=a.data===addDays(t,1);const tel=waNu
     (a.end?'<a target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(a.end)+'">📍 '+esc(a.end)+"</a>":"")+(a.obs?"<span>"+esc(a.obs)+"</span>":"")+'<div class="pills" style="justify-content:flex-start;margin-top:6px">'+pill+'</div></div><div class="aga">'+
     (a.end&&act?'<a class="btn primary small" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination='+encodeURIComponent(a.end)+'">🧭 Ir (Maps)</a><a class="btn line small" target="_blank" rel="noopener" href="https://waze.com/ul?navigate=yes&q='+encodeURIComponent(a.end)+'">Waze</a>':"")+
     (act&&tel&&a.status!=="confirmado"?'<button class="btn '+(tom?"wa":"line")+' small" type="button" data-act="agconf" data-agid="'+a.id+'">📲 Confirmar</button>':"")+
-    (act?'<button class="btn dark small" type="button" data-act="agos" data-agid="'+a.id+'">🔧 Abrir OS</button><button class="btn line small" type="button" data-act="agedit" data-agid="'+a.id+'">✎</button>'+(a.contratoId?'<button class="btn danger small" type="button" data-act="agcanc" data-agid="'+a.id+'" aria-label="Cancelar visita">✕</button>':""):"")+
+    (act?'<button class="btn dark small" type="button" data-act="agos" data-agid="'+a.id+'">🔧 Abrir OS</button><button class="btn line small" type="button" data-act="agedit" data-agid="'+a.id+'">✎</button>'+(a.contratoId&&!a.orcId?'<button class="btn line small" type="button" data-act="agorc" data-agid="'+a.id+'">📝 Fazer orçamento</button>':"")+(a.contratoId?'<button class="btn danger small" type="button" data-act="agcanc" data-agid="'+a.id+'" aria-label="Cancelar visita">✕</button>':""):"")+
     (!a.contratoId?'<button class="btn danger small" type="button" data-act="agdel" data-agid="'+a.id+'">🗑 Excluir</button>':"")+
     (a.status==="cancelado"?'<button class="btn line small" type="button" data-act="agreat" data-agid="'+a.id+'">Reativar</button>':"")+"</div></div>"}
 function renderAgenda(){const t=today(),until=addDays(t,60);
-  const late=agenda.filter(a=>agActive(a)&&a.data<t).sort(byDT),fut=agenda.filter(a=>a.data>=t&&a.data<=until&&a.status!=="cancelado").sort(byDT);
+  const late=agenda.filter(a=>agActive(a)&&a.data<t).sort(byDT),fut=agenda.filter(a=>a.data>=t&&a.data<=until&&a.status!=="cancelado"&&agVis(a)).sort(byDT);
   let h="";if(late.length)h+='<details class="mcat" open><summary><span class="mcn">⚠ Atrasados (não marcados como feitos)</span><span class="mcc">'+late.length+'</span></summary><div class="mcbody">'+late.map(a=>agItem(a,true)).join("")+"</div></details>";
   const days={};fut.forEach(a=>{(days[a.data]=days[a.data]||[]).push(a)});
   if(!days[t])h+='<div class="agday">Hoje <small>nenhum serviço</small></div>';
   Object.keys(days).sort().forEach(d=>{const l=days[d];h+='<div class="agday">'+dLabel(d)+' <small>'+br(d)+" · "+l.length+" serviço"+(l.length>1?"s":"")+"</small></div>"+l.map(a=>agItem(a,false)).join("")});
   if(!fut.length&&!late.length)h+='<div class="empty"><b>Nada agendado</b>Toque em + Agendar serviço para marcar uma visita.</div>';
-  $("#agList").innerHTML=h;renderContratos();renderAgBadge()}
+  $("#agList").innerHTML=h;renderAgBadge()}
 let agEdit=null,agPref=null;
 function fecharOrc(d){const P=d.payload||{},f=P.f||{},c=clients.find(x=>x.key===d.cli)||{};
   openAg(null,{cliNome:f.cliNome||d.cliNome,cliTel:f.cliTel||c.cliTel||"",end:[f.cliEnd||c.cliEnd,f.cliBairro||c.cliBairro,f.cliCidade||c.cliCidade].filter(Boolean).join(", "),svc:(P.svc||[])[0]||"Instalação",
@@ -1948,6 +1958,7 @@ async function soltarOrc(a){if(!a.orcId||a.status==="feito")return;const o=docs.
 async function agAction(act,a){
   if(act==="agconf"){const n=waNum(a.cliTel);if(!n){toast("Esse agendamento não tem WhatsApp");return}window.open(waLink(n,agMsg(a)),waTarget());a.status="confirmado";a.confirmadoEm=Date.now();a.atualizadoEm=Date.now();await DB.put("agenda",a);agenda=await DB.all("agenda");renderAgenda();renderAgHoje();if(cliView)renderDetail();toast("Mensagem de confirmação aberta no WhatsApp");return}
   if(act==="agedit")return openAg(a);
+  if(act==="agorc")return visitaOrc(a);
   if(act==="agcanc"){if(!(await ask("Cancelar este agendamento?",esc(a.cliNome)+" · "+br(a.data)+(a.hora?" às "+a.hora:""),"Cancelar agendamento")))return;await soltarOrc(a);a.status="cancelado";a.atualizadoEm=Date.now();await DB.put("agenda",a);agenda=await DB.all("agenda");renderAgenda();renderAgHoje();return}
   if(act==="agdel"){if(!(await ask("Excluir este agendamento?",a.cliNome+" · "+br(a.data)+(a.hora?" às "+a.hora:"")+". Ele é apagado de vez da agenda. Nenhuma OS nem cliente é alterado.","Excluir")))return;
     await soltarOrc(a);await DB.del("agenda",a.id);agenda=await DB.all("agenda");renderAgenda();renderAgHoje();if(cliView)renderDetail();toast("Agendamento excluído");return}
@@ -1957,39 +1968,50 @@ async function agAction(act,a){
     const ct=a.contratoId&&contratos.find(x=>x.id===a.contratoId);const cv=ct?ct.valor:a.ctValor,cn=ct?ct.nome:a.ctNome;if(cv)f.valor=fmt(cv);
     if(await ctl.os.newDoc(true,{f,svc:a.svc?[a.svc]:[],refAg:a.id,contrato:a.contratoId?(cn||"Contrato"):null}))showTab("os");return}}
 $("#agList").addEventListener("click",e=>{const b=e.target.closest("[data-agid]");if(!b)return;const a=agenda.find(x=>x.id===b.dataset.agid);if(a)agAction(b.dataset.act,a)});
-function agCliBox(c){const l=agenda.filter(a=>a.cli===c.key&&agActive(a)&&a.data>=addDays(today(),-30)).sort(byDT);if(!l.length)return"";
+function agCliBox(c){const l=agenda.filter(a=>a.cli===c.key&&agActive(a)&&agVis(a)&&a.data>=addDays(today(),-30)).sort(byDT);if(!l.length)return"";
   return'<section class="card"><h2>📅 Agendamentos</h2>'+l.map(a=>agItem(a,a.data<today())).join("")+"</section>"}
 
 /* contratos (PMOC) */
 const PER={1:"Mensal",2:"Bimestral",3:"Trimestral",6:"Semestral"};
 function ctVisitas(ct){if(ct.ativo===false||!ct.inicio)return[];const res=[],lim=addDays(today(),120),step=Number(ct.meses)||1,from=addDays(today(),-7);let i=0,d=ct.inicio;
   while(d<=lim&&i<240){if((!ct.fim||d<=ct.fim)&&d>=from)res.push(d);i++;d=addMonths(ct.inicio,step*i)}return res}
+function ctTel(ct){const c=clients.find(x=>x.key===ct.cli)||{};return ct.tel||c.cliTel||""}
+function ctEndStr(ct){const c=clients.find(x=>x.key===ct.cli)||{};return ct.end?[ct.end,ct.bairro,ct.cidade,ct.uf].filter(Boolean).join(", "):[c.cliEnd,c.cliBairro,c.cliCidade].filter(Boolean).join(", ")}
+function agVis(a){return !a.contratoId||a.data<=addDays(today(),1)}
+function ctProx(ct){return agenda.filter(a=>a.contratoId===ct.id&&a.data>=today()&&agActive(a)).sort(byDT)[0]||null}
 async function syncContratos(){if(isFunc())return 0;let n=0;
-  for(const a of agenda.filter(x=>x.contratoId&&x.ctNome==null)){const ct=contratos.find(c=>c.id===a.contratoId);if(ct){a.ctNome=ct.nome;a.ctValor=Number(ct.valor)||0;a.atualizadoEm=Date.now();await DB.put("agenda",a);n++}}for(const ct of contratos){for(const d of ctVisitas(ct)){const id="ct_"+ct.id+"_"+d;if(!agenda.find(a=>a.id===id)){const c=clients.find(x=>x.key===ct.cli)||{};
-    await DB.put("agenda",{id,data:d,hora:ct.hora||"",cli:ct.cli,cliNome:ct.cliNome,cliTel:c.cliTel||"",end:ct.end||[c.cliEnd,c.cliBairro,c.cliCidade].filter(Boolean).join(", "),svc:"Manutenção preventiva",obs:"Contrato: "+ct.nome,contratoId:ct.id,ctNome:ct.nome,ctValor:Number(ct.valor)||0,status:"agendado",criadoEm:Date.now(),atualizadoEm:Date.now()});n++}}}
+  for(const a of agenda.filter(x=>x.contratoId&&agActive(x)&&x.data>=today())){const ct=contratos.find(c=>c.id===a.contratoId);if(!ct)continue;const tel=ctTel(ct),end=ctEndStr(ct);
+    if(a.cliTel!==tel||a.end!==end||(a.status==="agendado"&&a.hora!==(ct.hora||""))){a.cliTel=tel;a.end=end;if(a.status==="agendado")a.hora=ct.hora||"";a.atualizadoEm=Date.now();await DB.put("agenda",a);n++}}
+  for(const a of agenda.filter(x=>x.contratoId&&x.ctNome==null)){const ct=contratos.find(c=>c.id===a.contratoId);if(ct){a.ctNome=ct.nome;a.ctValor=Number(ct.valor)||0;a.atualizadoEm=Date.now();await DB.put("agenda",a);n++}}for(const ct of contratos){for(const d of ctVisitas(ct)){const id="ct_"+ct.id+"_"+d;if(!agenda.find(a=>a.id===id)){
+    await DB.put("agenda",{id,data:d,hora:ct.hora||"",cli:ct.cli,cliNome:ct.cliNome,cliTel:ctTel(ct),end:ctEndStr(ct),svc:"Manutenção preventiva",obs:"Contrato: "+ct.nome,contratoId:ct.id,ctNome:ct.nome,ctValor:Number(ct.valor)||0,status:"agendado",criadoEm:Date.now(),atualizadoEm:Date.now()});n++}}}
   if(n){agenda=await DB.all("agenda");if(tab==="ag")renderAgenda();renderAgBadge()}return n}
 async function limparVisitas(ct,keep){for(const a of agenda.filter(x=>x.contratoId===ct.id&&x.status==="agendado"&&x.data>=today()&&!(keep||[]).includes(x.data)))await DB.del("agenda",a.id);agenda=await DB.all("agenda")}
-function ctCard(ct){const vs=agenda.filter(a=>a.contratoId===ct.id).sort(byDT);const prox=vs.find(a=>a.data>=today()&&agActive(a));const feitas=vs.filter(a=>a.status==="feito");
-  return'<div class="ctc"><div class="ch"><div><b>'+esc(ct.nome)+(ct.ativo===false?' <span class="pill na">inativo</span>':"")+'</b><span>'+esc(ct.cliNome)+" · "+(PER[ct.meses]||"Mensal")+" · R$ "+fmt(ct.valor)+" por visita</span><span>"+(prox?"Próxima visita: "+dLabel(prox.data)+(prox.hora?" às "+prox.hora:""):"Sem visita futura")+" · "+feitas.length+" visita"+(feitas.length===1?"":"s")+" feita"+(feitas.length===1?"":"s")+'</span></div><button class="btn line small" type="button" data-ctedit="'+ct.id+'">✎ Editar</button></div>'+
+function ctCard(ct){const vs=agenda.filter(a=>a.contratoId===ct.id).sort(byDT);const prox=ctProx(ct);const feitas=vs.filter(a=>a.status==="feito");
+  return'<div class="ctc"><div class="ch"><div><b>'+esc(ct.nome)+(ct.ativo===false?' <span class="pill na">inativo</span>':"")+'</b><span>'+esc(ct.cliNome)+" · "+(PER[ct.meses]||"Mensal")+" · R$ "+fmt(ct.valor)+" por visita</span><span>"+(prox?"Próxima visita: "+dLabel(prox.data)+(prox.hora?" às "+prox.hora:""):"Sem visita futura")+" · "+feitas.length+" visita"+(feitas.length===1?"":"s")+" feita"+(feitas.length===1?"":"s")+(prox&&prox.orcId?'</span><span style="color:var(--blue);font-weight:600">📝 Orçamento Nº '+pad(prox.orcNum,4)+" feito para a próxima visita":"")+'</span></div><div class="hbtns" style="display:flex;gap:6px;flex-wrap:wrap">'+(prox&&!prox.orcId?'<button class="btn line small" type="button" data-ctorc="'+prox.id+'">📝 Fazer orçamento</button>':"")+'<button class="btn line small" type="button" data-ctedit="'+ct.id+'">✎ Editar</button></div></div>'+
     (feitas.length?'<details><summary>Histórico de visitas</summary>'+feitas.slice(-12).reverse().map(a=>"<span>"+br(a.data)+" · OS "+(a.osNum?pad(a.osNum,4):"—")+"</span>").join("")+"</details>":"")+"</div>"}
 function renderContratos(){const el=$("#ctList");if(!el)return;el.innerHTML=contratos.length?contratos.slice().sort((a,b)=>(a.ativo===false)-(b.ativo===false)||a.nome.localeCompare(b.nome)).map(ctCard).join(""):'<p class="hint">Nenhum contrato ainda.</p>'}
 function ctCliBox(c){if(isFunc())return"";const l=contratos.filter(x=>x.cli===c.key);if(!l.length)return"";return'<section class="card"><h2>📋 Contratos de manutenção</h2>'+l.map(ctCard).join("")+"</section>"}
 let ctEdit=null;
 function openCt(ct,pref){ctEdit=ct||null;pref=pref||{};cliNamesDL();$("#ctT").textContent=ct?"Editar contrato":"Novo contrato de manutenção";const v=ct||pref;
-  $("#ctNome").value=v.nome||"";$("#ctCli").value=v.cliNome||"";$("#ctEnd").value=v.end||"";$("#ctMeses").value=String(v.meses||1);$("#ctValor").value=v.valor?fmt(v.valor):"";$("#ctIni").value=v.inicio||addDays(today(),7);
+  $("#ctNome").value=v.nome||"";$("#ctCli").value=v.cliNome||"";$("#ctEnd").value=v.end||"";["doc","tel","bairro","cidade","uf","cep"].forEach(k=>$("#ct"+k[0].toUpperCase()+k.slice(1)).value=v[k]||"");$("#ctMeses").value=String(v.meses||1);$("#ctValor").value=v.valor?fmt(v.valor):"";$("#ctIni").value=v.inicio||addDays(today(),7);
   $("#ctHora").value=v.hora||"08:00";$("#ctFim").value=v.fim||"";$("#ctEquip").value=v.equip||"";$("#ctObs").value=v.obs||"";$("#ctAtivo").checked=v.ativo!==false;$("#ctDel").hidden=!ct;openM("#mCt")}
 $("#ctNew").onclick=()=>openCt(null);
-$("#ctList").addEventListener("click",e=>{const b=e.target.closest("[data-ctedit]");if(b)openCt(contratos.find(x=>x.id===b.dataset.ctedit))});
+$("#ctList").addEventListener("click",e=>{const b=e.target.closest("[data-ctedit]");if(b)openCt(contratos.find(x=>x.id===b.dataset.ctedit));const o=e.target.closest("[data-ctorc]");if(o){const a=agenda.find(x=>x.id===o.dataset.ctorc);if(a)visitaOrc(a)}});
+async function visitaOrc(a){const ct=a.contratoId&&contratos.find(x=>x.id===a.contratoId);const c=clients.find(x=>x.key===a.cli)||{};const f={};CLI_KEYS.forEach(k=>{if(c[k])f[k]=c[k]});
+  f.cliNome=c.cliNome||a.cliNome;if(a.cliTel)f.cliTel=a.cliTel;if(ct){if(ct.doc)f.cliDoc=ct.doc;if(ct.end){f.cliEnd=ct.end;f.cliBairro=ct.bairro||f.cliBairro;f.cliCidade=ct.cidade||f.cliCidade;f.cliUf=ct.uf||f.cliUf;f.cliCep=ct.cep||f.cliCep}}
+  if(c.key)f.cliAnt="Sim";const cv=ct?ct.valor:a.ctValor;if(cv)f.valor=fmt(cv);
+  f.relato="Visita do contrato "+((ct&&ct.nome)||a.ctNome||"")+" em "+br(a.data)+(a.hora?" às "+a.hora:"")+".";
+  if(await ctl.orc.newDoc(true,{f,svc:a.svc?[a.svc]:[],refAg:a.id,contrato:a.contratoId?((ct&&ct.nome)||a.ctNome||"Contrato"):null})){showTab("orc");toast("Orçamento da visita de "+br(a.data)+": ao gerar, ele reserva o número para a OS")}}
 $("#cliDetail").addEventListener("click",e=>{const b=e.target.closest("[data-ctedit]");if(b)openCt(contratos.find(x=>x.id===b.dataset.ctedit))});
-$("#ctCli").addEventListener("change",()=>{const c=clients.find(x=>x.key===norm($("#ctCli").value));if(c){$("#ctCli").value=c.cliNome;if(!$("#ctEnd").value)$("#ctEnd").value=[c.cliEnd,c.cliBairro,c.cliCidade].filter(Boolean).join(", ")}});
+$("#ctCli").addEventListener("change",()=>{const c=clients.find(x=>x.key===norm($("#ctCli").value));if(c){$("#ctCli").value=c.cliNome;[["End","cliEnd"],["Doc","cliDoc"],["Tel","cliTel"],["Bairro","cliBairro"],["Cidade","cliCidade"],["Uf","cliUf"],["Cep","cliCep"]].forEach(([i,k])=>{if(!$("#ct"+i).value&&c[k])$("#ct"+i).value=c[k]})}});
 $("#ctValor").addEventListener("blur",e=>{if(e.target.value.trim())e.target.value=fmt(parseMoney(e.target.value))});
 $("#ctSave").onclick=async()=>{const nome=$("#ctNome").value.trim(),cli=$("#ctCli").value.trim(),ini=$("#ctIni").value;if(!nome||!cli||!ini){toast("Preencha nome do contrato, cliente e primeira visita");return}
-  const ct=Object.assign({},ctEdit||{id:uid(),criadoEm:Date.now()},{nome,cliNome:cli,cli:norm(cli),end:$("#ctEnd").value.trim(),meses:Number($("#ctMeses").value)||1,valor:parseMoney($("#ctValor").value),inicio:ini,hora:$("#ctHora").value,fim:$("#ctFim").value,equip:$("#ctEquip").value.trim(),obs:$("#ctObs").value.trim(),ativo:$("#ctAtivo").checked,atualizadoEm:Date.now()});
-  if(!clients.find(c=>c.key===ct.cli))await upsertClient({cliNome:cli,cliEnd:ct.end});
+  const ct=Object.assign({},ctEdit||{id:uid(),criadoEm:Date.now()},{nome,cliNome:cli,cli:norm(cli),end:$("#ctEnd").value.trim(),doc:$("#ctDoc").value.trim(),tel:$("#ctTel").value.trim(),bairro:$("#ctBairro").value.trim(),cidade:$("#ctCidade").value.trim(),uf:$("#ctUf").value.trim().toUpperCase(),cep:$("#ctCep").value.trim(),meses:Number($("#ctMeses").value)||1,valor:parseMoney($("#ctValor").value),inicio:ini,hora:$("#ctHora").value,fim:$("#ctFim").value,equip:$("#ctEquip").value.trim(),obs:$("#ctObs").value.trim(),ativo:$("#ctAtivo").checked,atualizadoEm:Date.now()});
+  await upsertClient({cliNome:cli,cliDoc:ct.doc,cliTel:ct.tel,cliEnd:ct.end,cliBairro:ct.bairro,cliCidade:ct.cidade,cliUf:ct.uf,cliCep:ct.cep});await refresh();
   await DB.put("contratos",ct);contratos=await DB.all("contratos");if(ctEdit)await limparVisitas(ct,ctVisitas(ct));const n=await syncContratos();
-  closeM($("#mCt"));await refresh();if(tab==="ag")renderAgenda();toast("Contrato salvo"+(n?": "+n+" visita"+(n>1?"s":"")+" na agenda":""))};
+  closeM($("#mCt"));await refresh();if(tab==="ag")renderAgenda();if(tab==="fin")renderFin();const pv=ctProx(ct);toast("Contrato salvo"+(pv?". Próxima visita "+br(pv.data)+": entra na agenda 1 dia antes":""))};
 $("#ctDel").onclick=async()=>{if(!ctEdit)return;if(!(await ask("Excluir o contrato "+ctEdit.nome+"?","As próximas visitas desse contrato saem da agenda. As OS já feitas continuam na ficha do cliente.","Excluir")))return;
-  await limparVisitas(ctEdit,[]);await DB.del("contratos",ctEdit.id);contratos=await DB.all("contratos");closeM($("#mCt"));await refresh();if(tab==="ag")renderAgenda();toast("Contrato excluído")};
+  await limparVisitas(ctEdit,[]);await DB.del("contratos",ctEdit.id);contratos=await DB.all("contratos");closeM($("#mCt"));await refresh();if(tab==="ag")renderAgenda();if(tab==="fin")renderFin();toast("Contrato excluído")};
 
 /* garantias */
 function garPill(d){const g=osGar(d);if(!g)return"";return g.ativa?'<span class="pill ok">🛡️ até '+br(g.fim)+"</span>":'<span class="pill na">garantia vencida</span>'}
@@ -2055,7 +2077,7 @@ $("#teamList").addEventListener("click",async e=>{const b=e.target.closest("[dat
 /* ============================================================
    NUVEM (Supabase): login + sincronização
    ============================================================ */
-const APP_VERSION="Versão 15 · 20/11/2026 · Rota para o cliente";
+const APP_VERSION="Versão 16 · 21/11/2026 · Saldos, contratos e OS sem checklist";
 const SB_URL="https://xipiemiyvrwfxosbfpvl.supabase.co",SB_KEY="sb_publishable_RtUvyM---ErVKDlMnonTVg_AEy9yL5I";
 let sb=null,appStarted=false;
 function fnv(s){let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(36)+s.length.toString(36)}
