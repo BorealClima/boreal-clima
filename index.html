@@ -76,6 +76,12 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 
 .equip{border:1.5px dashed var(--line);border-radius:12px;padding:14px;margin-bottom:12px;position:relative}
 .equip .eh{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;font-weight:700;color:var(--navy)}
 .rm{background:none;border:0;color:var(--danger);font-weight:600;cursor:pointer;padding:6px 8px}
+.cardbox{margin-top:12px;padding:12px 14px;border-radius:12px;background:#EEF5FF;border:1px solid #CFE0FA;font-size:15px;line-height:1.5}
+.cardbox small{color:#4B5B70;font-size:13px}.cardbox .warn{color:#B42318;font-weight:600}
+.cardbox table{width:100%;border-collapse:collapse;margin-top:6px}.cardbox td{padding:5px 4px;border-top:1px solid #D9E6F7}.cardbox td:last-child{text-align:right;font-weight:700}
+.pixwrap{display:flex;gap:16px;align-items:center;flex-wrap:wrap}.pixwrap canvas{background:#fff;border-radius:10px;border:1px solid #D9E6F7;width:220px;height:220px}
+.pixwrap .pv{font-size:24px;font-weight:800;color:#0B1426;margin:2px 0 6px}
+.taxgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin-top:10px}
 .ck{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
 .ck:last-child{border-bottom:0}
 .ck .t{flex:1;font-weight:500;font-size:16px}
@@ -384,8 +390,10 @@ body.func .adm{display:none!important}
       <label class="f">Mão de obra / serviço (R$)<input type="text" inputmode="decimal" data-k="valor" placeholder="0,00"></label>
       <label class="f">Garantia do serviço<select data-k="garantia"><option>30 dias</option><option>60 dias</option><option>90 dias</option><option>4 meses</option><option>6 meses</option><option>9 meses</option><option>1 ano</option><option>2 anos</option><option>Sem garantia</option></select></label>
       <label class="f">Orçamento válido até<input type="date" data-k="validade"></label>
+      <label class="f wide">Pagamento no cartão (aparece no PDF)<select data-k="mostraCartao"><option value="">Não mostrar para o cliente</option><option value="sim">Mostrar: Pix, débito e crédito à vista sem acréscimo; 2x a 12x com a taxa da maquininha</option></select></label>
     </div>
     <div class="totbox"><div>Mão de obra<b class="totMo">R$ 0,00</b></div><div>Peças e materiais<b class="totMat">R$ 0,00</b></div><div class="big">Total geral<b class="totGeral">R$ 0,00</b></div></div>
+    <div class="cardbox" hidden></div>
   </section>
 
   <section class="card">
@@ -494,11 +502,15 @@ body.func .adm{display:none!important}
     <div class="grid">
       <label class="f">Mão de obra / serviço (R$)<input type="text" inputmode="decimal" data-k="valor" placeholder="0,00"></label>
       <label class="f">Forma de pagamento<select data-k="pgto"><option value="">—</option><option>Pix</option><option>Dinheiro</option><option>Cartão de débito</option><option>Cartão de crédito</option><option>Boleto</option><option>Transferência</option><option>A combinar</option></select></label>
+      <label class="f cc-only" hidden>Parcelas no crédito<select data-k="parcelas"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option></select></label>
+      <label class="f cc-only" hidden>Juros da maquininha<select data-k="juros"><option value="eu">Sem juros (eu pago a taxa)</option><option value="cli">Com juros (cliente paga a taxa)</option></select></label>
+      <input type="hidden" data-k="taxaPct">
       <label class="f">Situação<select data-k="pgSit"><option value="">—</option><option>Pago</option><option>Pendente</option><option>Parcial</option></select></label>
       <label class="f">Garantia do serviço<select data-k="garantia"><option>30 dias</option><option>60 dias</option><option>90 dias</option><option>4 meses</option><option>6 meses</option><option>9 meses</option><option>1 ano</option><option>2 anos</option><option>Sem garantia</option></select></label>
       <label class="f">Próxima manutenção sugerida<input type="date" data-k="proxManut"></label>
     </div>
-    <div class="totbox"><div>Mão de obra<b class="totMo">R$ 0,00</b></div><div>Peças e materiais<b class="totMat">R$ 0,00</b></div><div class="big">Total geral<b class="totGeral">R$ 0,00</b></div></div>
+    <div class="totbox"><div>Mão de obra<b class="totMo">R$ 0,00</b></div><div>Peças e materiais<b class="totMat">R$ 0,00</b></div><div class="big"><span class="totLbl">Total geral</span><b class="totGeral">R$ 0,00</b></div></div>
+    <div class="cardbox" hidden></div>
   </section>
 
   <section class="card">
@@ -578,6 +590,26 @@ body.func .adm{display:none!important}
     <p class="hint">Para empresas, escritórios e comércios. Cada visita entra sozinha na agenda <b>1 dia antes</b>, para você confirmar com o cliente. A OS de cada visita é o relatório dela. O valor do contrato só aparece aqui.</p>
     <div id="ctList"></div>
     <button class="btn ghost small" type="button" id="ctNew">+ Novo contrato</button>
+  </section>
+
+  <section class="card">
+    <h2>Pix para receber<span class="right savedtag" id="pixSaved"></span></h2>
+    <p class="hint">Cadastre a sua chave Pix uma vez. Na OS, quando a forma de pagamento for <b>Pix</b>, aparece um <b>QR Code com o valor exato</b> para o cliente pagar, e o código <b>Pix copia e cola</b>. Se a OS não estiver paga, o QR também sai no PDF. Tudo é salvo sozinho.</p>
+    <div class="grid">
+      <label class="f">Tipo de chave<select data-px="tipo"><option value="cnpj">CNPJ / CPF</option><option value="cel">Celular</option><option value="email">E-mail</option><option value="aleatoria">Chave aleatória</option><option value="codigo">Colar código copia e cola do banco</option></select></label>
+      <label class="f wide">Chave Pix<input type="text" data-px="chave" placeholder="Digite a chave ou cole o código do seu banco"></label>
+      <label class="f">Nome de quem recebe (como no banco)<input type="text" data-px="nome" maxlength="25" placeholder="BOREAL CLIMA"></label>
+      <label class="f">Cidade<input type="text" data-px="cidade" maxlength="15" placeholder="CAMPINAS"></label>
+    </div>
+    <div id="pixTest" class="cardbox" hidden></div>
+  </section>
+
+  <section class="card">
+    <h2>Taxas da maquininha de cartão<span class="right savedtag" id="taxSaved"></span></h2>
+    <details class="mcat" id="taxBox"><summary>Toque para ver ou mudar as taxas (%)</summary>
+      <p class="hint">Coloque a taxa que a sua maquininha cobra em cada caso. Na OS, quando escolher <b>com juros</b>, o app soma a taxa no valor para você receber o valor cheio. Quando escolher <b>sem juros</b>, ou no débito, a taxa sai do <b>Caixa da Boreal</b>. Tudo é salvo sozinho.</p>
+      <div class="taxgrid"><label class="f">Débito %<input type="number" step="0.01" min="0" inputmode="decimal" data-tx="deb"></label><label class="f">Crédito 1x %<input type="number" step="0.01" min="0" inputmode="decimal" data-tx="1"></label><label class="f">Crédito 2x %<input type="number" step="0.01" min="0" inputmode="decimal" data-tx="2"></label><label class="f">Crédito 3x %<input type="number" step="0.01" min="0" inputmode="decimal" data-tx="3"></label><label class="f">Crédito 4x %<input type="number" step="0.01" min="0" inputmode="decimal" data-tx="4"></label><label class="f">Crédito 5x %<input type="number" step="0.01" min="0" inputmode="decimal" data-tx="5"></label><label class="f">Crédito 6x %<input type="number" step="0.01" min="0" inputmode="decimal" data-tx="6"></label><label class="f">Crédito 7x %<input type="number" step="0.01" min="0" inputmode="decimal" data-tx="7"></label><label class="f">Crédito 8x %<input type="number" step="0.01" min="0" inputmode="decimal" data-tx="8"></label><label class="f">Crédito 9x %<input type="number" step="0.01" min="0" inputmode="decimal" data-tx="9"></label><label class="f">Crédito 10x %<input type="number" step="0.01" min="0" inputmode="decimal" data-tx="10"></label><label class="f">Crédito 11x %<input type="number" step="0.01" min="0" inputmode="decimal" data-tx="11"></label><label class="f">Crédito 12x %<input type="number" step="0.01" min="0" inputmode="decimal" data-tx="12"></label></div>
+    </details>
   </section>
 
   <section class="card">
@@ -897,6 +929,1300 @@ function parseMoney(v){v=String(v==null?"":v).replace(/[^\d,.-]/g,"");if(!v)retu
 function fmt(n){return (n||0).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2})}
 const norm=s=>String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/\s+/g," ").trim();
 const r2=n=>Math.round((Number(n)||0)*100)/100;
+/* QR encoder: from qrcode-terminal vendor/QRCode (Apache-2.0), port of QRCode for JavaScript by Kazuhiko Arase (MIT) */
+const QRLib=(function(){const M={};function def(n,f){M[n]={f:f,e:null}}function req(n){n=n.replace('./','');const m=M[n];if(!m.e){const module={exports:{}};m.e=module.exports;m.f(module,module.exports,req);m.e=module.exports}return m.e}
+def('QRMode',function(module,exports,require){
+module.exports = {
+    MODE_NUMBER :       1 << 0,
+    MODE_ALPHA_NUM :    1 << 1,
+    MODE_8BIT_BYTE :    1 << 2,
+    MODE_KANJI :        1 << 3
+};
+
+});
+def('QRErrorCorrectLevel',function(module,exports,require){
+module.exports = {
+	L : 1,
+	M : 0,
+	Q : 3,
+	H : 2
+};
+
+
+});
+def('QRMath',function(module,exports,require){
+var QRMath = {
+
+	glog : function(n) {
+	
+		if (n < 1) {
+			throw new Error("glog(" + n + ")");
+		}
+		
+		return QRMath.LOG_TABLE[n];
+	},
+	
+	gexp : function(n) {
+	
+		while (n < 0) {
+			n += 255;
+		}
+	
+		while (n >= 256) {
+			n -= 255;
+		}
+	
+		return QRMath.EXP_TABLE[n];
+	},
+	
+	EXP_TABLE : new Array(256),
+	
+	LOG_TABLE : new Array(256)
+
+};
+	
+for (var i = 0; i < 8; i++) {
+	QRMath.EXP_TABLE[i] = 1 << i;
+}
+for (var i = 8; i < 256; i++) {
+	QRMath.EXP_TABLE[i] = QRMath.EXP_TABLE[i - 4]
+		^ QRMath.EXP_TABLE[i - 5]
+		^ QRMath.EXP_TABLE[i - 6]
+		^ QRMath.EXP_TABLE[i - 8];
+}
+for (var i = 0; i < 255; i++) {
+	QRMath.LOG_TABLE[QRMath.EXP_TABLE[i] ] = i;
+}
+
+module.exports = QRMath;
+
+});
+def('QRPolynomial',function(module,exports,require){
+var QRMath = require('./QRMath');
+
+function QRPolynomial(num, shift) {
+	if (num.length === undefined) {
+		throw new Error(num.length + "/" + shift);
+	}
+
+	var offset = 0;
+
+	while (offset < num.length && num[offset] === 0) {
+		offset++;
+	}
+
+	this.num = new Array(num.length - offset + shift);
+	for (var i = 0; i < num.length - offset; i++) {
+		this.num[i] = num[i + offset];
+	}
+}
+
+QRPolynomial.prototype = {
+
+	get : function(index) {
+		return this.num[index];
+	},
+	
+	getLength : function() {
+		return this.num.length;
+	},
+	
+	multiply : function(e) {
+	
+		var num = new Array(this.getLength() + e.getLength() - 1);
+	
+		for (var i = 0; i < this.getLength(); i++) {
+			for (var j = 0; j < e.getLength(); j++) {
+				num[i + j] ^= QRMath.gexp(QRMath.glog(this.get(i) ) + QRMath.glog(e.get(j) ) );
+			}
+		}
+	
+		return new QRPolynomial(num, 0);
+	},
+	
+	mod : function(e) {
+	
+		if (this.getLength() - e.getLength() < 0) {
+			return this;
+		}
+	
+		var ratio = QRMath.glog(this.get(0) ) - QRMath.glog(e.get(0) );
+	
+		var num = new Array(this.getLength() );
+		
+		for (var i = 0; i < this.getLength(); i++) {
+			num[i] = this.get(i);
+		}
+		
+		for (var x = 0; x < e.getLength(); x++) {
+			num[x] ^= QRMath.gexp(QRMath.glog(e.get(x) ) + ratio);
+		}
+	
+		// recursive call
+		return new QRPolynomial(num, 0).mod(e);
+	}
+};
+
+module.exports = QRPolynomial;
+
+});
+def('QRMaskPattern',function(module,exports,require){
+module.exports = {
+	PATTERN000 : 0,
+	PATTERN001 : 1,
+	PATTERN010 : 2,
+	PATTERN011 : 3,
+	PATTERN100 : 4,
+	PATTERN101 : 5,
+	PATTERN110 : 6,
+	PATTERN111 : 7
+};
+
+});
+def('QRUtil',function(module,exports,require){
+var QRMode = require('./QRMode');
+var QRPolynomial = require('./QRPolynomial');
+var QRMath = require('./QRMath');
+var QRMaskPattern = require('./QRMaskPattern');
+
+var QRUtil = {
+
+    PATTERN_POSITION_TABLE : [
+        [],
+        [6, 18],
+        [6, 22],
+        [6, 26],
+        [6, 30],
+        [6, 34],
+        [6, 22, 38],
+        [6, 24, 42],
+        [6, 26, 46],
+        [6, 28, 50],
+        [6, 30, 54],        
+        [6, 32, 58],
+        [6, 34, 62],
+        [6, 26, 46, 66],
+        [6, 26, 48, 70],
+        [6, 26, 50, 74],
+        [6, 30, 54, 78],
+        [6, 30, 56, 82],
+        [6, 30, 58, 86],
+        [6, 34, 62, 90],
+        [6, 28, 50, 72, 94],
+        [6, 26, 50, 74, 98],
+        [6, 30, 54, 78, 102],
+        [6, 28, 54, 80, 106],
+        [6, 32, 58, 84, 110],
+        [6, 30, 58, 86, 114],
+        [6, 34, 62, 90, 118],
+        [6, 26, 50, 74, 98, 122],
+        [6, 30, 54, 78, 102, 126],
+        [6, 26, 52, 78, 104, 130],
+        [6, 30, 56, 82, 108, 134],
+        [6, 34, 60, 86, 112, 138],
+        [6, 30, 58, 86, 114, 142],
+        [6, 34, 62, 90, 118, 146],
+        [6, 30, 54, 78, 102, 126, 150],
+        [6, 24, 50, 76, 102, 128, 154],
+        [6, 28, 54, 80, 106, 132, 158],
+        [6, 32, 58, 84, 110, 136, 162],
+        [6, 26, 54, 82, 110, 138, 166],
+        [6, 30, 58, 86, 114, 142, 170]
+    ],
+
+    G15 : (1 << 10) | (1 << 8) | (1 << 5) | (1 << 4) | (1 << 2) | (1 << 1) | (1 << 0),
+    G18 : (1 << 12) | (1 << 11) | (1 << 10) | (1 << 9) | (1 << 8) | (1 << 5) | (1 << 2) | (1 << 0),
+    G15_MASK : (1 << 14) | (1 << 12) | (1 << 10)    | (1 << 4) | (1 << 1),
+
+    getBCHTypeInfo : function(data) {
+        var d = data << 10;
+        while (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G15) >= 0) {
+            d ^= (QRUtil.G15 << (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G15) ) );    
+        }
+        return ( (data << 10) | d) ^ QRUtil.G15_MASK;
+    },
+
+    getBCHTypeNumber : function(data) {
+        var d = data << 12;
+        while (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G18) >= 0) {
+            d ^= (QRUtil.G18 << (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G18) ) );    
+        }
+        return (data << 12) | d;
+    },
+
+    getBCHDigit : function(data) {
+
+        var digit = 0;
+
+        while (data !== 0) {
+            digit++;
+            data >>>= 1;
+        }
+
+        return digit;
+    },
+
+    getPatternPosition : function(typeNumber) {
+        return QRUtil.PATTERN_POSITION_TABLE[typeNumber - 1];
+    },
+
+    getMask : function(maskPattern, i, j) {
+        
+        switch (maskPattern) {
+            
+        case QRMaskPattern.PATTERN000 : return (i + j) % 2 === 0;
+        case QRMaskPattern.PATTERN001 : return i % 2 === 0;
+        case QRMaskPattern.PATTERN010 : return j % 3 === 0;
+        case QRMaskPattern.PATTERN011 : return (i + j) % 3 === 0;
+        case QRMaskPattern.PATTERN100 : return (Math.floor(i / 2) + Math.floor(j / 3) ) % 2 === 0;
+        case QRMaskPattern.PATTERN101 : return (i * j) % 2 + (i * j) % 3 === 0;
+        case QRMaskPattern.PATTERN110 : return ( (i * j) % 2 + (i * j) % 3) % 2 === 0;
+        case QRMaskPattern.PATTERN111 : return ( (i * j) % 3 + (i + j) % 2) % 2 === 0;
+
+        default :
+            throw new Error("bad maskPattern:" + maskPattern);
+        }
+    },
+
+    getErrorCorrectPolynomial : function(errorCorrectLength) {
+
+        var a = new QRPolynomial([1], 0);
+
+        for (var i = 0; i < errorCorrectLength; i++) {
+            a = a.multiply(new QRPolynomial([1, QRMath.gexp(i)], 0) );
+        }
+
+        return a;
+    },
+
+    getLengthInBits : function(mode, type) {
+
+        if (1 <= type && type < 10) {
+
+            // 1 - 9
+
+            switch(mode) {
+            case QRMode.MODE_NUMBER     : return 10;
+            case QRMode.MODE_ALPHA_NUM  : return 9;
+            case QRMode.MODE_8BIT_BYTE  : return 8;
+            case QRMode.MODE_KANJI      : return 8;
+            default :
+                throw new Error("mode:" + mode);
+            }
+
+        } else if (type < 27) {
+
+            // 10 - 26
+
+            switch(mode) {
+            case QRMode.MODE_NUMBER     : return 12;
+            case QRMode.MODE_ALPHA_NUM  : return 11;
+            case QRMode.MODE_8BIT_BYTE  : return 16;
+            case QRMode.MODE_KANJI      : return 10;
+            default :
+                throw new Error("mode:" + mode);
+            }
+
+        } else if (type < 41) {
+
+            // 27 - 40
+
+            switch(mode) {
+            case QRMode.MODE_NUMBER     : return 14;
+            case QRMode.MODE_ALPHA_NUM  : return 13;
+            case QRMode.MODE_8BIT_BYTE  : return 16;
+            case QRMode.MODE_KANJI      : return 12;
+            default :
+                throw new Error("mode:" + mode);
+            }
+
+        } else {
+            throw new Error("type:" + type);
+        }
+    },
+
+    getLostPoint : function(qrCode) {
+        
+        var moduleCount = qrCode.getModuleCount();
+        var lostPoint = 0;
+        var row = 0; 
+        var col = 0;
+
+        
+        // LEVEL1
+        
+        for (row = 0; row < moduleCount; row++) {
+
+            for (col = 0; col < moduleCount; col++) {
+
+                var sameCount = 0;
+                var dark = qrCode.isDark(row, col);
+
+                for (var r = -1; r <= 1; r++) {
+
+                    if (row + r < 0 || moduleCount <= row + r) {
+                        continue;
+                    }
+
+                    for (var c = -1; c <= 1; c++) {
+
+                        if (col + c < 0 || moduleCount <= col + c) {
+                            continue;
+                        }
+
+                        if (r === 0 && c === 0) {
+                            continue;
+                        }
+
+                        if (dark === qrCode.isDark(row + r, col + c) ) {
+                            sameCount++;
+                        }
+                    }
+                }
+
+                if (sameCount > 5) {
+                    lostPoint += (3 + sameCount - 5);
+                }
+            }
+        }
+
+        // LEVEL2
+
+        for (row = 0; row < moduleCount - 1; row++) {
+            for (col = 0; col < moduleCount - 1; col++) {
+                var count = 0;
+                if (qrCode.isDark(row,     col    ) ) count++;
+                if (qrCode.isDark(row + 1, col    ) ) count++;
+                if (qrCode.isDark(row,     col + 1) ) count++;
+                if (qrCode.isDark(row + 1, col + 1) ) count++;
+                if (count === 0 || count === 4) {
+                    lostPoint += 3;
+                }
+            }
+        }
+
+        // LEVEL3
+
+        for (row = 0; row < moduleCount; row++) {
+            for (col = 0; col < moduleCount - 6; col++) {
+                if (qrCode.isDark(row, col) && 
+                        !qrCode.isDark(row, col + 1) && 
+                         qrCode.isDark(row, col + 2) && 
+                         qrCode.isDark(row, col + 3) && 
+                         qrCode.isDark(row, col + 4) && 
+                        !qrCode.isDark(row, col + 5) && 
+                         qrCode.isDark(row, col + 6) ) {
+                    lostPoint += 40;
+                }
+            }
+        }
+
+        for (col = 0; col < moduleCount; col++) {
+            for (row = 0; row < moduleCount - 6; row++) {
+                if (qrCode.isDark(row, col) &&
+                        !qrCode.isDark(row + 1, col) &&
+                         qrCode.isDark(row + 2, col) &&
+                         qrCode.isDark(row + 3, col) &&
+                         qrCode.isDark(row + 4, col) &&
+                        !qrCode.isDark(row + 5, col) &&
+                         qrCode.isDark(row + 6, col) ) {
+                    lostPoint += 40;
+                }
+            }
+        }
+
+        // LEVEL4
+        
+        var darkCount = 0;
+
+        for (col = 0; col < moduleCount; col++) {
+            for (row = 0; row < moduleCount; row++) {
+                if (qrCode.isDark(row, col) ) {
+                    darkCount++;
+                }
+            }
+        }
+        
+        var ratio = Math.abs(100 * darkCount / moduleCount / moduleCount - 50) / 5;
+        lostPoint += ratio * 10;
+
+        return lostPoint;       
+    }
+
+};
+
+module.exports = QRUtil;
+
+});
+def('QR8bitByte',function(module,exports,require){
+var QRMode = require('./QRMode');
+
+function QR8bitByte(data) {
+	this.mode = QRMode.MODE_8BIT_BYTE;
+	this.data = data;
+}
+
+QR8bitByte.prototype = {
+
+	getLength : function() {
+		return this.data.length;
+	},
+	
+	write : function(buffer) {
+		for (var i = 0; i < this.data.length; i++) {
+			// not JIS ...
+			buffer.put(this.data.charCodeAt(i), 8);
+		}
+	}
+};
+
+module.exports = QR8bitByte;
+
+});
+def('QRBitBuffer',function(module,exports,require){
+function QRBitBuffer() {
+	this.buffer = [];
+	this.length = 0;
+}
+
+QRBitBuffer.prototype = {
+
+	get : function(index) {
+		var bufIndex = Math.floor(index / 8);
+		return ( (this.buffer[bufIndex] >>> (7 - index % 8) ) & 1) == 1;
+	},
+	
+	put : function(num, length) {
+		for (var i = 0; i < length; i++) {
+			this.putBit( ( (num >>> (length - i - 1) ) & 1) == 1);
+		}
+	},
+	
+	getLengthInBits : function() {
+		return this.length;
+	},
+	
+	putBit : function(bit) {
+	
+		var bufIndex = Math.floor(this.length / 8);
+		if (this.buffer.length <= bufIndex) {
+			this.buffer.push(0);
+		}
+	
+		if (bit) {
+			this.buffer[bufIndex] |= (0x80 >>> (this.length % 8) );
+		}
+	
+		this.length++;
+	}
+};
+
+module.exports = QRBitBuffer;
+
+});
+def('QRRSBlock',function(module,exports,require){
+var QRErrorCorrectLevel = require('./QRErrorCorrectLevel');
+
+function QRRSBlock(totalCount, dataCount) {
+	this.totalCount = totalCount;
+	this.dataCount  = dataCount;
+}
+
+QRRSBlock.RS_BLOCK_TABLE = [
+
+	// L
+	// M
+	// Q
+	// H
+
+	// 1
+	[1, 26, 19],
+	[1, 26, 16],
+	[1, 26, 13],
+	[1, 26, 9],
+	
+	// 2
+	[1, 44, 34],
+	[1, 44, 28],
+	[1, 44, 22],
+	[1, 44, 16],
+
+	// 3
+	[1, 70, 55],
+	[1, 70, 44],
+	[2, 35, 17],
+	[2, 35, 13],
+
+	// 4		
+	[1, 100, 80],
+	[2, 50, 32],
+	[2, 50, 24],
+	[4, 25, 9],
+	
+	// 5
+	[1, 134, 108],
+	[2, 67, 43],
+	[2, 33, 15, 2, 34, 16],
+	[2, 33, 11, 2, 34, 12],
+	
+	// 6
+	[2, 86, 68],
+	[4, 43, 27],
+	[4, 43, 19],
+	[4, 43, 15],
+	
+	// 7		
+	[2, 98, 78],
+	[4, 49, 31],
+	[2, 32, 14, 4, 33, 15],
+	[4, 39, 13, 1, 40, 14],
+	
+	// 8
+	[2, 121, 97],
+	[2, 60, 38, 2, 61, 39],
+	[4, 40, 18, 2, 41, 19],
+	[4, 40, 14, 2, 41, 15],
+	
+	// 9
+	[2, 146, 116],
+	[3, 58, 36, 2, 59, 37],
+	[4, 36, 16, 4, 37, 17],
+	[4, 36, 12, 4, 37, 13],
+	
+	// 10		
+	[2, 86, 68, 2, 87, 69],
+	[4, 69, 43, 1, 70, 44],
+	[6, 43, 19, 2, 44, 20],
+	[6, 43, 15, 2, 44, 16],
+
+	// 11
+	[4, 101, 81],
+	[1, 80, 50, 4, 81, 51],
+	[4, 50, 22, 4, 51, 23],
+	[3, 36, 12, 8, 37, 13],
+
+	// 12
+	[2, 116, 92, 2, 117, 93],
+	[6, 58, 36, 2, 59, 37],
+	[4, 46, 20, 6, 47, 21],
+	[7, 42, 14, 4, 43, 15],
+
+	// 13
+	[4, 133, 107],
+	[8, 59, 37, 1, 60, 38],
+	[8, 44, 20, 4, 45, 21],
+	[12, 33, 11, 4, 34, 12],
+
+	// 14
+	[3, 145, 115, 1, 146, 116],
+	[4, 64, 40, 5, 65, 41],
+	[11, 36, 16, 5, 37, 17],
+	[11, 36, 12, 5, 37, 13],
+
+	// 15
+	[5, 109, 87, 1, 110, 88],
+	[5, 65, 41, 5, 66, 42],
+	[5, 54, 24, 7, 55, 25],
+	[11, 36, 12],
+
+	// 16
+	[5, 122, 98, 1, 123, 99],
+	[7, 73, 45, 3, 74, 46],
+	[15, 43, 19, 2, 44, 20],
+	[3, 45, 15, 13, 46, 16],
+
+	// 17
+	[1, 135, 107, 5, 136, 108],
+	[10, 74, 46, 1, 75, 47],
+	[1, 50, 22, 15, 51, 23],
+	[2, 42, 14, 17, 43, 15],
+
+	// 18
+	[5, 150, 120, 1, 151, 121],
+	[9, 69, 43, 4, 70, 44],
+	[17, 50, 22, 1, 51, 23],
+	[2, 42, 14, 19, 43, 15],
+
+	// 19
+	[3, 141, 113, 4, 142, 114],
+	[3, 70, 44, 11, 71, 45],
+	[17, 47, 21, 4, 48, 22],
+	[9, 39, 13, 16, 40, 14],
+
+	// 20
+	[3, 135, 107, 5, 136, 108],
+	[3, 67, 41, 13, 68, 42],
+	[15, 54, 24, 5, 55, 25],
+	[15, 43, 15, 10, 44, 16],
+
+	// 21
+	[4, 144, 116, 4, 145, 117],
+	[17, 68, 42],
+	[17, 50, 22, 6, 51, 23],
+	[19, 46, 16, 6, 47, 17],
+
+	// 22
+	[2, 139, 111, 7, 140, 112],
+	[17, 74, 46],
+	[7, 54, 24, 16, 55, 25],
+	[34, 37, 13],
+
+	// 23
+	[4, 151, 121, 5, 152, 122],
+	[4, 75, 47, 14, 76, 48],
+	[11, 54, 24, 14, 55, 25],
+	[16, 45, 15, 14, 46, 16],
+
+	// 24
+	[6, 147, 117, 4, 148, 118],
+	[6, 73, 45, 14, 74, 46],
+	[11, 54, 24, 16, 55, 25],
+	[30, 46, 16, 2, 47, 17],
+
+	// 25
+	[8, 132, 106, 4, 133, 107],
+	[8, 75, 47, 13, 76, 48],
+	[7, 54, 24, 22, 55, 25],
+	[22, 45, 15, 13, 46, 16],
+
+	// 26
+	[10, 142, 114, 2, 143, 115],
+	[19, 74, 46, 4, 75, 47],
+	[28, 50, 22, 6, 51, 23],
+	[33, 46, 16, 4, 47, 17],
+
+	// 27
+	[8, 152, 122, 4, 153, 123],
+	[22, 73, 45, 3, 74, 46],
+	[8, 53, 23, 26, 54, 24],
+	[12, 45, 15, 28, 46, 16],
+
+	// 28
+	[3, 147, 117, 10, 148, 118],
+	[3, 73, 45, 23, 74, 46],
+	[4, 54, 24, 31, 55, 25],
+	[11, 45, 15, 31, 46, 16],
+
+	// 29
+	[7, 146, 116, 7, 147, 117],
+	[21, 73, 45, 7, 74, 46],
+	[1, 53, 23, 37, 54, 24],
+	[19, 45, 15, 26, 46, 16],
+
+	// 30
+	[5, 145, 115, 10, 146, 116],
+	[19, 75, 47, 10, 76, 48],
+	[15, 54, 24, 25, 55, 25],
+	[23, 45, 15, 25, 46, 16],
+
+	// 31
+	[13, 145, 115, 3, 146, 116],
+	[2, 74, 46, 29, 75, 47],
+	[42, 54, 24, 1, 55, 25],
+	[23, 45, 15, 28, 46, 16],
+
+	// 32
+	[17, 145, 115],
+	[10, 74, 46, 23, 75, 47],
+	[10, 54, 24, 35, 55, 25],
+	[19, 45, 15, 35, 46, 16],
+
+	// 33
+	[17, 145, 115, 1, 146, 116],
+	[14, 74, 46, 21, 75, 47],
+	[29, 54, 24, 19, 55, 25],
+	[11, 45, 15, 46, 46, 16],
+
+	// 34
+	[13, 145, 115, 6, 146, 116],
+	[14, 74, 46, 23, 75, 47],
+	[44, 54, 24, 7, 55, 25],
+	[59, 46, 16, 1, 47, 17],
+
+	// 35
+	[12, 151, 121, 7, 152, 122],
+	[12, 75, 47, 26, 76, 48],
+	[39, 54, 24, 14, 55, 25],
+	[22, 45, 15, 41, 46, 16],
+
+	// 36
+	[6, 151, 121, 14, 152, 122],
+	[6, 75, 47, 34, 76, 48],
+	[46, 54, 24, 10, 55, 25],
+	[2, 45, 15, 64, 46, 16],
+
+	// 37
+	[17, 152, 122, 4, 153, 123],
+	[29, 74, 46, 14, 75, 47],
+	[49, 54, 24, 10, 55, 25],
+	[24, 45, 15, 46, 46, 16],
+
+	// 38
+	[4, 152, 122, 18, 153, 123],
+	[13, 74, 46, 32, 75, 47],
+	[48, 54, 24, 14, 55, 25],
+	[42, 45, 15, 32, 46, 16],
+
+	// 39
+	[20, 147, 117, 4, 148, 118],
+	[40, 75, 47, 7, 76, 48],
+	[43, 54, 24, 22, 55, 25],
+	[10, 45, 15, 67, 46, 16],
+
+	// 40
+	[19, 148, 118, 6, 149, 119],
+	[18, 75, 47, 31, 76, 48],
+	[34, 54, 24, 34, 55, 25],
+	[20, 45, 15, 61, 46, 16]
+];
+
+QRRSBlock.getRSBlocks = function(typeNumber, errorCorrectLevel) {
+	
+	var rsBlock = QRRSBlock.getRsBlockTable(typeNumber, errorCorrectLevel);
+	
+	if (rsBlock === undefined) {
+		throw new Error("bad rs block @ typeNumber:" + typeNumber + "/errorCorrectLevel:" + errorCorrectLevel);
+	}
+
+	var length = rsBlock.length / 3;
+	
+	var list = [];
+	
+	for (var i = 0; i < length; i++) {
+
+		var count = rsBlock[i * 3 + 0];
+		var totalCount = rsBlock[i * 3 + 1];
+		var dataCount  = rsBlock[i * 3 + 2];
+
+		for (var j = 0; j < count; j++) {
+			list.push(new QRRSBlock(totalCount, dataCount) );	
+		}
+	}
+	
+	return list;
+};
+
+QRRSBlock.getRsBlockTable = function(typeNumber, errorCorrectLevel) {
+
+	switch(errorCorrectLevel) {
+	case QRErrorCorrectLevel.L :
+		return QRRSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 0];
+	case QRErrorCorrectLevel.M :
+		return QRRSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 1];
+	case QRErrorCorrectLevel.Q :
+		return QRRSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 2];
+	case QRErrorCorrectLevel.H :
+		return QRRSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 3];
+	default :
+		return undefined;
+	}
+};
+
+module.exports = QRRSBlock;
+
+});
+def('index',function(module,exports,require){
+//---------------------------------------------------------------------
+// QRCode for JavaScript
+//
+// Copyright (c) 2009 Kazuhiko Arase
+//
+// URL: http://www.d-project.com/
+//
+// Licensed under the MIT license:
+//   http://www.opensource.org/licenses/mit-license.php
+//
+// The word "QR Code" is registered trademark of 
+// DENSO WAVE INCORPORATED
+//   http://www.denso-wave.com/qrcode/faqpatent-e.html
+//
+//---------------------------------------------------------------------
+// Modified to work in node for this project (and some refactoring)
+//---------------------------------------------------------------------
+
+var QR8bitByte = require('./QR8bitByte');
+var QRUtil = require('./QRUtil');
+var QRPolynomial = require('./QRPolynomial');
+var QRRSBlock = require('./QRRSBlock');
+var QRBitBuffer = require('./QRBitBuffer');
+
+function QRCode(typeNumber, errorCorrectLevel) {
+	this.typeNumber = typeNumber;
+	this.errorCorrectLevel = errorCorrectLevel;
+	this.modules = null;
+	this.moduleCount = 0;
+	this.dataCache = null;
+	this.dataList = [];
+}
+
+QRCode.prototype = {
+	
+	addData : function(data) {
+		var newData = new QR8bitByte(data);
+		this.dataList.push(newData);
+		this.dataCache = null;
+	},
+	
+	isDark : function(row, col) {
+		if (row < 0 || this.moduleCount <= row || col < 0 || this.moduleCount <= col) {
+			throw new Error(row + "," + col);
+		}
+		return this.modules[row][col];
+	},
+
+	getModuleCount : function() {
+		return this.moduleCount;
+	},
+	
+	make : function() {
+		// Calculate automatically typeNumber if provided is < 1
+		if (this.typeNumber < 1 ){
+			var typeNumber = 1;
+			for (typeNumber = 1; typeNumber < 40; typeNumber++) {
+				var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, this.errorCorrectLevel);
+
+				var buffer = new QRBitBuffer();
+				var totalDataCount = 0;
+				for (var i = 0; i < rsBlocks.length; i++) {
+					totalDataCount += rsBlocks[i].dataCount;
+				}
+
+				for (var x = 0; x < this.dataList.length; x++) {
+					var data = this.dataList[x];
+					buffer.put(data.mode, 4);
+					buffer.put(data.getLength(), QRUtil.getLengthInBits(data.mode, typeNumber) );
+					data.write(buffer);
+				}
+				if (buffer.getLengthInBits() <= totalDataCount * 8)
+					break;
+			}
+			this.typeNumber = typeNumber;
+		}
+		this.makeImpl(false, this.getBestMaskPattern() );
+	},
+	
+	makeImpl : function(test, maskPattern) {
+		
+		this.moduleCount = this.typeNumber * 4 + 17;
+		this.modules = new Array(this.moduleCount);
+		
+		for (var row = 0; row < this.moduleCount; row++) {
+			
+			this.modules[row] = new Array(this.moduleCount);
+			
+			for (var col = 0; col < this.moduleCount; col++) {
+				this.modules[row][col] = null;//(col + row) % 3;
+			}
+		}
+	
+		this.setupPositionProbePattern(0, 0);
+		this.setupPositionProbePattern(this.moduleCount - 7, 0);
+		this.setupPositionProbePattern(0, this.moduleCount - 7);
+		this.setupPositionAdjustPattern();
+		this.setupTimingPattern();
+		this.setupTypeInfo(test, maskPattern);
+		
+		if (this.typeNumber >= 7) {
+			this.setupTypeNumber(test);
+		}
+	
+		if (this.dataCache === null) {
+			this.dataCache = QRCode.createData(this.typeNumber, this.errorCorrectLevel, this.dataList);
+		}
+	
+		this.mapData(this.dataCache, maskPattern);
+	},
+
+	setupPositionProbePattern : function(row, col)  {
+		
+		for (var r = -1; r <= 7; r++) {
+			
+			if (row + r <= -1 || this.moduleCount <= row + r) continue;
+			
+			for (var c = -1; c <= 7; c++) {
+				
+				if (col + c <= -1 || this.moduleCount <= col + c) continue;
+				
+				if ( (0 <= r && r <= 6 && (c === 0 || c === 6) ) || 
+                     (0 <= c && c <= 6 && (r === 0 || r === 6) ) || 
+                     (2 <= r && r <= 4 && 2 <= c && c <= 4) ) {
+					this.modules[row + r][col + c] = true;
+				} else {
+					this.modules[row + r][col + c] = false;
+				}
+			}		
+		}		
+	},
+	
+	getBestMaskPattern : function() {
+	
+		var minLostPoint = 0;
+		var pattern = 0;
+	
+		for (var i = 0; i < 8; i++) {
+			
+			this.makeImpl(true, i);
+	
+			var lostPoint = QRUtil.getLostPoint(this);
+	
+			if (i === 0 || minLostPoint >  lostPoint) {
+				minLostPoint = lostPoint;
+				pattern = i;
+			}
+		}
+	
+		return pattern;
+	},
+	
+	createMovieClip : function(target_mc, instance_name, depth) {
+	
+		var qr_mc = target_mc.createEmptyMovieClip(instance_name, depth);
+		var cs = 1;
+	
+		this.make();
+
+		for (var row = 0; row < this.modules.length; row++) {
+			
+			var y = row * cs;
+			
+			for (var col = 0; col < this.modules[row].length; col++) {
+	
+				var x = col * cs;
+				var dark = this.modules[row][col];
+			
+				if (dark) {
+					qr_mc.beginFill(0, 100);
+					qr_mc.moveTo(x, y);
+					qr_mc.lineTo(x + cs, y);
+					qr_mc.lineTo(x + cs, y + cs);
+					qr_mc.lineTo(x, y + cs);
+					qr_mc.endFill();
+				}
+			}
+		}
+		
+		return qr_mc;
+	},
+
+	setupTimingPattern : function() {
+		
+		for (var r = 8; r < this.moduleCount - 8; r++) {
+			if (this.modules[r][6] !== null) {
+				continue;
+			}
+			this.modules[r][6] = (r % 2 === 0);
+		}
+	
+		for (var c = 8; c < this.moduleCount - 8; c++) {
+			if (this.modules[6][c] !== null) {
+				continue;
+			}
+			this.modules[6][c] = (c % 2 === 0);
+		}
+	},
+	
+	setupPositionAdjustPattern : function() {
+	
+		var pos = QRUtil.getPatternPosition(this.typeNumber);
+		
+		for (var i = 0; i < pos.length; i++) {
+		
+			for (var j = 0; j < pos.length; j++) {
+			
+				var row = pos[i];
+				var col = pos[j];
+				
+				if (this.modules[row][col] !== null) {
+					continue;
+				}
+				
+				for (var r = -2; r <= 2; r++) {
+				
+					for (var c = -2; c <= 2; c++) {
+					
+						if (Math.abs(r) === 2 || 
+                            Math.abs(c) === 2 ||
+                            (r === 0 && c === 0) ) {
+							this.modules[row + r][col + c] = true;
+						} else {
+							this.modules[row + r][col + c] = false;
+						}
+					}
+				}
+			}
+		}
+	},
+	
+	setupTypeNumber : function(test) {
+	
+		var bits = QRUtil.getBCHTypeNumber(this.typeNumber);
+        var mod;
+	
+		for (var i = 0; i < 18; i++) {
+			mod = (!test && ( (bits >> i) & 1) === 1);
+			this.modules[Math.floor(i / 3)][i % 3 + this.moduleCount - 8 - 3] = mod;
+		}
+	
+		for (var x = 0; x < 18; x++) {
+			mod = (!test && ( (bits >> x) & 1) === 1);
+			this.modules[x % 3 + this.moduleCount - 8 - 3][Math.floor(x / 3)] = mod;
+		}
+	},
+	
+	setupTypeInfo : function(test, maskPattern) {
+	
+		var data = (this.errorCorrectLevel << 3) | maskPattern;
+		var bits = QRUtil.getBCHTypeInfo(data);
+        var mod;
+	
+		// vertical		
+		for (var v = 0; v < 15; v++) {
+	
+			mod = (!test && ( (bits >> v) & 1) === 1);
+	
+			if (v < 6) {
+				this.modules[v][8] = mod;
+			} else if (v < 8) {
+				this.modules[v + 1][8] = mod;
+			} else {
+				this.modules[this.moduleCount - 15 + v][8] = mod;
+			}
+		}
+	
+		// horizontal
+		for (var h = 0; h < 15; h++) {
+	
+			mod = (!test && ( (bits >> h) & 1) === 1);
+			
+			if (h < 8) {
+				this.modules[8][this.moduleCount - h - 1] = mod;
+			} else if (h < 9) {
+				this.modules[8][15 - h - 1 + 1] = mod;
+			} else {
+				this.modules[8][15 - h - 1] = mod;
+			}
+		}
+	
+		// fixed module
+		this.modules[this.moduleCount - 8][8] = (!test);
+	
+	},
+	
+	mapData : function(data, maskPattern) {
+		
+		var inc = -1;
+		var row = this.moduleCount - 1;
+		var bitIndex = 7;
+		var byteIndex = 0;
+		
+		for (var col = this.moduleCount - 1; col > 0; col -= 2) {
+	
+			if (col === 6) col--;
+	
+			while (true) {
+	
+				for (var c = 0; c < 2; c++) {
+					
+					if (this.modules[row][col - c] === null) {
+						
+						var dark = false;
+	
+						if (byteIndex < data.length) {
+							dark = ( ( (data[byteIndex] >>> bitIndex) & 1) === 1);
+						}
+	
+						var mask = QRUtil.getMask(maskPattern, row, col - c);
+	
+						if (mask) {
+							dark = !dark;
+						}
+						
+						this.modules[row][col - c] = dark;
+						bitIndex--;
+	
+						if (bitIndex === -1) {
+							byteIndex++;
+							bitIndex = 7;
+						}
+					}
+				}
+								
+				row += inc;
+	
+				if (row < 0 || this.moduleCount <= row) {
+					row -= inc;
+					inc = -inc;
+					break;
+				}
+			}
+		}
+		
+	}
+
+};
+
+QRCode.PAD0 = 0xEC;
+QRCode.PAD1 = 0x11;
+
+QRCode.createData = function(typeNumber, errorCorrectLevel, dataList) {
+	
+	var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, errorCorrectLevel);
+	
+	var buffer = new QRBitBuffer();
+	
+	for (var i = 0; i < dataList.length; i++) {
+		var data = dataList[i];
+		buffer.put(data.mode, 4);
+		buffer.put(data.getLength(), QRUtil.getLengthInBits(data.mode, typeNumber) );
+		data.write(buffer);
+	}
+
+	// calc num max data.
+	var totalDataCount = 0;
+	for (var x = 0; x < rsBlocks.length; x++) {
+		totalDataCount += rsBlocks[x].dataCount;
+	}
+
+	if (buffer.getLengthInBits() > totalDataCount * 8) {
+		throw new Error("code length overflow. (" + 
+            buffer.getLengthInBits() + 
+            ">" +  
+            totalDataCount * 8 + 
+            ")");
+	}
+
+	// end code
+	if (buffer.getLengthInBits() + 4 <= totalDataCount * 8) {
+		buffer.put(0, 4);
+	}
+
+	// padding
+	while (buffer.getLengthInBits() % 8 !== 0) {
+		buffer.putBit(false);
+	}
+
+	// padding
+	while (true) {
+		
+		if (buffer.getLengthInBits() >= totalDataCount * 8) {
+			break;
+		}
+		buffer.put(QRCode.PAD0, 8);
+		
+		if (buffer.getLengthInBits() >= totalDataCount * 8) {
+			break;
+		}
+		buffer.put(QRCode.PAD1, 8);
+	}
+
+	return QRCode.createBytes(buffer, rsBlocks);
+};
+
+QRCode.createBytes = function(buffer, rsBlocks) {
+
+	var offset = 0;
+	
+	var maxDcCount = 0;
+	var maxEcCount = 0;
+	
+	var dcdata = new Array(rsBlocks.length);
+	var ecdata = new Array(rsBlocks.length);
+	
+	for (var r = 0; r < rsBlocks.length; r++) {
+
+		var dcCount = rsBlocks[r].dataCount;
+		var ecCount = rsBlocks[r].totalCount - dcCount;
+
+		maxDcCount = Math.max(maxDcCount, dcCount);
+		maxEcCount = Math.max(maxEcCount, ecCount);
+		
+		dcdata[r] = new Array(dcCount);
+		
+		for (var i = 0; i < dcdata[r].length; i++) {
+			dcdata[r][i] = 0xff & buffer.buffer[i + offset];
+		}
+		offset += dcCount;
+		
+		var rsPoly = QRUtil.getErrorCorrectPolynomial(ecCount);
+		var rawPoly = new QRPolynomial(dcdata[r], rsPoly.getLength() - 1);
+
+		var modPoly = rawPoly.mod(rsPoly);
+		ecdata[r] = new Array(rsPoly.getLength() - 1);
+		for (var x = 0; x < ecdata[r].length; x++) {
+            var modIndex = x + modPoly.getLength() - ecdata[r].length;
+			ecdata[r][x] = (modIndex >= 0)? modPoly.get(modIndex) : 0;
+		}
+
+	}
+	
+	var totalCodeCount = 0;
+	for (var y = 0; y < rsBlocks.length; y++) {
+		totalCodeCount += rsBlocks[y].totalCount;
+	}
+
+	var data = new Array(totalCodeCount);
+	var index = 0;
+
+	for (var z = 0; z < maxDcCount; z++) {
+		for (var s = 0; s < rsBlocks.length; s++) {
+			if (z < dcdata[s].length) {
+				data[index++] = dcdata[s][z];
+			}
+		}
+	}
+
+	for (var xx = 0; xx < maxEcCount; xx++) {
+		for (var t = 0; t < rsBlocks.length; t++) {
+			if (xx < ecdata[t].length) {
+				data[index++] = ecdata[t][xx];
+			}
+		}
+	}
+
+	return data;
+
+};
+
+module.exports = QRCode;
+
+});
+return{QRCode:req('index'),ECL:req('QRErrorCorrectLevel')}})();
+function pixTLV(id,v){v=String(v);return id+String(v.length).padStart(2,"0")+v}
+function crc16(t){let c=0xFFFF;for(let i=0;i<t.length;i++){c^=t.charCodeAt(i)<<8;for(let j=0;j<8;j++)c=(c&0x8000)?((c<<1)^0x1021)&0xFFFF:(c<<1)&0xFFFF}return c.toString(16).toUpperCase().padStart(4,"0")}
+function pixAscii(t,max){return String(t||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^A-Za-z0-9 .,\-\/@&]/g,"").replace(/\s+/g," ").trim().slice(0,max)}
+function pixTLVparse(t){const o={};let i=0;while(i+4<=t.length){const id=t.substr(i,2),n=Number(t.substr(i+2,2));if(isNaN(n))break;o[id]=t.substr(i+4,n);i+=4+n}return o}
+function pixParse(code){const top=pixTLVparse(code.replace(/\s/g,""));const m=pixTLVparse(top["26"]||"");return{key:m["01"]||"",nome:top["59"]||"",cidade:top["60"]||""}}
+function pixKeyNorm(tipo,k){k=String(k||"").trim();if(!k)return"";if(tipo==="cnpj")return k.replace(/\D/g,"");
+  if(tipo==="cel"){let d=k.replace(/\D/g,"");if(!d.startsWith("55")||d.length<=11)d="55"+d;return"+"+d}if(tipo==="email")return k.toLowerCase();return k}
+function pixCfg(){const p=cfg.pix||{};let key=String(p.chave||"").trim(),nome=p.nome||"",cid=p.cidade||"";
+  if(p.tipo==="codigo"||/^000201/.test(key)){const r=pixParse(key);key=r.key;nome=r.nome||nome;cid=r.cidade||cid}else key=pixKeyNorm(p.tipo||"cnpj",key);
+  if(!key)return null;return{key,nome:pixAscii(nome||cfg.nome||"Boreal Clima",25)||"BOREAL CLIMA",cidade:pixAscii(cid,15)||"BRASIL"}}
+function pixPayload(valor,txid){const P=pixCfg();if(!P)return"";const v=r2(Number(valor)||0);
+  let t=pixTLV("00","01")+pixTLV("26",pixTLV("00","br.gov.bcb.pix")+pixTLV("01",P.key))+pixTLV("52","0000")+pixTLV("53","986")+(v>0?pixTLV("54",v.toFixed(2)):"")+pixTLV("58","BR")+pixTLV("59",P.nome)+pixTLV("60",P.cidade)+pixTLV("62",pixTLV("05",String(txid||"").replace(/[^A-Za-z0-9]/g,"").slice(0,25)||"***"))+"6304";
+  return t+crc16(t)}
+function qrDraw(g,text,x,y,size){const q=new QRLib.QRCode(-1,QRLib.ECL.M);q.addData(text);q.make();const n=q.getModuleCount(),m=Math.max(1,Math.floor(size/(n+8))),off=Math.floor((size-m*n)/2);
+  g.fillStyle="#fff";g.fillRect(x,y,size,size);g.fillStyle="#000";for(let r=0;r<n;r++)for(let c=0;c<n;c++)if(q.isDark(r,c))g.fillRect(x+off+c*m,y+off+r*m,m,m)}
+function pixBoxHTML(valor,txid,extra){const code=pixPayload(valor,txid);if(!code)return'<span class="warn">Cadastre a sua chave Pix em Financeiro → Pix para receber, para aparecer o QR Code.</span>';const P=pixCfg();
+  return'<div class="pixwrap"><canvas class="pixqr" width="440" height="440" data-code="'+esc(code)+'"></canvas><div style="flex:1;min-width:200px"><small>PAGUE COM PIX</small><div class="pv">R$ '+fmt(valor)+'</div><small>Recebedor: '+esc(P.nome)+'</small><br><small>O cliente abre o app do banco, escolhe Pix → Ler QR Code e aponta a câmera.</small><div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary small pixwa" type="button">💬 Enviar Pix pelo WhatsApp</button><button class="btn line small pixcopy" type="button">📋 Copiar Pix copia e cola</button></div>'+(extra||"")+'</div></div>'}
+function pixPaint(root){(root||document).querySelectorAll("canvas.pixqr").forEach(c=>{try{qrDraw(c.getContext("2d"),c.dataset.code,0,0,c.width)}catch(e){console.warn(e)}})}
+document.addEventListener("click",e=>{const b=e.target.closest(".pixwa");if(!b)return;const w=b.closest(".pixwrap"),c=w.querySelector("canvas.pixqr").dataset.code;
+  const pg=b.closest("#pg-os"),g=k=>pg?((pg.querySelector('[data-k='+k+']')||{}).value||"").trim():"";const n=waNum(g("cliTel"));
+  if(!n){toast("Coloque o WhatsApp do cliente na OS para enviar o Pix.");return}
+  const nome=(g("cliNome").split(" ")[0])||"",num=document.querySelector("#hdrNum");const val=w.querySelector(".pv").textContent;
+  if(b.dataset.step==="2"){window.open(waLink(n,c),waTarget());b.dataset.step="";b.textContent="💬 Enviar Pix pelo WhatsApp";toast("Código Pix enviado. O cliente só precisa copiar e colar.");return}
+  const msg="Olá"+(nome?", "+nome:"")+"! Aqui é da "+(cfg.nome||"Boreal Clima")+".\n\nSegue o Pix para pagamento"+(num&&num.textContent?" da "+num.textContent.trim():"")+": *"+val+"*.\n\nNa próxima mensagem vou mandar só o código. É só copiar e colar no app do seu banco, em *Pix → Pix Copia e Cola*. Obrigado pela preferência!";
+  window.open(waLink(n,msg),waTarget());b.dataset.step="2";b.textContent="💬 2º passo: enviar o código Pix";toast("Agora toque de novo para enviar o código sozinho, fácil de copiar.")});
+document.addEventListener("click",async e=>{const b=e.target.closest(".pixcopy");if(!b)return;const c=b.closest(".pixwrap").querySelector("canvas.pixqr").dataset.code;
+  try{await navigator.clipboard.writeText(c);toast("Código Pix copiado. Cole no WhatsApp do cliente.")}catch(_){prompt("Copie o código Pix:",c)}});
+function taxasCfg(){const t=cfg.taxas||{};return{deb:Number(t.deb)||0,c:Array.from({length:12},(_,i)=>Number((t.c||[])[i])||0)}}
+function comTaxa(v,pct){return pct>0&&pct<100?r2(v/(1-pct/100)):r2(v)}
+const pctFmt=v=>String(r2(v)).replace(".",",");
+function cardPct(f){const T=taxasCfg();if(f.pgto==="Cartão de débito")return T.deb;if(f.pgto==="Cartão de crédito")return T.c[Math.min(12,Math.max(1,Number(f.parcelas)||1))-1];return 0}
+function cardInfo(f,tot){if(!/^Cartão/.test(f.pgto||""))return null;const cred=f.pgto==="Cartão de crédito",n=cred?Math.min(12,Math.max(1,Number(f.parcelas)||1)):1;
+  const pct=f.taxaPct!==""&&f.taxaPct!=null&&!isNaN(Number(f.taxaPct))?Number(f.taxaPct):cardPct(f);const cli=cred&&f.juros==="cli";
+  let total=cli?comTaxa(tot,pct):r2(tot),parc=r2(total/n);if(cli&&n>1){parc=r2((pct>0&&pct<100?tot/(1-pct/100):tot)/n);total=r2(parc*n)}return{pct,cli,n,cred,total,parc,fee:cli?0:r2(tot*pct/100),acres:r2(total-tot)}}
+function parcelTable(tot){const T=taxasCfg();const rows=[["Pix ou dinheiro",tot,""],["Cartão de débito",tot,""],["Crédito à vista (1x)",tot,""]];
+  for(let n=2;n<=12;n++)if(T.c[n-1]>0){const pc=r2(tot/(1-T.c[n-1]/100)/n);rows.push([n+"x no crédito",r2(pc*n),n+"x de R$ "+fmt(pc)])}return rows}
 function margem(){const v=Number(cfg.margem);return cfg.margem===""||cfg.margem==null||isNaN(v)?20:v}
 function matCusto(m){if(!m)return 0;if(m.custo!=null&&m.custo!=="")return Number(m.custo)||0;return m.preco?r2(m.preco/(1+margem()/100)):0}
 function venda(c){return r2((Number(c)||0)*(1+margem()/100))}
@@ -1106,7 +2432,22 @@ function FormCtl(type){
     const cs=r.dataset.custo;return{nome:g("nome"),qtd:qv,preco:p,sub:qv*p,custo:cs!=null&&cs!==""?Number(cs):null}}).filter(m=>m.nome||m.preco)}
   function recalc(){let t=0;qq(".mrow").forEach(r=>{const qv=Number(String(r.querySelector('[data-m=qtd]').value||"1").replace(",","."))||0;const p=parseMoney(r.querySelector('[data-m=preco]').value);
     const s=qv*p;t+=s;r.querySelector(".sub").textContent="R$ "+fmt(s)});const mo=parseMoney(q('[data-k="valor"]').value);
-    q(".matTotal").textContent="R$ "+fmt(t);q(".totMat").textContent="R$ "+fmt(t);q(".totMo").textContent="R$ "+fmt(mo);q(".totGeral").textContent="R$ "+fmt(t+mo);return t+mo}
+    q(".matTotal").textContent="R$ "+fmt(t);q(".totMat").textContent="R$ "+fmt(t);q(".totMo").textContent="R$ "+fmt(mo);q(".totGeral").textContent="R$ "+fmt(t+mo);cardUI(r2(t+mo));return t+mo}
+  function cardUI(tot){const box=q(".cardbox");if(!box)return;
+    if(isOS){const g=k=>q('[data-k='+k+']').value;const f={pgto:g("pgto"),parcelas:g("parcelas"),juros:g("juros")};const cred=f.pgto==="Cartão de crédito",card=/^Cartão/.test(f.pgto);
+      qq(".cc-only").forEach(e=>e.hidden=!cred);q('[data-k=taxaPct]').value=card?String(cardPct(f)):"";f.taxaPct=q('[data-k=taxaPct]').value;
+      const lbl=q(".totLbl");if(lbl)lbl.textContent="Total geral";
+      if(f.pgto==="Pix"&&tot>0){box.hidden=false;box.innerHTML=pixBoxHTML(tot,"BOREALOS"+pad(st.num,4));pixPaint(box);return}
+      if(!card||tot<=0){box.hidden=true;return}const ci=cardInfo(f,tot);box.hidden=false;
+      const warn=ci.pct?"":'<br><span class="warn">Taxa da maquininha não cadastrada. Coloque em Financeiro → Taxas da maquininha.</span>';
+      if(ci.cli){if(lbl)lbl.textContent="Total com juros da maquininha";q(".totGeral").textContent="R$ "+fmt(ci.total);
+        box.innerHTML='<b>Cobrar na maquininha: R$ '+fmt(ci.total)+(ci.n>1?' em '+ci.n+'x de R$ '+fmt(ci.parc):' à vista')+'</b><br><small>Taxa '+pctFmt(ci.pct)+'%: acréscimo de R$ '+fmt(ci.acres)+' pago pelo cliente. Você recebe R$ '+fmt(tot)+'.</small>'+warn}
+      else box.innerHTML='<b>Cobrar na maquininha: R$ '+fmt(tot)+(ci.n>1?' em '+ci.n+'x de R$ '+fmt(ci.parc):'')+'</b><br><small>Taxa '+pctFmt(ci.pct)+'% = R$ '+fmt(ci.fee)+', paga por você: sai do Caixa da Boreal.</small>'+warn;
+      return}
+    if(q('[data-k=mostraCartao]').value!=="sim"||tot<=0){box.hidden=true;return}
+    const rows=parcelTable(tot);box.hidden=false;
+    box.innerHTML='<b>Como vai aparecer no PDF</b><table>'+rows.map(r=>'<tr><td>'+r[0]+'</td><td>'+(r[2]?'<small>'+r[2]+'</small>':'')+'</td><td>R$ '+fmt(r[1])+'</td></tr>').join("")+'</table>'+(rows.length<4?'<span class="warn">Coloque as taxas de 2x a 12x em Financeiro → Taxas da maquininha para mostrar as parcelas.</span>':'<small>De 2x em diante, o valor já inclui a taxa da maquininha.</small>')}
+  ["pgto","parcelas","juros","mostraCartao"].forEach(k=>{const e=q('[data-k='+k+']');if(e)e.addEventListener("change",()=>{recalc();saveDraft()})});
   q(".addMat").onclick=()=>{const el=addMat();saveDraft();el.querySelector("[data-m=nome]").focus()};
   q(".addGrp").onclick=()=>openGroupPicker(api);
   function addGroup(g){qq(".mrow").forEach(r=>{const v=k=>r.querySelector('[data-m='+k+']').value.trim();if(!v("nome")&&!v("preco"))r.remove()});
@@ -1407,7 +2748,18 @@ async function renderPDF(D){
 
   d.section(isOS?"Valores e garantia":"Valores");
   pdfTotals(d,parseMoney(f.valor),matTot);
-  if(isOS)d.fields([["Forma de pagamento",f.pgto],["Situação",f.pgSit],["Garantia do serviço",f.garantia+(garFim(f.data,f.garantia)?" (até "+br(garFim(f.data,f.garantia))+")":"")],["Próxima manutenção sugerida",br(f.proxManut)]],4);
+  const totDoc=r2(parseMoney(f.valor)+matTot),ciP=isOS?cardInfo(f,totDoc):null;
+  if(ciP&&ciP.cli)d.fields([["Total no cartão (com juros da maquininha)","R$ "+fmt(ciP.total)],["Parcelamento",ciP.n>1?ciP.n+"x de R$ "+fmt(ciP.parc):"À vista"]],2);
+  if(!isOS&&f.mostraCartao==="sim"&&totDoc>0){const rows=parcelTable(totDoc),rh=40;d.ensure(70+rows.length*rh);
+    d.text("FORMAS DE PAGAMENTO",MX,d.y,"700",16,C.blue);d.y+=30;
+    rows.forEach((r,i)=>{if(i%2===0){d.g.fillStyle=C.ice;d.rr(MX,d.y,CW,rh,8);d.g.fill()}d.text(r[0],MX+16,d.y+10,"600",19,C.text);if(r[2])d.text(r[2],MX+CW*0.48,d.y+11,"500",18,C.muted);d.text("R$ "+fmt(r[1]),MX+CW-16,d.y+10,"800",19,C.navy,"right");d.y+=rh});
+    d.y+=8;if(rows.length>3){d.text("No crédito de 2x em diante, o valor inclui a taxa da operadora do cartão.",MX,d.y,"500",16,C.muted);d.y+=30}d.y+=10}
+  const pixCode=isOS&&f.pgto==="Pix"&&f.pgSit!=="Pago"&&totDoc>0?pixPayload(totDoc,"BOREALOS"+pad(D.num,4)):"";
+  if(pixCode){const qs=250;d.ensure(qs+30);const y0=d.y;d.g.fillStyle=C.ice;d.rr(MX,y0,CW,qs+20,14);d.g.fill();qrDraw(d.g,pixCode,MX+10,y0+10,qs);const tx=MX+qs+40,tw=CW-qs-60;
+    d.text("PAGUE COM PIX",tx,y0+22,"700",17,C.blue);d.text("R$ "+fmt(totDoc),tx,y0+48,"800",36,C.navy);d.text("Recebedor: "+(pixCfg()||{}).nome,tx,y0+98,"600",17,C.text);
+    d.text("Abra o app do banco → Pix → Ler QR Code.",tx,y0+126,"500",16,C.muted);d.text("Ou use o Pix copia e cola:",tx,y0+150,"500",16,C.muted);
+    const ls=[];for(let i=0;i<pixCode.length;i+=Math.max(30,Math.floor(tw/10.5)))ls.push(pixCode.slice(i,i+Math.max(30,Math.floor(tw/10.5))));ls.slice(0,5).forEach((l,i)=>d.text(l,tx,y0+176+i*20,"500",14,C.text));d.y=y0+qs+44}
+  if(isOS)d.fields([["Forma de pagamento",(f.pgto||"")+(ciP&&ciP.cred?" "+ciP.n+"x"+(ciP.cli?" (com juros da maquininha)":""):"")],["Situação",f.pgSit],["Garantia do serviço",f.garantia+(garFim(f.data,f.garantia)?" (até "+br(garFim(f.data,f.garantia))+")":"")],["Próxima manutenção sugerida",br(f.proxManut)]],4);
   else{
     const tecImg=D.sigTec?await loadImg(D.sigTec).catch(()=>null):null;
     const colW=(CW-60)/2,sh=110,top=24;const fl=[["Garantia do serviço",f.garantia],["Orçamento válido até",br(f.validade)]].filter(v=>v[1]);
@@ -1737,8 +3089,8 @@ function finOS(d){const P=d.payload||{},f=P.f||{},mg=margem();let custo=0,mk=0,m
   (P.mats||[]).forEach(m=>{const q=Number(m.qtd)||0,p=Number(m.preco)||0;let c=m.custo;
     if(c==null||c===""){const cm=findMat(m.nome);if(cm&&matCusto(cm))c=matCusto(cm);else{c=p/(1+mg/100);est=true}}
     c=Number(c)||0;custo+=c*q;mk+=(p-c)*q;mat+=p*q});
-  const mo=parseMoney(f.valor);
-  return{id:d.id,num:d.num,data:f.data||d.data,cliente:f.cliNome||d.cliNome,pg:f.pgSit||"",svc:(P.svc||[]).join(", "),bruto:r2(mat+mo),custo:r2(custo),markup:r2(mk),mo:r2(mo),est}}
+  const mo=parseMoney(f.valor);const ci=cardInfo(f,r2(mat+mo));
+  return{id:d.id,num:d.num,data:f.data||d.data,cliente:f.cliNome||d.cliNome,pg:f.pgSit||"",svc:(P.svc||[]).join(", "),bruto:r2(mat+mo),custo:r2(custo),markup:r2(mk),mo:r2(mo),taxa:ci?ci.fee:0,est}}
 function finMonthBase(ym){const os=docs.filter(d=>osDone(d)&&osYM(d)===ym).map(finOS).sort((a,b)=>(a.data||"").localeCompare(b.data||"")||(a.num-b.num));
   let bruto=0,custo=0,markup=0;os.forEach(o=>{bruto+=o.bruto;custo+=o.custo;markup+=o.markup});
   const base=bruto-custo-markup,terco=r2(base/3);
@@ -1747,11 +3099,12 @@ function finMonthBase(ym){const os=docs.filter(d=>osDone(d)&&osYM(d)===ym).map(f
 const CAIXAS={mat:"Materiais",boreal:"Caixa da Boreal",manut:"Caixa de manutenção",lucro:"Lucro / Salário"};
 function saiMonth(ym){const s={boreal:0,manut:0,lucro:0,mat:0};const list=saidas.filter(x=>String(x.data||"").slice(0,7)===ym).sort((a,b)=>(a.data||"").localeCompare(b.data||""));
   list.forEach(x=>{s[x.caixa]=(s[x.caixa]||0)+(Number(x.valor)||0)});const nf=notas.filter(n=>String(n.data||"").slice(0,7)===ym).reduce((t,n)=>t+(Number(n.valor)||0),0);s.mat+=nf;
-  Object.keys(s).forEach(k=>s[k]=r2(s[k]));return{s,list,nf:r2(nf)}}
+  const tx=r2(docs.filter(d=>osDone(d)&&osYM(d)===ym).reduce((t,d)=>t+finOS(d).taxa,0));s.boreal+=tx;
+  Object.keys(s).forEach(k=>s[k]=r2(s[k]));return{s,list,nf:r2(nf),tx}}
 function caixaAcum(ym){const ms=new Set([...docs.filter(osDone).map(osYM),...saidas.map(x=>String(x.data||"").slice(0,7)),...notas.map(n=>String(n.data||"").slice(0,7))].filter(m=>m&&m<=ym));
   const A={mat:0,boreal:0,manut:0,lucro:0};ms.forEach(m=>{const r=finMonthBase(m),s=saiMonth(m).s;A.mat+=r.custo-s.mat;A.boreal+=r.boreal-s.boreal;A.manut+=r.manut-s.manut;A.lucro+=r.lucro-s.lucro});
   Object.keys(A).forEach(k=>A[k]=r2(A[k]));return A}
-function finMonth(ym){const r=finMonthBase(ym),sm=saiMonth(ym);r.sai=sm.s;r.compras=sm.nf;r.saidas=sm.list.map(x=>({data:x.data,caixa:x.caixa,valor:Number(x.valor)||0,desc:x.desc||""}));r.acum=caixaAcum(ym);return r}
+function finMonth(ym){const r=finMonthBase(ym),sm=saiMonth(ym);r.sai=sm.s;r.compras=sm.nf;r.taxaCartao=sm.tx;r.saidas=sm.list.map(x=>({data:x.data,caixa:x.caixa,valor:Number(x.valor)||0,desc:x.desc||""}));r.acum=caixaAcum(ym);return r}
 function finSig(r){return [r.bruto,r.custo,r.markup,r.os.map(o=>o.id+":"+o.bruto+":"+o.custo).join("|"),JSON.stringify(r.sai||{}),JSON.stringify((r.saidas||[]).map(x=>[x.data,x.caixa,x.valor,x.desc])),r.compras||0].join("#")}
 async function saveClosing(ym){const r=finMonth(ym);r.geradoEm=Date.now();r.atualizadoEm=Date.now();r.parcial=ym>=ymNow();await DB.put("fech",r);fechs=await DB.all("fech");return r}
 async function autoClose(){let n=0;const cur=ymNow();const months=new Set(docs.filter(osDone).map(osYM).filter(m=>m&&m<cur));
@@ -1766,13 +3119,13 @@ function renderFin(){
     (r.aReceber?'<div>Ainda a receber<b style="color:#8A5800">R$ '+fmt(r.aReceber)+"</b></div>":"");
   const ent={mat:r.custo,boreal:r.boreal,manut:r.manut,lucro:r.lucro},S=r.sai||{},A=r.acum||{};
   const sal=k=>r2(ent[k]-(S[k]||0)),big=k=>'<b'+(sal(k)<0?' style="color:#B42318"':"")+'>R$ '+fmt(sal(k))+"</b>";
-  const mov=k=>'<span class="sx">Entrou R$ '+fmt(ent[k])+'</span><span class="sx">− Saídas R$ '+fmt(S[k]||0)+(k==="mat"&&r.compras?" (notas R$ "+fmt(r.compras)+")":"")+'</span><span class="sx'+(sal(k)<0?" neg":"")+'">= Saldo do mês R$ '+fmt(sal(k))+'</span><span class="sx'+((A[k]||0)<0?" neg":"")+'"><b style="display:inline;font-size:12.5px;margin:0">Saldo acumulado R$ '+fmt(A[k]||0)+"</b></span>";
+  const mov=k=>'<span class="sx">Entrou R$ '+fmt(ent[k])+'</span><span class="sx">− Saídas R$ '+fmt(S[k]||0)+(k==="mat"&&r.compras?" (notas R$ "+fmt(r.compras)+")":"")+(k==="boreal"&&r.taxaCartao?" (taxas de cartão R$ "+fmt(r.taxaCartao)+")":"")+'</span><span class="sx'+(sal(k)<0?" neg":"")+'">= Saldo do mês R$ '+fmt(sal(k))+'</span><span class="sx'+((A[k]||0)<0?" neg":"")+'"><b style="display:inline;font-size:12.5px;margin:0">Saldo acumulado R$ '+fmt(A[k]||0)+"</b></span>";
   $("#finSplit").innerHTML=
     '<div style="--c:#7D8A98"><small>1 · Materiais · saldo</small>'+big("mat")+'<span>Repor o material usado (sem a margem).</span>'+mov("mat")+'</div>'+
     '<div style="--c:#1C6FE0"><small>2 · Caixa da Boreal · saldo</small>'+big("boreal")+'<span>Documentos, gasolina e almoço.</span><em>1/3 do serviço R$ '+fmt(r.terco)+' + '+fmt(r.margem).replace(",00","")+'% dos materiais R$ '+fmt(r.markup)+' (ajuda na gasolina)</em>'+mov("boreal")+'</div>'+
     '<div style="--c:#C27C00"><small>3 · Caixa de manutenção · saldo</small>'+big("manut")+'<span>Depreciação do veículo e ferramentas.</span>'+mov("manut")+'</div>'+
     '<div style="--c:#17905A"><small>4 · Lucro / Salário · saldo</small>'+big("lucro")+'<span>Sua retirada do mês.</span>'+mov("lucro")+'</div>';
-  $("#finFormula").textContent="Como é feita a conta: valor bruto R$ "+fmt(r.bruto)+" − materiais R$ "+fmt(r.custo)+" − margem dos materiais R$ "+fmt(r.markup)+" = R$ "+fmt(r.base)+", dividido em 3 partes iguais. A margem dos materiais vai inteira para o Caixa da Boreal."+(r.est?" * Algumas OS têm material sem custo cadastrado: o custo foi estimado tirando a margem do preço cobrado.":"");
+  $("#finFormula").textContent="Como é feita a conta: valor bruto R$ "+fmt(r.bruto)+" − materiais R$ "+fmt(r.custo)+" − margem dos materiais R$ "+fmt(r.markup)+" = R$ "+fmt(r.base)+", dividido em 3 partes iguais. A margem dos materiais vai inteira para o Caixa da Boreal."+(r.taxaCartao?" Taxas de cartão pagas por você no mês: R$ "+fmt(r.taxaCartao)+", descontadas do Caixa da Boreal.":"")+(r.est?" * Algumas OS têm material sem custo cadastrado: o custo foi estimado tirando a margem do preço cobrado.":"");
   $("#finOsList").innerHTML=r.os.length?'<div class="fwrap"><table class="ftable"><thead><tr><th>Nº</th><th>Data</th><th>Cliente</th><th class="n">Bruto</th><th class="n hm">Materiais</th><th class="n hm">Margem</th></tr></thead><tbody>'+
     r.os.map(o=>'<tr><td><b>'+pad(o.num,4)+'</b></td><td>'+br(o.data).slice(0,5)+'</td><td>'+esc(o.cliente)+(o.pg==="Pendente"||o.pg==="Parcial"?' <span class="pill warn">'+esc(o.pg)+"</span>":"")+'</td><td class="n">R$ '+fmt(o.bruto)+'</td><td class="n hm">R$ '+fmt(o.custo)+(o.est?"*":"")+'</td><td class="n hm">R$ '+fmt(o.markup)+"</td></tr>").join("")+
     '</tbody><tfoot><tr><td colspan="3">Total</td><td class="n">R$ '+fmt(r.bruto)+'</td><td class="n hm">R$ '+fmt(r.custo)+'</td><td class="n hm">R$ '+fmt(r.markup)+"</td></tr></tfoot></table></div>"
@@ -1840,7 +3193,16 @@ $("#notasList").addEventListener("click",async e=>{const v=e.target.closest("[da
 /* editores (materiais e grupos) com salvamento automático */
 let finSuspend=false,finTmr=null;
 function finEditing(){const a=document.activeElement;return !!(a&&a.closest&&a.closest("#pg-fin")&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))}
-function renderFinEditors(){if(finTmr)finSaveNow();finSuspend=true;$("#finMargem").value=margem();renderCfgMats(cfg.materiais);$("#cfgGroups").innerHTML="";(cfg.grupos||[]).forEach(cfgGroupCard);
+function renderTaxas(){const T=taxasCfg();$$("#taxBox [data-tx]").forEach(i=>{const k=i.dataset.tx;const v=k==="deb"?T.deb:T.c[Number(k)-1];if(document.activeElement!==i)i.value=v?v:""})}
+let taxTmr=null;$("#taxBox").addEventListener("input",()=>{$("#taxSaved").textContent="Salvando…";clearTimeout(taxTmr);taxTmr=setTimeout(()=>{const g=k=>{const v=Number(String(($("#taxBox [data-tx='"+k+"']")||{}).value||"").replace(",","."));return isNaN(v)?0:v};
+  cfg.taxas={deb:g("deb"),c:Array.from({length:12},(_,i)=>g(String(i+1)))};cfg.atualizadoEm=Date.now();LS.set("boreal_cfg",cfg);DB.mark("cfg","main");$("#taxSaved").textContent="✓ Salvo";if(tab==="fin")renderFin()},700)});
+function renderPix(){const p=cfg.pix||{};$$("#pg-fin [data-px]").forEach(i=>{if(document.activeElement!==i)i.value=p[i.dataset.px]||(i.dataset.px==="tipo"?"cnpj":"")});pixTestUI()}
+function pixTestUI(){const b=$("#pixTest");if(!pixCfg()){b.hidden=true;return}b.hidden=false;
+  b.innerHTML=pixBoxHTML(1,"BOREALTESTE",'<p class="hint" style="margin-top:8px">Teste: pague este Pix de R$ 1,00 com outro celular. Se cair na sua conta com o nome certo, está tudo certo. Chave usada: <b>'+esc(pixCfg().key)+'</b></p>');pixPaint(b)}
+let pixTmr=null;$("#pg-fin").addEventListener("input",e=>{if(!e.target.matches("[data-px]"))return;$("#pixSaved").textContent="Salvando…";clearTimeout(pixTmr);pixTmr=setTimeout(()=>{const p={};$$("#pg-fin [data-px]").forEach(i=>p[i.dataset.px]=i.value.trim());
+  cfg.pix=p;cfg.atualizadoEm=Date.now();LS.set("boreal_cfg",cfg);DB.mark("cfg","main");$("#pixSaved").textContent="✓ Salvo";pixTestUI()},700)});
+$("#pg-fin").addEventListener("change",e=>{if(e.target.matches("select[data-px]"))e.target.dispatchEvent(new Event("input",{bubbles:true}))});
+function renderFinEditors(){if(finTmr)finSaveNow();finSuspend=true;$("#finMargem").value=margem();renderTaxas();renderPix();renderCfgMats(cfg.materiais);$("#cfgGroups").innerHTML="";(cfg.grupos||[]).forEach(cfgGroupCard);
   setTimeout(()=>{finSuspend=false},0)}
 function finSaveSoon(){if(finSuspend)return;$("#finSaved").textContent="Salvando…";clearTimeout(finTmr);finTmr=setTimeout(finSaveNow,800)}
 function finSaveNow(){clearTimeout(finTmr);finTmr=null;cfg.materiais=readCfgMats();cfg.grupos=readGroups();const mg=Number($("#finMargem").value);cfg.margem=isNaN(mg)?20:mg;
@@ -1876,7 +3238,7 @@ async function renderFinPDF(r){
     g.fillStyle="#fff";g.strokeStyle=C.line;g.lineWidth=2;d.rr(MX,d.y,CW,h,12);g.fill();g.stroke();g.fillStyle=p[3];d.rr(MX,d.y,8,h,4);g.fill();
     d.text(p[0],MX+28,d.y+16,"800",22,C.navy);ls.forEach((l,i)=>d.text(l,MX+28,d.y+46+i*24,"500",18,C.muted));
     d.text("R$ "+fmt(p[1]),PW-MX-24,d.y+(h-34)/2,"800",30,C.navy,"right");d.y+=h+12});
-  d.y+=4;d.para("Conta: bruto R$ "+fmt(r.bruto)+" − materiais R$ "+fmt(r.custo)+" − margem R$ "+fmt(r.markup)+" = R$ "+fmt(r.base)+" ÷ 3 = R$ "+fmt(r.terco)+" para cada parte. A margem dos materiais vai inteira para o Caixa da Boreal.",18);d.y+=18;
+  d.y+=4;d.para("Conta: bruto R$ "+fmt(r.bruto)+" − materiais R$ "+fmt(r.custo)+" − margem R$ "+fmt(r.markup)+" = R$ "+fmt(r.base)+" ÷ 3 = R$ "+fmt(r.terco)+" para cada parte. A margem dos materiais vai inteira para o Caixa da Boreal."+(r.taxaCartao?" Taxas de cartão pagas pela Boreal: R$ "+fmt(r.taxaCartao)+" (descontadas do Caixa da Boreal).":""),18);d.y+=18;
   if(r.sai){d.section("Movimento dos caixas");const A=r.acum||{},ent={mat:r.custo,boreal:r.boreal,manut:r.manut,lucro:r.lucro};
     const cols=[["Caixa",CW-4*190,"left"],["Entrou",190,"right"],["Saiu",190,"right"],["Saldo do mês",190,"right"],["Acumulado",190,"right"]];
     let x=MX;g.fillStyle=C.ice;d.rr(MX,d.y,CW,44,8);g.fill();cols.forEach(([tt,w,al])=>{d.text(tt.toUpperCase(),al==="right"?x+w-12:x+12,d.y+13,"700",15,C.navy,al);x+=w});d.y+=50;
@@ -2062,7 +3424,7 @@ function renderPainel(){const cur=ymNow(),months=[];for(let i=11;i>=0;i--)months
   $("#pnGar").innerHTML=gl.length?gl.map(x=>'<div class="nrow"><div class="nic">🛡️</div><div class="ni"><b>'+esc(x.d.cliNome)+"</b><span>OS "+pad(x.d.num,4)+" · "+esc((x.d.svc||[]).join(", "))+'</span></div><div class="nv">vence '+br(x.g.fim)+"</div></div>").join(""):'<p class="hint">Nenhuma garantia vence nos próximos 30 dias.</p>'}
 
 /* equipe */
-function cfgPublico(){return{nome:cfg.nome,cnpj:cfg.cnpj,tel:cfg.tel,email:cfg.email,end:cfg.end,site:cfg.site,logo:cfg.logo,meses:cfg.meses,garantiaPadrao:cfg.garantiaPadrao,googleLink:cfg.googleLink,atualizadoEm:cfg.atualizadoEm,
+function cfgPublico(){return{nome:cfg.nome,cnpj:cfg.cnpj,tel:cfg.tel,email:cfg.email,end:cfg.end,site:cfg.site,logo:cfg.logo,meses:cfg.meses,garantiaPadrao:cfg.garantiaPadrao,googleLink:cfg.googleLink,taxas:cfg.taxas||null,pix:cfg.pix||null,atualizadoEm:cfg.atualizadoEm,
   materiais:(cfg.materiais||[]).map(m=>({nome:m.nome,cat:m.cat,venda:matVenda(m)})),grupos:(cfg.grupos||[]).map(g=>({nome:g.nome,itens:(g.itens||[]).map(i=>({nome:i.nome,qtd:i.qtd,venda:grpItemVenda(i)}))}))}}
 async function loadTeam(){const el=$("#teamList");if(!sb||!navigator.onLine){el.innerHTML='<p class="hint">Conecte à internet para ver a equipe.</p>';return}
   el.innerHTML='<p class="hint">Carregando…</p>';const {data,error}=await sb.from("membros").select("user_id,email,nome,papel");
@@ -2077,7 +3439,7 @@ $("#teamList").addEventListener("click",async e=>{const b=e.target.closest("[dat
 /* ============================================================
    NUVEM (Supabase): login + sincronização
    ============================================================ */
-const APP_VERSION="Versão 16 · 21/11/2026 · Saldos, contratos e OS sem checklist";
+const APP_VERSION="Versão 19 · 21/11/2026 · Enviar Pix pelo WhatsApp";
 const SB_URL="https://xipiemiyvrwfxosbfpvl.supabase.co",SB_KEY="sb_publishable_RtUvyM---ErVKDlMnonTVg_AEy9yL5I";
 let sb=null,appStarted=false;
 function fnv(s){let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(36)+s.length.toString(36)}
