@@ -81,6 +81,15 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 
 .cardbox table{width:100%;border-collapse:collapse;margin-top:6px}.cardbox td{padding:5px 4px;border-top:1px solid #D9E6F7}.cardbox td:last-child{text-align:right;font-weight:700}
 .pixwrap{display:flex;gap:16px;align-items:center;flex-wrap:wrap}.pixwrap canvas{background:#fff;border-radius:10px;border:1px solid #D9E6F7;width:220px;height:220px}
 .pixwrap .pv{font-size:24px;font-weight:800;color:#0B1426;margin:2px 0 6px}
+#askP{white-space:pre-line}
+.igsec{margin:4px 0 14px}.igsec h3{font-size:15px;margin:0 0 8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.igc{border:1px solid var(--line,#DDE5EF);border-left:5px solid #7A4FD8;border-radius:14px;background:#fff;margin-bottom:10px}
+.igc.cond{border-left-color:#0F8A8A}.igc.venc{border-left-color:#B42318;background:#FFF5F4}
+.igc>summary{list-style:none;cursor:pointer;padding:12px 14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}.igc>summary::-webkit-details-marker{display:none}
+.igc .ign{font-weight:700;font-size:16px;flex:1;min-width:160px}.igc .igs{font-size:13px;color:#4B5B70}
+.igc .igb{padding:0 14px 14px}.igc .igm{display:flex;justify-content:space-between;gap:8px;padding:8px 10px;border-radius:10px;background:#F4F7FB;margin-top:6px;cursor:pointer;font-size:14px}
+.igc .venc-t{color:#B42318;font-weight:700}.igtag{font-size:12px;font-weight:700;padding:2px 8px;border-radius:99px;background:#EFE8FC;color:#5B34B5}.igtag.cond{background:#E2F5F4;color:#0B6F6F}
+.totDescW b{color:#B42318!important}
 .taxgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin-top:10px}
 .ck{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
 .ck:last-child{border-bottom:0}
@@ -334,6 +343,7 @@ body.func .adm{display:none!important}
     </div>
     <div class="stats" id="cliStats"></div>
     <div class="filt" id="cliFilt"></div>
+    <div id="igList"></div>
     <div id="cliList"></div>
     <div class="legwrap"></div>
   </div>
@@ -390,9 +400,11 @@ body.func .adm{display:none!important}
       <label class="f">Mão de obra / serviço (R$)<input type="text" inputmode="decimal" data-k="valor" placeholder="0,00"></label>
       <label class="f">Garantia do serviço<select data-k="garantia"><option>30 dias</option><option>60 dias</option><option>90 dias</option><option>4 meses</option><option>6 meses</option><option>9 meses</option><option>1 ano</option><option>2 anos</option><option>Sem garantia</option></select></label>
       <label class="f">Orçamento válido até<input type="date" data-k="validade"></label>
+      <label class="f">Indicado por (grupo)<select data-k="indPor" class="igSel"><option value="">— Nenhum —</option></select></label>
+      <input type="hidden" data-k="descPct"><input type="hidden" data-k="descVal"><input type="hidden" data-k="credUsado"><input type="hidden" data-k="indNome">
       <label class="f wide">Pagamento no cartão (aparece no PDF)<select data-k="mostraCartao"><option value="">Não mostrar para o cliente</option><option value="sim">Mostrar: Pix, débito e crédito à vista sem acréscimo; 2x a 12x com a taxa da maquininha</option></select></label>
     </div>
-    <div class="totbox"><div>Mão de obra<b class="totMo">R$ 0,00</b></div><div>Peças e materiais<b class="totMat">R$ 0,00</b></div><div class="big">Total geral<b class="totGeral">R$ 0,00</b></div></div>
+    <div class="totbox"><div>Mão de obra<b class="totMo">R$ 0,00</b></div><div>Peças e materiais<b class="totMat">R$ 0,00</b></div><div class="totDescW" hidden><span class="totDescL">Desconto</span><b class="totDesc">− R$ 0,00</b></div><div class="big">Total geral<b class="totGeral">R$ 0,00</b></div></div>
     <div class="cardbox" hidden></div>
   </section>
 
@@ -508,8 +520,10 @@ body.func .adm{display:none!important}
       <label class="f">Situação<select data-k="pgSit"><option value="">—</option><option>Pago</option><option>Pendente</option><option>Parcial</option></select></label>
       <label class="f">Garantia do serviço<select data-k="garantia"><option>30 dias</option><option>60 dias</option><option>90 dias</option><option>4 meses</option><option>6 meses</option><option>9 meses</option><option>1 ano</option><option>2 anos</option><option>Sem garantia</option></select></label>
       <label class="f">Próxima manutenção sugerida<input type="date" data-k="proxManut"></label>
+      <label class="f">Indicado por (grupo)<select data-k="indPor" class="igSel"><option value="">— Nenhum —</option></select></label>
+      <input type="hidden" data-k="descPct"><input type="hidden" data-k="descVal"><input type="hidden" data-k="credUsado"><input type="hidden" data-k="indNome">
     </div>
-    <div class="totbox"><div>Mão de obra<b class="totMo">R$ 0,00</b></div><div>Peças e materiais<b class="totMat">R$ 0,00</b></div><div class="big"><span class="totLbl">Total geral</span><b class="totGeral">R$ 0,00</b></div></div>
+    <div class="totbox"><div>Mão de obra<b class="totMo">R$ 0,00</b></div><div>Peças e materiais<b class="totMat">R$ 0,00</b></div><div class="totDescW" hidden><span class="totDescL">Desconto</span><b class="totDesc">− R$ 0,00</b></div><div class="big"><span class="totLbl">Total geral</span><b class="totGeral">R$ 0,00</b></div></div>
     <div class="cardbox" hidden></div>
   </section>
 
@@ -684,7 +698,8 @@ body.func .adm{display:none!important}
     <label class="f">Cidade<input type="text" data-cl="cliCidade"></label>
     <label class="f">Estado (UF)<input type="text" data-cl="cliUf" maxlength="2" style="text-transform:uppercase"></label>
     <label class="f">CEP<input type="text" data-cl="cliCep" inputmode="numeric"></label>
-    <label class="f">Como nos conheceu / Indicado por<input type="text" data-cl="cliRef"></label>
+    <label class="f">Como nos conheceu<input type="text" data-cl="cliRef"></label>
+    <label class="f">Grupo de indicação<select data-cl="grupo" class="igSel"><option value="">— Nenhum —</option></select></label>
   </div>
   <div class="actions">
     <button class="btn line" data-close>Cancelar</button>
@@ -848,6 +863,26 @@ body.func .adm{display:none!important}
 </div></div>
 
 <!-- Confirm modal -->
+<div class="modal" id="mIg"><div class="sheet" style="max-width:600px">
+  <h3 id="igT">Grupo de indicação</h3>
+  <p class="hint">Os clientes que você marcar como <b>indicados</b> por este grupo ficam dentro da pasta dele.</p>
+  <div class="grid" style="margin-top:12px">
+    <label class="f">Tipo<select id="igTipo"><option value="parc">Parceiro (salão, loja, etc.)</option><option value="cond">Condomínio / prédio</option></select></label>
+    <label class="f">Nome do grupo<input type="text" id="igNome" placeholder="Ex.: Salão Master"></label>
+    <label class="f"><span class="igl-dono">Dono(a) / quem indica</span><input type="text" id="igDono" list="igCliNames" placeholder="Nome (fica cadastrado como cliente)"></label>
+    <label class="f">WhatsApp<input type="tel" id="igTel" placeholder="(19) 99999-9999"></label>
+    <label class="f">Desconto para os indicados (%)<input type="number" id="igDesc" min="0" max="100" step="0.5" inputmode="decimal"></label>
+    <label class="f ig-parc">Crédito por cliente indicado (R$)<input type="text" id="igValor" inputmode="decimal" placeholder="0,00"></label>
+    <label class="f ig-parc">Início do prazo<input type="date" id="igIni"></label>
+    <label class="f ig-parc">Fim do prazo<input type="date" id="igFim"></label>
+    <label class="f wide ig-parc" style="flex-direction:row;align-items:center;gap:10px"><input type="checkbox" id="igAviso" style="width:22px;height:22px"> Avisar pelo WhatsApp quando um indicado concluir o primeiro serviço</label>
+  </div>
+  <p class="hint ig-parc" style="margin-top:8px">O crédito conta <b>1 vez por cliente</b>, quando a primeira OS dele é concluída dentro do prazo. Ele é descontado na próxima OS do(a) dono(a) e o saldo volta a zero.</p>
+  <p class="hint ig-cond" style="margin-top:8px">O desconto vale <b>em todo serviço</b>, para moradores, síndico e o próprio condomínio, sem prazo.</p>
+  <datalist id="igCliNames"></datalist>
+  <div class="actions"><button class="btn danger" type="button" id="igDel">Excluir grupo</button><span style="flex:1"></span><button class="btn line" data-close>Cancelar</button><button class="btn dark" id="igSave">Salvar grupo</button></div>
+</div></div>
+
 <div class="modal" id="mAsk"><div class="sheet" style="max-width:460px">
   <h3 id="askT"></h3><p id="askP" style="color:var(--muted);margin:6px 0 0"></p>
   <div class="actions"><button class="btn line" data-close>Cancelar</button><button class="btn dark" id="askOk">Confirmar</button></div>
@@ -2214,6 +2249,24 @@ document.addEventListener("click",e=>{const b=e.target.closest(".pixwa");if(!b)r
   window.open(waLink(n,msg),waTarget());b.dataset.step="2";b.textContent="💬 2º passo: enviar o código Pix";toast("Agora toque de novo para enviar o código sozinho, fácil de copiar.")});
 document.addEventListener("click",async e=>{const b=e.target.closest(".pixcopy");if(!b)return;const c=b.closest(".pixwrap").querySelector("canvas.pixqr").dataset.code;
   try{await navigator.clipboard.writeText(c);toast("Código Pix copiado. Cole no WhatsApp do cliente.")}catch(_){prompt("Copie o código Pix:",c)}});
+async function avisarParceiro(g,c){const cr=gCreditos(g);const primeiro=(String(g.donoNome||"").split(" ")[0])||"";
+  const msg="Oi"+(primeiro?", "+primeiro:"")+"! Aqui é da "+(cfg.nome||"Boreal Clima")+". 😊\n\n"+c.cliNome+", que você indicou, acabou de fechar um serviço com a gente. Muito obrigado pela indicação!\n\nSeu crédito agora é de *R$ "+fmt(cr.saldo)+"*, para usar no seu próximo serviço.";
+  if(!(await ask("Avisar "+(g.donoNome||g.nome)+"?","É o primeiro serviço de "+c.cliNome+", indicado(a) por "+g.nome+". O WhatsApp vai abrir com a mensagem pronta:\n\n"+msg.replace(/\*/g,""),"Abrir WhatsApp")))return;
+  window.open(waLink(waNum(g.tel),msg),waTarget());c.indAvisado=Date.now();c.atualizadoEm=Date.now();await DB.put("clients",c)}
+function grupos(){return Array.isArray(cfg.indGrupos)?cfg.indGrupos:[]}
+function grupoBy(id){return id?grupos().find(g=>g.id===id):null}
+function gAtivo(g,dt){if(!g)return false;if(g.tipo==="cond")return true;dt=dt||today();return(!g.ini||dt>=g.ini)&&(!g.fim||dt<=g.fim)}
+function gVencido(g){return g&&g.tipo==="parc"&&!!g.fim&&today()>g.fim}
+function grupoDono(key){return grupos().find(g=>g.tipo==="parc"&&g.dono&&g.dono===key)||null}
+function gMembros(g){return clients.filter(c=>c.grupo===g.id&&c.key!==g.dono)}
+function gCreditos(g,exceptId){if(!g||g.tipo!=="parc")return{saldo:0,ganho:0,usado:0,lista:[]};const v=parseMoney(g.valor);const lista=[];
+  gMembros(g).forEach(c=>{const os=docs.filter(d=>d.cli===c.key&&osDone(d)).map(d=>String(((d.payload||{}).f||{}).data||d.data||"")).sort();if(os.length&&gAtivo(g,os[0]))lista.push({c,data:os[0]})});
+  const ganho=r2(lista.length*v),usado=r2(docs.filter(d=>d.type==="os"&&d.cli===g.dono&&d.id!==exceptId&&osDone(d)).reduce((t,d)=>t+parseMoney(((d.payload||{}).f||{}).credUsado),0));
+  return{ganho,usado,saldo:Math.max(0,r2(ganho-usado)),lista,v}}
+function igOpts(sel,cur){if(!sel)return;const v=cur!=null?cur:sel.value;const gs=grupos();
+  sel.innerHTML='<option value="">— Nenhum —</option>'+gs.map(g=>'<option value="'+esc(g.id)+'">'+esc(g.nome)+(g.tipo==="cond"?" (condomínio)":" (parceiro)")+(gVencido(g)?" · prazo vencido":"")+"</option>").join("");
+  if(v&&!gs.find(g=>g.id===v)){const o=document.createElement("option");o.value=v;o.textContent="(grupo excluído)";sel.appendChild(o)}sel.value=v||""}
+async function saveCfgGrupos(){cfg.atualizadoEm=Date.now();LS.set("boreal_cfg",cfg);await DB.mark("cfg","main")}
 function taxasCfg(){const t=cfg.taxas||{};return{deb:Number(t.deb)||0,c:Array.from({length:12},(_,i)=>Number((t.c||[])[i])||0)}}
 function comTaxa(v,pct){return pct>0&&pct<100?r2(v/(1-pct/100)):r2(v)}
 const pctFmt=v=>String(r2(v)).replace(".",",");
@@ -2432,7 +2485,16 @@ function FormCtl(type){
     const cs=r.dataset.custo;return{nome:g("nome"),qtd:qv,preco:p,sub:qv*p,custo:cs!=null&&cs!==""?Number(cs):null}}).filter(m=>m.nome||m.preco)}
   function recalc(){let t=0;qq(".mrow").forEach(r=>{const qv=Number(String(r.querySelector('[data-m=qtd]').value||"1").replace(",","."))||0;const p=parseMoney(r.querySelector('[data-m=preco]').value);
     const s=qv*p;t+=s;r.querySelector(".sub").textContent="R$ "+fmt(s)});const mo=parseMoney(q('[data-k="valor"]').value);
-    q(".matTotal").textContent="R$ "+fmt(t);q(".totMat").textContent="R$ "+fmt(t);q(".totMo").textContent="R$ "+fmt(mo);q(".totGeral").textContent="R$ "+fmt(t+mo);cardUI(r2(t+mo));return t+mo}
+    q(".matTotal").textContent="R$ "+fmt(t);q(".totMat").textContent="R$ "+fmt(t);q(".totMo").textContent="R$ "+fmt(mo);const sub=r2(t+mo),dt=(q('[data-k="data"]')||{}).value||today();
+    const ip=q('[data-k=indPor]');if(ip&&ip.options.length!==grupos().length+1+(ip.value&&!grupoBy(ip.value)?1:0))igOpts(ip);
+    const gid=ip?ip.value:"",g=grupoBy(gid),pct=g&&gAtivo(g,dt)?(Number(g.desc)||0):0,dv=r2(sub*pct/100);
+    let cred=0;const gd=isOS?grupoDono(norm((q('[data-k="cliNome"]')||{}).value||"")):null;if(gd)cred=Math.min(gCreditos(gd,st.docId).saldo,r2(sub-dv));cred=Math.max(0,r2(cred));
+    const sv=(k,v)=>{const e=q('[data-k='+k+']');if(e)e.value=v};sv("descPct",pct?String(pct):"");sv("descVal",dv?fmt(dv):"");sv("credUsado",cred?fmt(cred):"");sv("indNome",g?g.nome:(gid?(q('[data-k=indNome]')||{}).value||"":""));
+    const tot=r2(sub-dv-cred),w=q(".totDescW");if(w){w.hidden=!(dv||cred);q(".totDescL").textContent=[dv?"Desconto indicação "+pctFmt(pct)+"%":"",cred?"Crédito de indicações":""].filter(Boolean).join(" + ");q(".totDesc").textContent="− R$ "+fmt(r2(dv+cred))}
+    q(".totGeral").textContent="R$ "+fmt(tot);const nt=q(".ignote");if(nt)nt.remove();
+    if(gd){const cr=gCreditos(gd,st.docId);const el=document.createElement("p");el.className="hint ignote";el.style.marginTop="8px";el.innerHTML="🤝 <b>"+esc(gd.nome)+"</b>: crédito de indicações disponível <b>R$ "+fmt(cr.saldo)+"</b>"+(cred?", descontado nesta OS.":isOS?".":". Ele é descontado na OS.");q(".totbox").after(el)}
+    else if(!isOS&&grupoDono(norm((q('[data-k="cliNome"]')||{}).value||""))){}
+    cardUI(tot);return tot}
   function cardUI(tot){const box=q(".cardbox");if(!box)return;
     if(isOS){const g=k=>q('[data-k='+k+']').value;const f={pgto:g("pgto"),parcelas:g("parcelas"),juros:g("juros")};const cred=f.pgto==="Cartão de crédito",card=/^Cartão/.test(f.pgto);
       qq(".cc-only").forEach(e=>e.hidden=!cred);q('[data-k=taxaPct]').value=card?String(cardPct(f)):"";f.taxaPct=q('[data-k=taxaPct]').value;
@@ -2447,7 +2509,7 @@ function FormCtl(type){
     if(q('[data-k=mostraCartao]').value!=="sim"||tot<=0){box.hidden=true;return}
     const rows=parcelTable(tot);box.hidden=false;
     box.innerHTML='<b>Como vai aparecer no PDF</b><table>'+rows.map(r=>'<tr><td>'+r[0]+'</td><td>'+(r[2]?'<small>'+r[2]+'</small>':'')+'</td><td>R$ '+fmt(r[1])+'</td></tr>').join("")+'</table>'+(rows.length<4?'<span class="warn">Coloque as taxas de 2x a 12x em Financeiro → Taxas da maquininha para mostrar as parcelas.</span>':'<small>De 2x em diante, o valor já inclui a taxa da maquininha.</small>')}
-  ["pgto","parcelas","juros","mostraCartao"].forEach(k=>{const e=q('[data-k='+k+']');if(e)e.addEventListener("change",()=>{recalc();saveDraft()})});
+  ["pgto","parcelas","juros","mostraCartao","indPor","data"].forEach(k=>{const e=q('[data-k='+k+']');if(e)e.addEventListener("change",()=>{recalc();saveDraft()})});
   q(".addMat").onclick=()=>{const el=addMat();saveDraft();el.querySelector("[data-m=nome]").focus()};
   q(".addGrp").onclick=()=>openGroupPicker(api);
   function addGroup(g){qq(".mrow").forEach(r=>{const v=k=>r.querySelector('[data-m='+k+']').value.trim();if(!v("nome")&&!v("preco"))r.remove()});
@@ -2502,8 +2564,8 @@ function FormCtl(type){
   const nameIn=q('[data-k="cliNome"]'),cliSug=q(".cliSug"),note=q(".matchnote");
   function clientMatch(){const k=norm(nameIn.value);const c=k&&clients.find(c=>c.key===k);
     note.textContent=c?"✓ Cliente já cadastrado: "+(isOS?"esta OS":"este orçamento")+" vai para a ficha dele(a)":(k?"Cliente novo: entra no cadastro quando você gerar o PDF":"");
-    note.style.color=c?"var(--ok)":"var(--muted)"}
-  function fillClient(c){CLI_KEYS.forEach(k=>setField(k,c[k]||""));if(isOS&&!c.cliAnt)setField("cliAnt","Sim");cliSug.classList.remove("open");clientMatch();saveDraft()}
+    note.style.color=c?"var(--ok)":"var(--muted)";const ip=q('[data-k=indPor]');if(c&&ip&&!ip.value&&c.grupo&&grupoBy(c.grupo)){igOpts(ip);ip.value=c.grupo;recalc()}}
+  function fillClient(c){CLI_KEYS.forEach(k=>setField(k,c[k]||""));if(c.grupo&&grupoBy(c.grupo)){igOpts(q('[data-k=indPor]'));setField("indPor",c.grupo)}recalc();if(isOS&&!c.cliAnt)setField("cliAnt","Sim");cliSug.classList.remove("open");clientMatch();saveDraft()}
   function showCliSug(){const n=norm(nameIn.value);if(!n){cliSug.classList.remove("open");return}
     const list=clients.filter(c=>c.key.includes(n)&&c.key!==n).slice(0,6);if(!list.length){cliSug.classList.remove("open");return}
     cliSug.innerHTML="";list.forEach(c=>{const b=document.createElement("button");b.type="button";b.innerHTML=esc(c.cliNome)+"<span>"+esc([c.cliTel,c.cliCidade].filter(Boolean).join(" · ")||"Cliente cadastrado")+"</span>";
@@ -2530,7 +2592,7 @@ function FormCtl(type){
   root.addEventListener("change",e=>{if(e.target.matches("[data-k],[data-e],[data-m]"))saveDraft()});
 
   function applyData(d){
-    qq("[data-k]").forEach(i=>{i.tagName==="SELECT"?i.selectedIndex=0:i.value=""});
+    qq("[data-k]").forEach(i=>{i.tagName==="SELECT"?i.selectedIndex=0:i.value=""});igOpts(q('[data-k=indPor]'),(d.f||{}).indPor||"");
     Object.entries(d.f||{}).forEach(([k,v])=>setField(k,v));
     q(".eqList").innerHTML="";(d.eq&&d.eq.length?d.eq:[{}]).forEach(addEquip);
     q(".matList").innerHTML="";(d.mats&&d.mats.length?d.mats:[{}]).forEach(addMat);
@@ -2578,9 +2640,11 @@ function FormCtl(type){
     refOrc:st.refOrc,refOrcId:st.refOrcId,docId:st.docId,assinadoEm:st.assinadoEm,criadoEm:st.criadoEm}}
 
   async function record(D){
-    const key=norm(D.f.cliNome);await upsertClient(D.f);
+    const key=norm(D.f.cliNome);const cRec=await upsertClient(D.f);
     const id=st.docId||uid();const ex=docs.find(x=>x.id===id);
-    const total=D.mats.reduce((s,m)=>s+m.sub,0)+parseMoney(D.f.valor);
+    const total=r2(D.mats.reduce((s,m)=>s+m.sub,0)+parseMoney(D.f.valor)-parseMoney(D.f.descVal)-parseMoney(D.f.credUsado));
+    const cl0=clients.find(c=>c.key===key);const prevOS=cl0?docs.filter(d=>d.cli===key&&osDone(d)&&d.id!==(st.docId||"")).length:0;
+    if(D.f.indPor&&grupoBy(D.f.indPor)){const g=grupoBy(D.f.indPor);const c=cRec||clients.find(x=>x.key===key);if(c&&c.grupo!==D.f.indPor&&c.key!==g.dono){c.grupo=D.f.indPor;c.atualizadoEm=Date.now();await DB.put("clients",c)}}
     D.docId=id;D.criadoEm=D.criadoEm||Date.now();
     const rec={id,type,num:st.num,cli:key,cliNome:D.f.cliNome,data:D.f.data||today(),total,svc:D.svc,
       status:isOS?(D.f.pgSit||""):((ex&&ex.status==="aprovado")||D.refAg?"aprovado":"pendente"),osNum:ex?ex.osNum:null,refOrc:D.refOrc||null,refOrcId:D.refOrcId||null,
@@ -2589,7 +2653,9 @@ function FormCtl(type){
     if(!isOS&&D.refAg){const a=agenda.find(x=>x.id===D.refAg);if(a&&a.orcId!==id){a.orcId=id;a.orcNum=st.num;a.atualizadoEm=Date.now();await DB.put("agenda",a)}}
     if(isOS&&D.refAg){const a=agenda.find(x=>x.id===D.refAg);if(a){a.status="feito";a.osNum=st.num;a.osId=id;a.atualizadoEm=Date.now();await DB.put("agenda",a)}}
     if(isOS&&D.refOrcId){const o=docs.find(x=>x.id===D.refOrcId);if(o){o.status="aprovado";o.osNum=st.num;o.atualizadoEm=Date.now();await DB.put("docs",o)}}
-    st.docId=id;st.numFixed=true;st.criadoEm=D.criadoEm;st.dirty=false;flush();refreshTexts();await refresh();return rec}
+    st.docId=id;st.numFixed=true;st.criadoEm=D.criadoEm;st.dirty=false;flush();refreshTexts();await refresh();
+    if(isOS&&D.sigCli&&!prevOS){const c=clients.find(x=>x.key===key),g=c&&grupoBy(c.grupo);if(g&&g.tipo==="parc"&&g.aviso&&waNum(g.tel)&&gAtivo(g,D.f.data||today())&&c.key!==g.dono&&!c.indAvisado)setTimeout(()=>avisarParceiro(g,c),700)}
+    return rec}
 
   async function generate(){
     const f=collect();root.querySelectorAll(".invalid").forEach(e=>e.classList.remove("invalid"));
@@ -2692,10 +2758,11 @@ function pdfMats(d,mats){let matTot=0;if(!mats.length)return 0;d.section("Peças
     [String(m.qtd).replace(".",","),"R$ "+fmt(m.preco),"R$ "+fmt(m.sub)].forEach((v,k)=>{const w=cols[k+1][1];d.text(v,x+w-14,d.y+10,k===2?"700":"500",21,C.text,"right");x+=w});
     d.y+=h;d.g.fillStyle=C.line;d.g.fillRect(MX,d.y,CW,1.5)});
   d.ensure(60);d.y+=12;d.text("Total de materiais",PW-MX-260,d.y+4,"600",20,C.muted,"right");d.text("R$ "+fmt(matTot),PW-MX-14,d.y,"800",26,C.navy,"right");d.y+=64;return matTot}
-function pdfTotals(d,mo,matTot){const tot=mo+matTot;if(tot<=0)return;d.ensure(130);const n=matTot>0&&mo>0?3:1,gap=14,bw=(CW-gap*(n-1))/n;
-  const boxes=n===3?[["Mão de obra",mo],["Peças e materiais",matTot],["Total geral",tot]]:[["Total geral",tot]];
+function pdfTotals(d,mo,matTot,desc){desc=r2(desc||0);const sub=mo+matTot;if(sub<=0)return;const tot=r2(sub-desc);d.ensure(130);
+  const boxes=[];if(matTot>0&&mo>0){boxes.push(["Mão de obra",mo],["Peças e materiais",matTot])}else if(desc>0)boxes.push(["Valor do serviço",sub]);if(desc>0)boxes.push(["Desconto",-desc]);boxes.push(["Total geral",tot]);
+  const n=boxes.length,gap=14,bw=(CW-gap*(n-1))/n,fs=n>3?28:34;
   boxes.forEach((b,i)=>{const x=MX+i*(bw+gap),big=i===boxes.length-1;d.g.fillStyle=big?C.navy:C.ice;d.rr(x,d.y,bw,96,12);d.g.fill();
-    d.text(b[0].toUpperCase(),x+20,d.y+16,"700",16,big?"rgba(255,255,255,.75)":C.muted);d.text("R$ "+fmt(b[1]),x+20,d.y+44,"800",34,big?"#fff":C.navy)});d.y+=124}
+    d.text(b[0].toUpperCase(),x+20,d.y+16,"700",16,big?"rgba(255,255,255,.75)":C.muted);d.text((b[1]<0?"− ":"")+"R$ "+fmt(Math.abs(b[1])),x+20,d.y+44,"800",fs,big?"#fff":(b[1]<0?"#B42318":C.navy))});d.y+=124}
 function pdfSigs(d,blocks){const sw=(CW-60)/2,sh=170;
   blocks.forEach((b,k)=>{const x=MX+k*(sw+60);if(b.img){const s=Math.min((sw-20)/b.img.width,(sh-10)/b.img.height,1.4);const w=b.img.width*s,h=b.img.height*s;d.g.drawImage(b.img,x+(sw-w)/2,d.y+sh-h,w,h)}
     d.g.fillStyle=C.text;d.g.fillRect(x,d.y+sh+8,sw,2);d.text(b.name||"",x+sw/2,d.y+sh+22,"700",21,C.text,"center");
@@ -2747,8 +2814,10 @@ async function renderPDF(D){
     [["Problemas encontrados / serviço executado",f.obs],["Recomendações ao cliente",f.recom]].forEach(([t,v])=>{if(!v)return;d.ensure(70);d.text(t.toUpperCase(),MX,d.y,"700",16,C.muted);d.y+=30;d.para(v,22);d.y+=14})}
 
   d.section(isOS?"Valores e garantia":"Valores");
-  pdfTotals(d,parseMoney(f.valor),matTot);
-  const totDoc=r2(parseMoney(f.valor)+matTot),ciP=isOS?cardInfo(f,totDoc):null;
+  const dscV=parseMoney(f.descVal),crV=parseMoney(f.credUsado);
+  pdfTotals(d,parseMoney(f.valor),matTot,dscV+crV);
+  if(dscV||crV)d.fields([dscV?["Desconto por indicação",(f.indNome||"Indicação")+" · "+pctFmt(Number(f.descPct)||0)+"% = R$ "+fmt(dscV)]:null,crV?["Crédito de indicações usado","R$ "+fmt(crV)]:null].filter(Boolean),2);
+  const totDoc=r2(parseMoney(f.valor)+matTot-dscV-crV),ciP=isOS?cardInfo(f,totDoc):null;
   if(ciP&&ciP.cli)d.fields([["Total no cartão (com juros da maquininha)","R$ "+fmt(ciP.total)],["Parcelamento",ciP.n>1?ciP.n+"x de R$ "+fmt(ciP.parc):"À vista"]],2);
   if(!isOS&&f.mostraCartao==="sim"&&totDoc>0){const rows=parcelTable(totDoc),rh=40;d.ensure(70+rows.length*rh);
     d.text("FORMAS DE PAGAMENTO",MX,d.y,"700",16,C.blue);d.y+=30;
@@ -2914,7 +2983,8 @@ function renderList(){renderAgHoje();const lw=$("#cliListView .legwrap");if(lw&&
     .sort((a,b)=>(b.s.last||b.c.atualizadoEm||0)-(a.s.last||a.c.atualizadoEm||0));
   const dueN=clients.filter(c=>stats(c.key).due).length;if(!dueN&&listFilter==="due")listFilter="all";
   $("#cliFilt").innerHTML=dueN?'<button class="chip" type="button" data-lf="all" aria-pressed="'+(listFilter==="all")+'">Todos</button><button class="chip" type="button" data-lf="due" aria-pressed="'+(listFilter==="due")+'" style="'+(listFilter==="due"?"background:#B98B00;border-color:#B98B00":"border-color:#EBC94F;background:#FFF4C7")+'">⚠ 6+ meses sem serviço ('+dueN+")</button>":"";
-  const shown=listFilter==="due"?list.filter(x=>x.s.due):list;
+  renderGrupos(n);const inG=new Set(n?[]:grupos().flatMap(g=>gMembros(g).map(c=>c.key)));
+  const shown=(listFilter==="due"?list.filter(x=>x.s.due):list).filter(x=>!inG.has(x.c.key));
   const pend=docs.filter(d=>d.type==="orc"&&d.status==="pendente"&&!isExpired(d)).length;
   $("#cliStats").innerHTML='<div>Clientes<b>'+clients.length+'</b></div><div>Ordens de serviço<b>'+docs.filter(d=>d.type==="os").length+'</b></div><div>Orçamentos em aberto<b>'+pend+"</b></div>";
   if(!clients.length){$("#cliList").innerHTML='<div class="empty"><b>Nenhum cliente ainda</b>Os clientes entram aqui sozinhos quando você gera um orçamento ou uma OS. Também dá para cadastrar em <b style="display:inline;font-size:inherit">+ Novo cliente</b>.</div>';return}
@@ -2924,6 +2994,41 @@ function renderList(){renderAgHoje();const lw=$("#cliListView .legwrap");if(lw&&
     (s.os.length?'<span class="pill os">'+s.os.length+" OS</span>":"")+(s.orc.length?'<span class="pill orc">'+s.orc.length+" orç.</span>":"")+'</div><span class="sm">'+(s.last?"Último: "+new Date(s.last).toLocaleDateString("pt-BR"):"Sem documentos")+"</span></div></div>").join("");
 }
 $("#cliSearch").addEventListener("input",renderList);
+let igOpen=new Set();
+function renderGrupos(n){const el=$("#igList");if(!el)return;const gs=grupos();
+  const head='<div class="igsec"><h3>🤝 Grupos de indicação'+(isFunc()?"":'<button class="btn ghost small" type="button" id="igNew">+ Novo grupo</button>')+'</h3>';
+  if(!gs.length){el.innerHTML=isFunc()?"":head+'<p class="hint" style="margin:0">Crie um grupo para um parceiro (salão, loja…) ou um condomínio. Os clientes indicados ficam na pasta dele.</p></div>';return}
+  el.innerHTML=head+gs.map(g=>{const ms=gMembros(g),cr=gCreditos(g),venc=gVencido(g),dono=clients.find(c=>c.key===g.dono);
+    const info=g.tipo==="cond"?(Number(g.desc)||0)+"% de desconto · sem prazo":"Crédito <b>R$ "+fmt(cr.saldo)+"</b>"+(Number(g.desc)?" · indicados "+pctFmt(Number(g.desc))+"%":"")+(g.fim?' · <span class="'+(venc?"venc-t":"")+'">'+(venc?"prazo vencido em ":"até ")+br(g.fim)+"</span>":"");
+    return'<details class="igc'+(g.tipo==="cond"?" cond":"")+(venc?" venc":"")+'" data-ig="'+esc(g.id)+'"'+(igOpen.has(g.id)?" open":"")+'><summary><span style="font-size:22px">'+(g.tipo==="cond"?"🏢":"🏪")+'</span><span class="ign">'+esc(g.nome)+'<br><span class="igs">'+info+'</span></span><span class="igtag'+(g.tipo==="cond"?" cond":"")+'">'+ms.length+" cliente"+(ms.length===1?"":"s")+'</span></summary><div class="igb">'+
+      '<div class="igs">'+(g.tipo==="cond"?"Síndico / responsável":"Dono(a)")+': <b>'+esc(g.donoNome||"—")+"</b>"+(g.tel?" · "+esc(g.tel):"")+(g.ini||g.fim?" · prazo "+(g.ini?br(g.ini):"…")+" a "+(g.fim?br(g.fim):"…"):"")+(g.tipo==="parc"&&cr.v?" · R$ "+fmt(cr.v)+" por cliente":"")+(g.tipo==="parc"?" · aviso no WhatsApp "+(g.aviso?"ligado":"desligado"):"")+"</div>"+
+      (g.tipo==="parc"?'<div class="igs" style="margin-top:6px">Créditos: ganhou R$ '+fmt(cr.ganho)+" ("+cr.lista.length+" cliente"+(cr.lista.length===1?"":"s")+" com OS concluída) · usou R$ "+fmt(cr.usado)+" · <b>saldo R$ "+fmt(cr.saldo)+"</b></div>":"")+
+      (dono?'<div class="igm" data-cli="'+esc(dono.key)+'"><span>⭐ '+esc(dono.cliNome)+'</span><span class="igs">'+(g.tipo==="cond"?"síndico":"dono(a) · ganha o crédito")+"</span></div>":"")+
+      (ms.length?ms.map(c=>{const ok=cr.lista.find(x=>x.c.key===c.key);return'<div class="igm" data-cli="'+esc(c.key)+'"><span>'+esc(c.cliNome)+'</span><span class="igs">'+(g.tipo==="parc"?(ok?"✓ crédito em "+br(ok.data):"aguardando 1ª OS concluída"):esc(c.cliTel||""))+"</span></div>"}).join(""):'<p class="hint">Nenhum cliente indicado ainda. No orçamento ou na OS, escolha este grupo em <b>Indicado por</b>.</p>')+
+      (isFunc()?"":'<div style="margin-top:10px"><button class="btn line small" type="button" data-igedit="'+esc(g.id)+'">✎ Editar grupo</button></div>')+"</div></details>"}).join("")+"</div>"}
+$("#igList").addEventListener("toggle",e=>{const d=e.target.closest&&e.target.closest("[data-ig]");if(d){d.open?igOpen.add(d.dataset.ig):igOpen.delete(d.dataset.ig)}},true);
+$("#igList").addEventListener("click",e=>{if(e.target.closest("#igNew"))return openIg(null);const ed=e.target.closest("[data-igedit]");if(ed)return openIg(grupoBy(ed.dataset.igedit));
+  const m=e.target.closest(".igm[data-cli]");if(m){cliView=m.dataset.cli;docFilter="all";renderDetail();window.scrollTo(0,0)}});
+let igEdit=null;
+function igTipoUI(){const t=$("#igTipo").value;$$("#mIg .ig-parc").forEach(e=>e.hidden=t!=="parc");$$("#mIg .ig-cond").forEach(e=>e.hidden=t!=="cond");$("#mIg .igl-dono").textContent=t==="cond"?"Síndico / responsável":"Dono(a) / quem indica"}
+function openIg(g){igEdit=g;$("#igT").textContent=g?"Editar grupo":"Novo grupo de indicação";$("#igCliNames").innerHTML=clients.map(c=>'<option value="'+esc(c.cliNome)+'">').join("");
+  $("#igTipo").value=g?g.tipo:"parc";$("#igNome").value=g?g.nome:"";$("#igDono").value=g?(g.donoNome||""):"";$("#igTel").value=g?(g.tel||""):"";$("#igDesc").value=g&&g.desc?g.desc:"";
+  $("#igValor").value=g&&g.valor?fmt(parseMoney(g.valor)):"";$("#igIni").value=g?(g.ini||""):today();$("#igFim").value=g?(g.fim||""):"";$("#igAviso").checked=g?!!g.aviso:false;$("#igDel").hidden=!g;igTipoUI();openM("#mIg")}
+$("#igTipo").addEventListener("change",igTipoUI);
+$("#igDono").addEventListener("change",()=>{const c=clients.find(x=>x.key===norm($("#igDono").value));if(c){$("#igDono").value=c.cliNome;if(!$("#igTel").value&&c.cliTel)$("#igTel").value=c.cliTel}});
+$("#igValor").addEventListener("blur",e=>{if(e.target.value.trim())e.target.value=fmt(parseMoney(e.target.value))});
+$("#igSave").onclick=async()=>{const nome=$("#igNome").value.trim(),dn=$("#igDono").value.trim(),tipo=$("#igTipo").value;
+  if(!nome){toast("Coloque o nome do grupo");return}if(!dn){toast(tipo==="cond"?"Coloque o nome do síndico ou responsável":"Coloque o nome do(a) dono(a)");return}
+  const ini=$("#igIni").value,fim=$("#igFim").value;if(tipo==="parc"&&ini&&fim&&fim<ini){toast("O fim do prazo está antes do início");return}
+  const g=Object.assign({},igEdit||{id:uid(),criadoEm:Date.now()},{tipo,nome,donoNome:dn,dono:norm(dn),tel:$("#igTel").value.trim(),desc:Number($("#igDesc").value)||0,
+    valor:tipo==="parc"?fmt(parseMoney($("#igValor").value)):"",ini:tipo==="parc"?ini:"",fim:tipo==="parc"?fim:"",aviso:tipo==="parc"&&$("#igAviso").checked,atualizadoEm:Date.now()});
+  cfg.indGrupos=grupos().filter(x=>x.id!==g.id).concat([g]);await saveCfgGrupos();
+  await upsertClient({cliNome:dn,cliTel:g.tel});await refresh();
+  if(tipo==="cond"){const c=clients.find(x=>x.key===g.dono);if(c&&c.grupo!==g.id){c.grupo=g.id;c.atualizadoEm=Date.now();await DB.put("clients",c);await refresh()}}
+  igOpen.add(g.id);closeM($("#mIg"));renderList();toast("Grupo salvo")};
+$("#igDel").onclick=async()=>{const g=igEdit;if(!g)return;const ms=clients.filter(c=>c.grupo===g.id);
+  if(!(await ask("Excluir o grupo "+g.nome+"?",ms.length+" cliente"+(ms.length===1?"":"s")+" volta"+(ms.length===1?"":"m")+" para a lista normal, com todos os orçamentos e OS. "+(g.tipo==="parc"?"O crédito acumulado é perdido. ":"")+"Os documentos já feitos não mudam.","Excluir grupo")))return;
+  for(const c of ms){c.grupo="";c.atualizadoEm=Date.now();await DB.put("clients",c)}cfg.indGrupos=grupos().filter(x=>x.id!==g.id);await saveCfgGrupos();closeM($("#mIg"));await refresh();renderList();toast("Grupo excluído")};
 $("#cliFilt").addEventListener("click",e=>{const b=e.target.closest("[data-lf]");if(!b)return;listFilter=b.dataset.lf;renderList()});
 $("#agHoje").addEventListener("click",e=>{if(e.target.closest("[data-goag]"))showTab("ag")});
 $("#cliList").addEventListener("click",e=>{const r=e.target.closest("[data-remind]");if(r){e.stopPropagation();sendReminder(r.dataset.remind);return}const b=e.target.closest("[data-cli]");if(!b)return;cliView=b.dataset.cli;docFilter="all";renderDetail();window.scrollTo(0,0)});
@@ -2932,7 +3037,7 @@ function renderDetail(){
   const c=clients.find(x=>x.key===cliView);if(!c){cliView=null;renderList();return}
   $("#cliListView").hidden=true;const box=$("#cliDetail");box.hidden=false;
   const s=stats(c.key);const fat=s.os.reduce((t,d)=>t+(d.total||0),0);
-  const kv=[["CPF / CNPJ",c.cliDoc],["WhatsApp / Celular",c.cliTel],["E-mail",c.cliEmail],["Endereço",[c.cliEnd,c.cliBairro].filter(Boolean).join(" – ")],["Cidade / UF",[c.cliCidade,c.cliUf].filter(Boolean).join(" / ")],["CEP",c.cliCep],["Indicação",c.cliRef]].filter(x=>x[1]);
+  const kv=[["CPF / CNPJ",c.cliDoc],["WhatsApp / Celular",c.cliTel],["E-mail",c.cliEmail],["Endereço",[c.cliEnd,c.cliBairro].filter(Boolean).join(" – ")],["Cidade / UF",[c.cliCidade,c.cliUf].filter(Boolean).join(" / ")],["CEP",c.cliCep],["Indicação",c.cliRef],["Grupo de indicação",(grupoBy(c.grupo)||{}).nome],["Crédito de indicações",grupoDono(c.key)?"R$ "+fmt(gCreditos(grupoDono(c.key)).saldo)+" ("+grupoDono(c.key).nome+")":""]].filter(x=>x[1]);
   const list=s.ds.filter(d=>docFilter==="all"||d.type===docFilter).sort((a,b)=>(b.data||"").localeCompare(a.data||"")||(b.atualizadoEm||0)-(a.atualizadoEm||0));
   box.innerHTML='<button class="back" type="button" data-act="back">← Todos os clientes</button>'+
   (s.due?'<div class="duebanner">⚠ O último serviço foi em '+br(s.lastOS)+' (há '+s.mo+' meses). Bom momento para oferecer uma manutenção.<div style="margin-top:10px"><button class="btn wa small" type="button" data-act="remind">📲 Enviar lembrete de manutenção</button></div></div>':"")+
@@ -2996,7 +3101,7 @@ async function redoOrc(d){const C2=ctl.orc;
 async function convertToOS(orc,ag){
   const o=ctl.os,P=orc.payload||{},pf=P.f||{};
   if(o.hasUnsaved()&&!(await ask("Substituir a OS que está na tela?","A OS em andamento ainda não foi gerada e será descartada para abrir o orçamento Nº "+pad(orc.num,4)+".","Substituir")))return;
-  const f={};CLI_KEYS.forEach(k=>{if(pf[k])f[k]=pf[k]});f.cliAnt="Sim";if(pf.valor)f.valor=fmt(parseMoney(pf.valor));if(pf.garantia)f.garantia=pf.garantia;if(pf.tecnico)f.tecnico=pf.tecnico;if(ag&&ag.hora)f.hIni=ag.hora;
+  const f={};CLI_KEYS.forEach(k=>{if(pf[k])f[k]=pf[k]});f.cliAnt="Sim";if(pf.valor)f.valor=fmt(parseMoney(pf.valor));if(pf.garantia)f.garantia=pf.garantia;if(pf.tecnico)f.tecnico=pf.tecnico;if(ag&&ag.hora)f.hIni=ag.hora;if(pf.indPor)f.indPor=pf.indPor;
   const mats=(P.mats||[]).map(m=>({nome:m.nome,qtd:m.qtd,preco:typeof m.preco==="number"?m.preco:parseMoney(m.preco),custo:m.custo}));
   o.fresh({f,eq:(P.eq||[]).map(e=>Object.assign({},e)),svc:(P.svc||[]).slice(),mats,refOrc:orc.num,refOrcId:orc.id,refAg:ag?ag.id:null,contrato:ag&&ag.contratoId?((contratos.find(x=>x.id===ag.contratoId)||{}).nome||ag.ctNome||"Contrato"):null,num:orc.num,numFixed:true,sigTec:cfg.sig||P.sigTec||""});
   orc.status="aprovado";orc.osNum=o.st.num;orc.atualizadoEm=Date.now();await DB.put("docs",orc);await refresh();
@@ -3006,7 +3111,7 @@ async function convertToOS(orc,ag){
 /* client modal */
 let editingKey=null;
 function openClientModal(c){editingKey=c?c.key:null;$("#cliMT").textContent=c?"Editar cliente":"Novo cliente";
-  $$("[data-cl]").forEach(i=>{i.value=c?(c[i.dataset.cl]||""):"";i.classList.remove("invalid")});openM("#mCli");setTimeout(()=>{if(!c)$("#cliMNome").focus()},50)}
+  igOpts($('#mCli [data-cl=grupo]'),c?(c.grupo||""):"");$$("[data-cl]").forEach(i=>{i.value=c?(c[i.dataset.cl]||""):"";i.classList.remove("invalid")});openM("#mCli");setTimeout(()=>{if(!c)$("#cliMNome").focus()},50)}
 $("#cliNewBtn").onclick=()=>openClientModal(null);
 $("#cliMSave").onclick=async()=>{
   const o={};$$("[data-cl]").forEach(i=>o[i.dataset.cl]=i.value.trim());if(o.cliUf)o.cliUf=o.cliUf.toUpperCase();
@@ -3089,8 +3194,8 @@ function finOS(d){const P=d.payload||{},f=P.f||{},mg=margem();let custo=0,mk=0,m
   (P.mats||[]).forEach(m=>{const q=Number(m.qtd)||0,p=Number(m.preco)||0;let c=m.custo;
     if(c==null||c===""){const cm=findMat(m.nome);if(cm&&matCusto(cm))c=matCusto(cm);else{c=p/(1+mg/100);est=true}}
     c=Number(c)||0;custo+=c*q;mk+=(p-c)*q;mat+=p*q});
-  const mo=parseMoney(f.valor);const ci=cardInfo(f,r2(mat+mo));
-  return{id:d.id,num:d.num,data:f.data||d.data,cliente:f.cliNome||d.cliNome,pg:f.pgSit||"",svc:(P.svc||[]).join(", "),bruto:r2(mat+mo),custo:r2(custo),markup:r2(mk),mo:r2(mo),taxa:ci?ci.fee:0,est}}
+  const mo=parseMoney(f.valor),dsc=r2(parseMoney(f.descVal)+parseMoney(f.credUsado)),liq=r2(mat+mo-dsc);const ci=cardInfo(f,liq);
+  return{id:d.id,num:d.num,data:f.data||d.data,cliente:f.cliNome||d.cliNome,pg:f.pgSit||"",svc:(P.svc||[]).join(", "),bruto:liq,desc:dsc,custo:r2(custo),markup:r2(mk),mo:r2(mo),taxa:ci?ci.fee:0,est}}
 function finMonthBase(ym){const os=docs.filter(d=>osDone(d)&&osYM(d)===ym).map(finOS).sort((a,b)=>(a.data||"").localeCompare(b.data||"")||(a.num-b.num));
   let bruto=0,custo=0,markup=0;os.forEach(o=>{bruto+=o.bruto;custo+=o.custo;markup+=o.markup});
   const base=bruto-custo-markup,terco=r2(base/3);
@@ -3312,6 +3417,8 @@ $("#agNome").addEventListener("change",()=>{const c=clients.find(x=>x.key===norm
 $("#agNew").onclick=()=>openAg(null);
 $("#agSave").onclick=async()=>{const nome=$("#agNome").value.trim(),data=$("#agData").value;if(!nome){toast("Coloque o nome do cliente");return}if(!data){toast("Escolha a data");return}
   const old=agEdit;const a=Object.assign({},old||{id:uid(),status:"agendado",criadoEm:Date.now()},{cliNome:nome,cli:norm(nome),cliTel:$("#agTel").value.trim(),end:$("#agEnd").value.trim(),data,hora:$("#agHora").value,svc:$("#agSvc").value,obs:$("#agObs").value.trim(),atualizadoEm:Date.now()});
+  if(!old||old.data!==data){const ja=agenda.filter(x=>x.id!==a.id&&x.data===data&&x.status!=="cancelado").sort(byDT);
+    if(ja.length&&!(await ask("Nesse dia você já tem "+ja.length+" serviço"+(ja.length>1?"s":"")+" ("+br(data)+")",ja.map(x=>"• "+(x.hora||"sem horário")+" · "+(x.svc||"Serviço")+" · "+x.cliNome+(x.end?" · "+x.end:"")).join("\n")+"\n\nMarcar mesmo assim?","Marcar mesmo assim")))return}
   if(old&&old.status==="confirmado"&&(old.data!==a.data||old.hora!==a.hora))a.status="agendado";
   if(!old&&agPref&&agPref.orcId){a.orcId=agPref.orcId;a.orcNum=agPref.orcNum;const o=docs.find(x=>x.id===agPref.orcId);if(o&&o.status!=="aprovado"){o.status="aprovado";o.atualizadoEm=Date.now();await DB.put("docs",o)}}
   if(!clients.find(c=>c.key===a.cli))await upsertClient({cliNome:nome,cliTel:a.cliTel,cliEnd:a.end});
@@ -3424,7 +3531,7 @@ function renderPainel(){const cur=ymNow(),months=[];for(let i=11;i>=0;i--)months
   $("#pnGar").innerHTML=gl.length?gl.map(x=>'<div class="nrow"><div class="nic">🛡️</div><div class="ni"><b>'+esc(x.d.cliNome)+"</b><span>OS "+pad(x.d.num,4)+" · "+esc((x.d.svc||[]).join(", "))+'</span></div><div class="nv">vence '+br(x.g.fim)+"</div></div>").join(""):'<p class="hint">Nenhuma garantia vence nos próximos 30 dias.</p>'}
 
 /* equipe */
-function cfgPublico(){return{nome:cfg.nome,cnpj:cfg.cnpj,tel:cfg.tel,email:cfg.email,end:cfg.end,site:cfg.site,logo:cfg.logo,meses:cfg.meses,garantiaPadrao:cfg.garantiaPadrao,googleLink:cfg.googleLink,taxas:cfg.taxas||null,pix:cfg.pix||null,atualizadoEm:cfg.atualizadoEm,
+function cfgPublico(){return{nome:cfg.nome,cnpj:cfg.cnpj,tel:cfg.tel,email:cfg.email,end:cfg.end,site:cfg.site,logo:cfg.logo,meses:cfg.meses,garantiaPadrao:cfg.garantiaPadrao,googleLink:cfg.googleLink,taxas:cfg.taxas||null,pix:cfg.pix||null,indGrupos:grupos(),atualizadoEm:cfg.atualizadoEm,
   materiais:(cfg.materiais||[]).map(m=>({nome:m.nome,cat:m.cat,venda:matVenda(m)})),grupos:(cfg.grupos||[]).map(g=>({nome:g.nome,itens:(g.itens||[]).map(i=>({nome:i.nome,qtd:i.qtd,venda:grpItemVenda(i)}))}))}}
 async function loadTeam(){const el=$("#teamList");if(!sb||!navigator.onLine){el.innerHTML='<p class="hint">Conecte à internet para ver a equipe.</p>';return}
   el.innerHTML='<p class="hint">Carregando…</p>';const {data,error}=await sb.from("membros").select("user_id,email,nome,papel");
@@ -3439,7 +3546,7 @@ $("#teamList").addEventListener("click",async e=>{const b=e.target.closest("[dat
 /* ============================================================
    NUVEM (Supabase): login + sincronização
    ============================================================ */
-const APP_VERSION="Versão 19 · 21/11/2026 · Enviar Pix pelo WhatsApp";
+const APP_VERSION="Versão 20 · 21/11/2026 · Grupos de indicação e aviso de dia ocupado";
 const SB_URL="https://xipiemiyvrwfxosbfpvl.supabase.co",SB_KEY="sb_publishable_RtUvyM---ErVKDlMnonTVg_AEy9yL5I";
 let sb=null,appStarted=false;
 function fnv(s){let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(36)+s.length.toString(36)}
