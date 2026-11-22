@@ -3290,8 +3290,8 @@ function finYMs(upTo){const st=new Set();docs.filter(osDone).forEach(d=>st.add(o
 function dreMes(ym){const os=docs.filter(d=>osDone(d)&&osYM(d)===ym).map(finOS).sort((a,b)=>(a.data||"").localeCompare(b.data||"")||(a.num-b.num));
   const L=lancMes(ym),nf=r2(notas.filter(n=>String(n.data||"").slice(0,7)===ym).reduce((t,n)=>t+(Number(n.valor)||0),0));
   const sum=(arr,f)=>r2(arr.reduce((t,x)=>t+f(x),0));
-  const rb=sum(os,o=>o.bruto+o.desc),jur=sum(os,o=>o.juros||0),desc=sum(os,o=>o.desc),das=mesVal("das",ym);
-  const mat=sum(os,o=>o.custo),tx=sum(os,o=>o.taxa),gs=sum(L.filter(x=>x.tipo==="servico"&&x.fonte==="boreal"),x=>x.valor),rl=r2(rb+jur-desc-das-jur-tx),lb=r2(rl-mat-gs);
+  const rb=sum(os,o=>o.bruto+o.desc+(o.juros||0)),jur=sum(os,o=>o.juros||0),desc=sum(os,o=>o.desc),das=mesVal("das",ym);
+  const mat=sum(os,o=>o.custo),tx=sum(os,o=>o.taxa),gs=sum(L.filter(x=>x.tipo==="servico"&&x.fonte==="boreal"),x=>x.valor),rl=r2(rb-jur-tx-desc-das),lb=r2(rl-mat-gs);
   const FX=fixasMes(ym),fx=sum(FX,x=>x.v),outras=sum(L.filter(x=>x.tipo==="empresa"&&x.fonte==="boreal"),x=>x.valor),dep=mesVal("dep",ym),pro=mesVal("pro",ym);
   const res=r2(lb-fx-outras-dep-pro),rend=mesVal("rend",ym),luc=r2(res+rend);
   os.forEach(o=>{o.gastos=sum(L.filter(x=>x.tipo==="servico"&&x.osId===o.id),x=>x.valor);o.lucro=r2(o.bruto-o.custo-o.taxa-o.gastos)});
@@ -3339,7 +3339,7 @@ function renderFin(){
     '<div><span>🏢 Caixa Boreal (livre)</span><b'+neg(K.bor)+'>'+mR(K.bor)+'<small>saldo</small></b><span class="ln"><span class="in">+ R$ '+fmt(M.bIn)+' entrou</span> · <span class="out">− R$ '+fmt(M.bOut)+" saiu</span></span>"+(M.rend?'<span class="ln">inclui R$ '+fmt(M.rend)+" de rendimento</span>":"")+"</div></div>"+ch;
   const row=(l,v,c,cmp)=>'<div class="'+(c||"")+'"><span>'+l+(cmp!=null&&cmp!==undefined?"<small>"+(cmp>0?"+":"")+cmp+"% vs mês anterior</small>":"")+'</span><span class="'+(c?"":v<0?"neg":"")+'">'+(v<0?"− R$ "+fmt(-v):"R$ "+fmt(v))+"</span></div>";
   const lineN=(l,v)=>v?row(l,-v):"";
-  $("#finDre").innerHTML='<div class="dre">'+row("Receita bruta (OS concluídas)",D.rb,"",pct(D.rb,P.rb))+(D.jur?row("+ Juros da maquininha (pagos pelo cliente)",D.jur):"")+lineN("− Descontos de indicação",D.desc)+row("− DAS (MEI)",-D.das)+lineN("− Juros repassados à maquininha",D.jur)+lineN("− Taxas de cartão (pagas por você)",D.tx)+row("= Receita líquida <small>o que entrou de verdade</small>",D.rl,"sub")+
+  $("#finDre").innerHTML='<div class="dre">'+row("Receita bruta (o que os clientes pagaram)",D.rb,"",pct(D.rb,P.rb))+(D.jur+D.tx?row("− Taxa da maquininha"+(D.jur&&D.tx?"<small>R$ "+fmt(D.jur)+" paga pelo cliente · R$ "+fmt(D.tx)+" paga por você</small>":D.jur?"<small>paga pelo cliente</small>":"<small>paga por você</small>"),-r2(D.jur+D.tx)):"")+lineN("− Descontos de indicação",D.desc)+row("− DAS (MEI)",-D.das)+row("= Receita líquida <small>o que entrou de verdade</small>",D.rl,"sub")+
     row("− Materiais (preço de custo)",-D.mat)+row("− Gastos por serviço",-D.gs)+row("= Lucro bruto",D.lb,"sub")+
     row("− Despesas fixas",-D.fx)+lineN("− Outras despesas da empresa",D.outras)+row("− Depreciação",-D.dep)+row("− Pró-labore",-D.pro)+row("= Resultado do trabalho",D.res,"sub")+
     row("+ Rendimentos financeiros",D.rend)+'<div class="fin'+(D.luc<0?" bad":"")+'"><span>= Lucro líquido · margem '+D.margem+"%"+(pct(D.luc,P.luc)!=null&&P.luc?"<small>"+(pct(D.luc,P.luc)>0?"+":"")+pct(D.luc,P.luc)+"% vs mês anterior</small>":"")+'</span><span>'+(D.luc<0?"− R$ "+fmt(-D.luc):"R$ "+fmt(D.luc))+"</span></div></div>"+
@@ -3490,10 +3490,10 @@ async function renderFinPDF2(r){
   const d=new Doc(meta),D=r.dre,K=r.caixa||{},M=K.mes||{};
   const money=v=>(v<0?"− R$ ":"R$ ")+fmt(Math.abs(v));
   d.section("Resultado do mês (DRE)");
-  const rows=[["Receita bruta (OS concluídas)",D.rb]].concat(D.jur?[["+ Juros da maquininha (pagos pelo cliente)",D.jur]]:[]).concat([["− Descontos de indicação",-D.desc],["− DAS (MEI)",-D.das]]).concat(D.jur?[["− Juros repassados à maquininha",-D.jur]]:[]).concat([["− Taxas de cartão (pagas pela Boreal)",-D.tx],["= Receita líquida (o que entrou de verdade)",D.rl,"sub"],
+  const rows=[["Receita bruta (o que os clientes pagaram)",D.rb],["− Taxa da maquininha"+(D.jur&&D.tx?" (cliente R$ "+fmt(D.jur)+" · Boreal R$ "+fmt(D.tx)+")":D.jur?" (paga pelo cliente)":D.tx?" (paga pela Boreal)":""),-r2(D.jur+D.tx)],["− Descontos de indicação",-D.desc],["− DAS (MEI)",-D.das],["= Receita líquida (o que entrou de verdade)",D.rl,"sub"],
     ["− Materiais (preço de custo)",-D.mat],["− Gastos por serviço",-D.gs],["= Lucro bruto",D.lb,"sub"],
     ["− Despesas fixas",-D.fx],["− Outras despesas da empresa",-D.outras],["− Depreciação",-D.dep],["− Pró-labore",-D.pro],["= Resultado do trabalho",D.res,"sub"],
-    ["+ Rendimentos financeiros",D.rend],["= Lucro líquido · margem "+D.margem+"%",D.luc,"fin"]]);
+    ["+ Rendimentos financeiros",D.rend],["= Lucro líquido · margem "+D.margem+"%",D.luc,"fin"]];
   rows.forEach(([l,v,k])=>{const h=k?50:42;d.ensure(h);if(k){d.g.fillStyle=k==="fin"?(v<0?"#FDECEC":"#E7F6EE"):C.ice;d.rr(MX,d.y,CW,h-6,8);d.g.fill()}
     const col=k==="fin"?(v<0?"#B42318":"#0E6B3F"):k?C.navy:(v<0?"#B42318":C.text);
     d.text(l,MX+16,d.y+(k?12:9),k?"800":"500",k==="fin"?22:20,k?col:C.text);d.text(money(v),PW-MX-16,d.y+(k?12:9),k?"800":"600",k==="fin"?22:20,col,"right");
@@ -3765,7 +3765,7 @@ $("#teamList").addEventListener("click",async e=>{const b=e.target.closest("[dat
 /* ============================================================
    NUVEM (Supabase): login + sincronização
    ============================================================ */
-const APP_VERSION="Versão 24 · 22/11/2026 · DRE gerencial (cartão na receita líquida)";
+const APP_VERSION="Versão 25 · 22/11/2026 · Taxa da maquininha logo abaixo da receita bruta";
 const SB_URL="https://xipiemiyvrwfxosbfpvl.supabase.co",SB_KEY="sb_publishable_RtUvyM---ErVKDlMnonTVg_AEy9yL5I";
 let sb=null,appStarted=false;
 function fnv(s){let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(36)+s.length.toString(36)}
