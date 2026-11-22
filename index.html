@@ -2828,11 +2828,11 @@ function pdfMats(d,mats){let matTot=0;if(!mats.length)return 0;d.section("Peças
     [String(m.qtd).replace(".",","),"R$ "+fmt(m.preco),"R$ "+fmt(m.sub)].forEach((v,k)=>{const w=cols[k+1][1];d.text(v,x+w-14,d.y+10,k===2?"700":"500",21,C.text,"right");x+=w});
     d.y+=h;d.g.fillStyle=C.line;d.g.fillRect(MX,d.y,CW,1.5)});
   d.ensure(60);d.y+=12;d.text("Total de materiais",PW-MX-260,d.y+4,"600",20,C.muted,"right");d.text("R$ "+fmt(matTot),PW-MX-14,d.y,"800",26,C.navy,"right");d.y+=64;return matTot}
-function pdfTotals(d,mo,matTot,desc){desc=r2(desc||0);const sub=mo+matTot;if(sub<=0)return;const tot=r2(sub-desc);d.ensure(130);
-  const boxes=[];if(matTot>0&&mo>0){boxes.push(["Mão de obra",mo],["Peças e materiais",matTot])}else if(desc>0)boxes.push(["Valor do serviço",sub]);if(desc>0)boxes.push(["Desconto",-desc]);boxes.push(["Total geral",tot]);
-  const n=boxes.length,gap=14,bw=(CW-gap*(n-1))/n,fs=n>3?28:34;
+function pdfTotals(d,mo,matTot,desc,juros){desc=r2(desc||0);juros=r2(juros||0);const sub=mo+matTot;if(sub<=0)return;const tot=r2(sub-desc+juros);d.ensure(130);
+  const boxes=[];if(matTot>0&&mo>0){boxes.push(["Mão de obra",mo],["Peças e materiais",matTot])}else if(desc>0||juros>0)boxes.push(["Valor do serviço",sub]);if(desc>0)boxes.push(["Desconto",-desc]);if(juros>0)boxes.push(["Juros maquininha",juros,"+"]);boxes.push([juros>0?"Total com juros":"Total geral",tot]);
+  const n=boxes.length,gap=14,bw=(CW-gap*(n-1))/n,fs=n>4?24:n>3?28:34;
   boxes.forEach((b,i)=>{const x=MX+i*(bw+gap),big=i===boxes.length-1;d.g.fillStyle=big?C.navy:C.ice;d.rr(x,d.y,bw,96,12);d.g.fill();
-    d.text(b[0].toUpperCase(),x+20,d.y+16,"700",16,big?"rgba(255,255,255,.75)":C.muted);d.text((b[1]<0?"− ":"")+"R$ "+fmt(Math.abs(b[1])),x+20,d.y+44,"800",fs,big?"#fff":(b[1]<0?"#B42318":C.navy))});d.y+=124}
+    d.text(b[0].toUpperCase(),x+20,d.y+16,"700",16,big?"rgba(255,255,255,.75)":C.muted);d.text((b[1]<0?"− ":b[2]==="+"?"+ ":"")+"R$ "+fmt(Math.abs(b[1])),x+20,d.y+44,"800",fs,big?"#fff":(b[1]<0?"#B42318":C.navy))});d.y+=124}
 function pdfSigs(d,blocks){const sw=(CW-60)/2,sh=170;
   blocks.forEach((b,k)=>{const x=MX+k*(sw+60);if(b.img){const s=Math.min((sw-20)/b.img.width,(sh-10)/b.img.height,1.4);const w=b.img.width*s,h=b.img.height*s;d.g.drawImage(b.img,x+(sw-w)/2,d.y+sh-h,w,h)}
     d.g.fillStyle=C.text;d.g.fillRect(x,d.y+sh+8,sw,2);d.text(b.name||"",x+sw/2,d.y+sh+22,"700",21,C.text,"center");
@@ -2885,10 +2885,10 @@ async function renderPDF(D){
 
   d.section(isOS?"Valores e garantia":"Valores");
   const dscV=parseMoney(f.descVal),crV=parseMoney(f.credUsado);
-  pdfTotals(d,parseMoney(f.valor),matTot,dscV+crV);
-  if(dscV||crV)d.fields([dscV?["Desconto por indicação",(f.indNome||"Indicação")+" · "+pctFmt(Number(f.descPct)||0)+"% = R$ "+fmt(dscV)]:null,crV?["Crédito de indicações usado","R$ "+fmt(crV)]:null].filter(Boolean),2);
   const totDoc=r2(parseMoney(f.valor)+matTot-dscV-crV),ciP=isOS?cardInfo(f,totDoc):null;
-  if(ciP&&ciP.cli)d.fields([["Total no cartão (com juros da maquininha)","R$ "+fmt(ciP.total)],["Parcelamento",ciP.n>1?ciP.n+"x de R$ "+fmt(ciP.parc):"À vista"]],2);
+  pdfTotals(d,parseMoney(f.valor),matTot,dscV+crV,ciP&&ciP.cli?ciP.acres:0);
+  if(dscV||crV)d.fields([dscV?["Desconto por indicação",(f.indNome||"Indicação")+" · "+pctFmt(Number(f.descPct)||0)+"% = R$ "+fmt(dscV)]:null,crV?["Crédito de indicações usado","R$ "+fmt(crV)]:null].filter(Boolean),2);
+  if(ciP&&ciP.cli)d.fields([["Pagamento no cartão de crédito",ciP.n>1?ciP.n+"x de R$ "+fmt(ciP.parc)+" (total R$ "+fmt(ciP.total)+")":"À vista · R$ "+fmt(ciP.total)],["Juros da maquininha","Taxa de "+pctFmt(ciP.pct)+"% da operadora = R$ "+fmt(ciP.acres)]],2);
   if(!isOS&&f.mostraCartao==="sim"&&totDoc>0){const rows=parcelTable(totDoc),rh=40;d.ensure(70+rows.length*rh);
     d.text("FORMAS DE PAGAMENTO",MX,d.y,"700",16,C.blue);d.y+=30;
     rows.forEach((r,i)=>{if(i%2===0){d.g.fillStyle=C.ice;d.rr(MX,d.y,CW,rh,8);d.g.fill()}d.text(r[0],MX+16,d.y+10,"600",19,C.text);if(r[2])d.text(r[2],MX+CW*0.48,d.y+11,"500",18,C.muted);d.text("R$ "+fmt(r[1]),MX+CW-16,d.y+10,"800",19,C.navy,"right");d.y+=rh});
@@ -3265,7 +3265,7 @@ function finOS(d){const P=d.payload||{},f=P.f||{},mg=margem();let custo=0,mk=0,m
     if(c==null||c===""){const cm=findMat(m.nome);if(cm&&matCusto(cm))c=matCusto(cm);else{c=p/(1+mg/100);est=true}}
     c=Number(c)||0;custo+=c*q;mk+=(p-c)*q;mat+=p*q});
   const mo=parseMoney(f.valor),dsc=r2(parseMoney(f.descVal)+parseMoney(f.credUsado)),liq=r2(mat+mo-dsc);const ci=cardInfo(f,liq);
-  return{id:d.id,num:d.num,data:f.data||d.data,cliente:f.cliNome||d.cliNome,pg:f.pgSit||"",pgto:f.pgto||"",svc:(P.svc||[]).join(", "),bruto:liq,desc:dsc,custo:r2(custo),markup:r2(mk),mo:r2(mo),taxa:ci?ci.fee:0,est}}
+  return{id:d.id,num:d.num,data:f.data||d.data,cliente:f.cliNome||d.cliNome,pg:f.pgSit||"",pgto:f.pgto||"",svc:(P.svc||[]).join(", "),bruto:liq,desc:dsc,custo:r2(custo),markup:r2(mk),mo:r2(mo),taxa:ci?ci.fee:0,juros:ci&&ci.cli?ci.acres:0,est}}
 function finMonthBase(ym){const os=docs.filter(d=>osDone(d)&&osYM(d)===ym).map(finOS).sort((a,b)=>(a.data||"").localeCompare(b.data||"")||(a.num-b.num));
   let bruto=0,custo=0,markup=0;os.forEach(o=>{bruto+=o.bruto;custo+=o.custo;markup+=o.markup});
   const base=bruto-custo-markup,terco=r2(base/3);
@@ -3290,8 +3290,8 @@ function finYMs(upTo){const st=new Set();docs.filter(osDone).forEach(d=>st.add(o
 function dreMes(ym){const os=docs.filter(d=>osDone(d)&&osYM(d)===ym).map(finOS).sort((a,b)=>(a.data||"").localeCompare(b.data||"")||(a.num-b.num));
   const L=lancMes(ym),nf=r2(notas.filter(n=>String(n.data||"").slice(0,7)===ym).reduce((t,n)=>t+(Number(n.valor)||0),0));
   const sum=(arr,f)=>r2(arr.reduce((t,x)=>t+f(x),0));
-  const rb=sum(os,o=>o.bruto+o.desc),desc=sum(os,o=>o.desc),das=mesVal("das",ym),rl=r2(rb-desc-das);
-  const mat=sum(os,o=>o.custo),tx=sum(os,o=>o.taxa),gs=sum(L.filter(x=>x.tipo==="servico"&&x.fonte==="boreal"),x=>x.valor),lb=r2(rl-mat-tx-gs);
+  const rb=sum(os,o=>o.bruto+o.desc),jur=sum(os,o=>o.juros||0),desc=sum(os,o=>o.desc),das=mesVal("das",ym),rl=r2(rb+jur-desc-das);
+  const mat=sum(os,o=>o.custo),tx=sum(os,o=>o.taxa),gs=sum(L.filter(x=>x.tipo==="servico"&&x.fonte==="boreal"),x=>x.valor),lb=r2(rl-mat-tx-jur-gs);
   const FX=fixasMes(ym),fx=sum(FX,x=>x.v),outras=sum(L.filter(x=>x.tipo==="empresa"&&x.fonte==="boreal"),x=>x.valor),dep=mesVal("dep",ym),pro=mesVal("pro",ym);
   const res=r2(lb-fx-outras-dep-pro),rend=mesVal("rend",ym),luc=r2(res+rend);
   os.forEach(o=>{o.gastos=sum(L.filter(x=>x.tipo==="servico"&&x.osId===o.id),x=>x.valor);o.lucro=r2(o.bruto-o.custo-o.taxa-o.gastos)});
@@ -3301,7 +3301,7 @@ function dreMes(ym){const os=docs.filter(d=>osDone(d)&&osYM(d)===ym).map(finOS).
   const usoGar=sum(L.filter(x=>x.tipo!=="mov"&&x.fonte==="gar"),x=>x.valor),usoDep=sum(L.filter(x=>x.tipo!=="mov"&&x.fonte==="dep"),x=>x.valor);
   const bSai=sum(L.filter(x=>x.tipo!=="mov"&&x.fonte==="boreal"),x=>x.valor);
   return{id:ym,mes:ym,v:2,margem:margem(),os,L,nf,FX,markup:sum(os,o=>o.markup),usoGar,usoDep,bSai,recebido:sum(os,o=>o.bruto-o.taxa),
-    dre:{rb,desc,das,rl,mat,tx,gs,lb,fx,outras,dep,pro,res,rend,luc,margem:rb?Math.round(luc/rb*100):0},
+    dre:{rb,jur,desc,das,rl,mat,tx,gs,lb,fx,outras,dep,pro,res,rend,luc,margem:rb?Math.round(luc/rb*100):0},
     flow:{inC:r2(inC),inD:r2(inD),outC:r2(outC),outD:r2(outD)},est:os.some(o=>o.est),bruto:rb,lucro:luc}}
 function caixaAte(ym){let conta=0,din=0,gar=0,dep=0,bor=0,last=null;
   for(const m of finYMs(ym)){const r=dreMes(m);const gIn=r2(Math.min(r.markup,Math.max(0,TETO_GAR-gar))),dIn=r2(Math.min(r.dre.dep,Math.max(0,TETO_DEP-dep)));
@@ -3339,8 +3339,8 @@ function renderFin(){
     '<div><span>🏢 Caixa Boreal (livre)</span><b'+neg(K.bor)+'>'+mR(K.bor)+'<small>saldo</small></b><span class="ln"><span class="in">+ R$ '+fmt(M.bIn)+' entrou</span> · <span class="out">− R$ '+fmt(M.bOut)+" saiu</span></span>"+(M.rend?'<span class="ln">inclui R$ '+fmt(M.rend)+" de rendimento</span>":"")+"</div></div>"+ch;
   const row=(l,v,c,cmp)=>'<div class="'+(c||"")+'"><span>'+l+(cmp!=null&&cmp!==undefined?"<small>"+(cmp>0?"+":"")+cmp+"% vs mês anterior</small>":"")+'</span><span class="'+(c?"":v<0?"neg":"")+'">'+(v<0?"− R$ "+fmt(-v):"R$ "+fmt(v))+"</span></div>";
   const lineN=(l,v)=>v?row(l,-v):"";
-  $("#finDre").innerHTML='<div class="dre">'+row("Receita bruta (OS concluídas)",D.rb,"",pct(D.rb,P.rb))+lineN("− Descontos de indicação",D.desc)+row("− DAS (MEI)",-D.das)+row("= Receita líquida",D.rl,"sub")+
-    row("− Materiais (preço de custo)",-D.mat)+lineN("− Taxas de cartão",D.tx)+row("− Gastos por serviço",-D.gs)+row("= Lucro bruto",D.lb,"sub")+
+  $("#finDre").innerHTML='<div class="dre">'+row("Receita bruta (OS concluídas)",D.rb,"",pct(D.rb,P.rb))+(D.jur?row("+ Juros da maquininha (pagos pelo cliente)",D.jur):"")+lineN("− Descontos de indicação",D.desc)+row("− DAS (MEI)",-D.das)+row("= Receita líquida",D.rl,"sub")+
+    row("− Materiais (preço de custo)",-D.mat)+lineN("− Taxas de cartão (pagas por você)",D.tx)+lineN("− Juros repassados à maquininha",D.jur)+row("− Gastos por serviço",-D.gs)+row("= Lucro bruto",D.lb,"sub")+
     row("− Despesas fixas",-D.fx)+lineN("− Outras despesas da empresa",D.outras)+row("− Depreciação",-D.dep)+row("− Pró-labore",-D.pro)+row("= Resultado do trabalho",D.res,"sub")+
     row("+ Rendimentos financeiros",D.rend)+'<div class="fin'+(D.luc<0?" bad":"")+'"><span>= Lucro líquido · margem '+D.margem+"%"+(pct(D.luc,P.luc)!=null&&P.luc?"<small>"+(pct(D.luc,P.luc)>0?"+":"")+pct(D.luc,P.luc)+"% vs mês anterior</small>":"")+'</span><span>'+(D.luc<0?"− R$ "+fmt(-D.luc):"R$ "+fmt(D.luc))+"</span></div></div>"+
     '<p class="hint" style="margin-top:8px">Acumulado de '+finYM.slice(0,4)+": receita "+mR(r.ano.rb)+" · lucro líquido "+mR(r.ano.luc)+(r.est?" · * algumas OS têm material sem custo cadastrado (custo estimado).":"")+"</p>";
@@ -3487,20 +3487,20 @@ async function renderFinPDF2(r){
   const nome=cfg.nome||"Boreal Clima",custom=cfg.logo?await loadImg(cfg.logo).catch(()=>null):null;
   const meta={nome,cnpj:cfg.cnpj,tel:cfg.tel,email:cfg.email,end:cfg.end,site:cfg.site,num:r.id,numTxt:r.id.slice(5)+"/"+r.id.slice(0,4),title:"DRE · FECHAMENTO MENSAL",short:"DRE",
     hdr2:nome+" · DRE de "+ymLabel(r.id),dataTxt:"01/"+r.id.slice(5)+" a "+ymLast(r.id)+"/"+r.id.slice(5)+"/"+r.id.slice(0,4),cliente:"",logoImg:custom,lock:custom?null:await loadImg(LOGO_LOCK),showName:!!custom||norm(nome)!=="boreal clima"};
-  const d=new Doc(meta),g=d.g,D=r.dre,K=r.caixa||{},M=K.mes||{};
+  const d=new Doc(meta),D=r.dre,K=r.caixa||{},M=K.mes||{};
   const money=v=>(v<0?"− R$ ":"R$ ")+fmt(Math.abs(v));
   d.section("Resultado do mês (DRE)");
-  const rows=[["Receita bruta (OS concluídas)",D.rb],["− Descontos de indicação",-D.desc],["− DAS (MEI)",-D.das],["= Receita líquida",D.rl,"sub"],
-    ["− Materiais (preço de custo)",-D.mat],["− Taxas de cartão",-D.tx],["− Gastos por serviço",-D.gs],["= Lucro bruto",D.lb,"sub"],
+  const rows=[["Receita bruta (OS concluídas)",D.rb]].concat(D.jur?[["+ Juros da maquininha (pagos pelo cliente)",D.jur]]:[]).concat([["− Descontos de indicação",-D.desc],["− DAS (MEI)",-D.das],["= Receita líquida",D.rl,"sub"],
+    ["− Materiais (preço de custo)",-D.mat],["− Taxas de cartão (pagas pela Boreal)",-D.tx]]).concat(D.jur?[["− Juros repassados à maquininha",-D.jur]]:[]).concat([["− Gastos por serviço",-D.gs],["= Lucro bruto",D.lb,"sub"],
     ["− Despesas fixas",-D.fx],["− Outras despesas da empresa",-D.outras],["− Depreciação",-D.dep],["− Pró-labore",-D.pro],["= Resultado do trabalho",D.res,"sub"],
-    ["+ Rendimentos financeiros",D.rend],["= Lucro líquido · margem "+D.margem+"%",D.luc,"fin"]];
-  rows.forEach(([l,v,k])=>{const h=k?50:42;d.ensure(h);if(k){g.fillStyle=k==="fin"?(v<0?"#FDECEC":"#E7F6EE"):C.ice;d.rr(MX,d.y,CW,h-6,8);g.fill()}
+    ["+ Rendimentos financeiros",D.rend],["= Lucro líquido · margem "+D.margem+"%",D.luc,"fin"]]);
+  rows.forEach(([l,v,k])=>{const h=k?50:42;d.ensure(h);if(k){d.g.fillStyle=k==="fin"?(v<0?"#FDECEC":"#E7F6EE"):C.ice;d.rr(MX,d.y,CW,h-6,8);d.g.fill()}
     const col=k==="fin"?(v<0?"#B42318":"#0E6B3F"):k?C.navy:(v<0?"#B42318":C.text);
     d.text(l,MX+16,d.y+(k?12:9),k?"800":"500",k==="fin"?22:20,k?col:C.text);d.text(money(v),PW-MX-16,d.y+(k?12:9),k?"800":"600",k==="fin"?22:20,col,"right");
-    d.y+=h;if(!k){g.fillStyle=C.line;g.fillRect(MX,d.y-4,CW,1.5)}});
+    d.y+=h;if(!k){d.g.fillStyle=C.line;d.g.fillRect(MX,d.y-4,CW,1.5)}});
   d.y+=8;if(r.ano)d.para("Acumulado de "+r.id.slice(0,4)+" até "+ymLabel(r.id).toLowerCase()+": receita "+money(r.ano.rb)+" · lucro líquido "+money(r.ano.luc)+".",18);d.y+=10;
   d.section("Caixa no fim do mês");
-  const box=(x,w,t,v,sub,dark)=>{g.fillStyle=dark?C.navy:C.ice;d.rr(x,d.y,w,112,12);g.fill();d.text(t.toUpperCase(),x+18,d.y+14,"700",14,dark?"rgba(255,255,255,.75)":C.muted);
+  const box=(x,w,t,v,sub,dark)=>{d.g.fillStyle=dark?C.navy:C.ice;d.rr(x,d.y,w,112,12);d.g.fill();d.text(t.toUpperCase(),x+18,d.y+14,"700",14,dark?"rgba(255,255,255,.75)":C.muted);
     d.text(money(v),x+18,d.y+40,"800",28,dark?"#fff":(v<0?"#B42318":C.navy));(sub||[]).forEach((s,i)=>d.text(s,x+18,d.y+80+i*0,"500",14,dark?"rgba(255,255,255,.8)":C.muted))};
   const bw=(CW-2*14)/3;d.ensure(130);
   box(MX,bw,"Conta da empresa",K.conta||0);box(MX+bw+14,bw,"Dinheiro vivo",K.din||0);box(MX+2*(bw+14),bw,"Total da empresa",K.total||0,null,true);d.y+=128;d.ensure(130);
@@ -3511,13 +3511,13 @@ async function renderFinPDF2(r){
   d.section("Lucro por serviço");
   if(!(r.os||[]).length)d.para("Nenhuma OS concluída neste mês.",20);
   else{const cols=[["Nº",90,"left"],["Data",110,"left"],["Cliente",CW-90-110-190-190-190,"left"],["Entrou",190,"right"],["Custos",190,"right"],["Lucro",190,"right"]];
-    const head=()=>{let x=MX;g.fillStyle=C.ice;d.rr(MX,d.y,CW,44,8);g.fill();cols.forEach(([t,w,al])=>{d.text(t.toUpperCase(),al==="right"?x+w-12:x+12,d.y+13,"700",16,C.navy,al);x+=w});d.y+=50};
+    const head=()=>{let x=MX;d.g.fillStyle=C.ice;d.rr(MX,d.y,CW,44,8);d.g.fill();cols.forEach(([t,w,al])=>{d.text(t.toUpperCase(),al==="right"?x+w-12:x+12,d.y+13,"700",16,C.navy,al);x+=w});d.y+=50};
     d.ensure(110);head();
     r.os.forEach(o=>{const ls=d.wrap((o.cliente||"—")+(o.svc?" · "+o.svc:""),cols[2][1]-24,"500",18);const h=ls.length*24+18;if(d.ensure(h))head();let x=MX;
       [[pad(o.num,4),"700"],[br(o.data).slice(0,5),"500"]].forEach((v,k)=>{d.text(v[0],x+12,d.y+9,v[1],18,C.text);x+=cols[k][1]});
       ls.forEach((l,j)=>d.text(l,x+12,d.y+9+j*24,"500",18,C.text));x+=cols[2][1];
       [[money(o.bruto),"600",C.text],[money(r2(o.custo+o.taxa+(o.gastos||0))),"500",C.text],[money(o.lucro||0),"800",(o.lucro||0)<0?"#B42318":C.navy]].forEach((v,k)=>{const w=cols[3+k][1];d.text(v[0],x+w-12,d.y+9,v[1],18,v[2],"right");x+=w});
-      d.y+=h;g.fillStyle=C.line;g.fillRect(MX,d.y,CW,1.5)});d.y+=20}
+      d.y+=h;d.g.fillStyle=C.line;d.g.fillRect(MX,d.y,CW,1.5)});d.y+=20}
   d.section("Lançamentos do mês");
   const list=[];(r.L||[]).forEach(x=>{if(x.tipo==="mov")list.push([x.data,(x.de==="din"?"Depósito de dinheiro vivo na conta":"Saque da conta")+" (movimentação)",x.valor]);
     else list.push([x.data,(x.tipo==="servico"?"Gasto por serviço":"Despesa")+" · "+x.cat+(x.desc?" · "+x.desc:"")+(x.fonte!=="boreal"?" · "+FONTE[x.fonte]:""),x.valor])});
@@ -3765,7 +3765,7 @@ $("#teamList").addEventListener("click",async e=>{const b=e.target.closest("[dat
 /* ============================================================
    NUVEM (Supabase): login + sincronização
    ============================================================ */
-const APP_VERSION="Versão 22 · 22/11/2026 · Novo Financeiro: DRE, caixa e reservas";
+const APP_VERSION="Versão 23 · 22/11/2026 · Juros da maquininha no PDF e na DRE";
 const SB_URL="https://xipiemiyvrwfxosbfpvl.supabase.co",SB_KEY="sb_publishable_RtUvyM---ErVKDlMnonTVg_AEy9yL5I";
 let sb=null,appStarted=false;
 function fnv(s){let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(36)+s.length.toString(36)}
