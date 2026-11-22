@@ -401,7 +401,7 @@ body.func .adm{display:none!important}
       <label class="f">Garantia do serviço<select data-k="garantia"><option>30 dias</option><option>60 dias</option><option>90 dias</option><option>4 meses</option><option>6 meses</option><option>9 meses</option><option>1 ano</option><option>2 anos</option><option>Sem garantia</option></select></label>
       <label class="f">Orçamento válido até<input type="date" data-k="validade"></label>
       <label class="f">Indicado por (grupo)<select data-k="indPor" class="igSel"><option value="">— Nenhum —</option></select></label>
-      <input type="hidden" data-k="descPct"><input type="hidden" data-k="descVal"><input type="hidden" data-k="credUsado"><input type="hidden" data-k="indNome">
+      <input type="hidden" data-k="descPct"><input type="hidden" data-k="descVal"><input type="hidden" data-k="credUsado"><input type="hidden" data-k="indNome"><input type="hidden" data-k="credGrupo">
       <label class="f wide">Pagamento no cartão (aparece no PDF)<select data-k="mostraCartao"><option value="">Não mostrar para o cliente</option><option value="sim">Mostrar: Pix, débito e crédito à vista sem acréscimo; 2x a 12x com a taxa da maquininha</option></select></label>
     </div>
     <div class="totbox"><div>Mão de obra<b class="totMo">R$ 0,00</b></div><div>Peças e materiais<b class="totMat">R$ 0,00</b></div><div class="totDescW" hidden><span class="totDescL">Desconto</span><b class="totDesc">− R$ 0,00</b></div><div class="big">Total geral<b class="totGeral">R$ 0,00</b></div></div>
@@ -521,7 +521,7 @@ body.func .adm{display:none!important}
       <label class="f">Garantia do serviço<select data-k="garantia"><option>30 dias</option><option>60 dias</option><option>90 dias</option><option>4 meses</option><option>6 meses</option><option>9 meses</option><option>1 ano</option><option>2 anos</option><option>Sem garantia</option></select></label>
       <label class="f">Próxima manutenção sugerida<input type="date" data-k="proxManut"></label>
       <label class="f">Indicado por (grupo)<select data-k="indPor" class="igSel"><option value="">— Nenhum —</option></select></label>
-      <input type="hidden" data-k="descPct"><input type="hidden" data-k="descVal"><input type="hidden" data-k="credUsado"><input type="hidden" data-k="indNome">
+      <input type="hidden" data-k="descPct"><input type="hidden" data-k="descVal"><input type="hidden" data-k="credUsado"><input type="hidden" data-k="indNome"><input type="hidden" data-k="credGrupo">
     </div>
     <div class="totbox"><div>Mão de obra<b class="totMo">R$ 0,00</b></div><div>Peças e materiais<b class="totMat">R$ 0,00</b></div><div class="totDescW" hidden><span class="totDescL">Desconto</span><b class="totDesc">− R$ 0,00</b></div><div class="big"><span class="totLbl">Total geral</span><b class="totGeral">R$ 0,00</b></div></div>
     <div class="cardbox" hidden></div>
@@ -2257,11 +2257,12 @@ function grupos(){return Array.isArray(cfg.indGrupos)?cfg.indGrupos:[]}
 function grupoBy(id){return id?grupos().find(g=>g.id===id):null}
 function gAtivo(g,dt){if(!g)return false;if(g.tipo==="cond")return true;dt=dt||today();return(!g.ini||dt>=g.ini)&&(!g.fim||dt<=g.fim)}
 function gVencido(g){return g&&g.tipo==="parc"&&!!g.fim&&today()>g.fim}
-function grupoDono(key){return grupos().find(g=>g.tipo==="parc"&&g.dono&&g.dono===key)||null}
+const telKey=t=>{const d=String(t||"").replace(/\D/g,"");return d.length>=8?d.slice(-8):""};
+function grupoDono(key,tel){const tk=telKey(tel);return grupos().find(g=>g.tipo==="parc"&&((g.dono&&g.dono===key)||(tk&&telKey(g.tel)===tk)))||null}
 function gMembros(g){return clients.filter(c=>c.grupo===g.id&&c.key!==g.dono)}
 function gCreditos(g,exceptId){if(!g||g.tipo!=="parc")return{saldo:0,ganho:0,usado:0,lista:[]};const v=parseMoney(g.valor);const lista=[];
   gMembros(g).forEach(c=>{const os=docs.filter(d=>d.cli===c.key&&osDone(d)).map(d=>String(((d.payload||{}).f||{}).data||d.data||"")).sort();if(os.length&&gAtivo(g,os[0]))lista.push({c,data:os[0]})});
-  const ganho=r2(lista.length*v),usado=r2(docs.filter(d=>d.type==="os"&&d.cli===g.dono&&d.id!==exceptId&&osDone(d)).reduce((t,d)=>t+parseMoney(((d.payload||{}).f||{}).credUsado),0));
+  const ganho=r2(lista.length*v),usado=r2(docs.filter(d=>d.type==="os"&&d.id!==exceptId&&(((d.payload||{}).f||{}).credGrupo===g.id||(d.cli===g.dono&&!(((d.payload||{}).f||{}).credGrupo)))).reduce((t,d)=>t+parseMoney(((d.payload||{}).f||{}).credUsado),0));
   return{ganho,usado,saldo:Math.max(0,r2(ganho-usado)),lista,v}}
 function igOpts(sel,cur){if(!sel)return;const v=cur!=null?cur:sel.value;const gs=grupos();
   sel.innerHTML='<option value="">— Nenhum —</option>'+gs.map(g=>'<option value="'+esc(g.id)+'">'+esc(g.nome)+(g.tipo==="cond"?" (condomínio)":" (parceiro)")+(gVencido(g)?" · prazo vencido":"")+"</option>").join("");
@@ -2488,8 +2489,8 @@ function FormCtl(type){
     q(".matTotal").textContent="R$ "+fmt(t);q(".totMat").textContent="R$ "+fmt(t);q(".totMo").textContent="R$ "+fmt(mo);const sub=r2(t+mo),dt=(q('[data-k="data"]')||{}).value||today();
     const ip=q('[data-k=indPor]');if(ip&&ip.options.length!==grupos().length+1+(ip.value&&!grupoBy(ip.value)?1:0))igOpts(ip);
     const gid=ip?ip.value:"",g=grupoBy(gid),pct=g&&gAtivo(g,dt)?(Number(g.desc)||0):0,dv=r2(sub*pct/100);
-    let cred=0;const gd=isOS?grupoDono(norm((q('[data-k="cliNome"]')||{}).value||"")):null;if(gd)cred=Math.min(gCreditos(gd,st.docId).saldo,r2(sub-dv));cred=Math.max(0,r2(cred));
-    const sv=(k,v)=>{const e=q('[data-k='+k+']');if(e)e.value=v};sv("descPct",pct?String(pct):"");sv("descVal",dv?fmt(dv):"");sv("credUsado",cred?fmt(cred):"");sv("indNome",g?g.nome:(gid?(q('[data-k=indNome]')||{}).value||"":""));
+    let cred=0;const gd=isOS?grupoDono(norm((q('[data-k="cliNome"]')||{}).value||""),(q('[data-k="cliTel"]')||{}).value):null;if(gd)cred=Math.min(gCreditos(gd,st.docId).saldo,r2(sub-dv));cred=Math.max(0,r2(cred));
+    const sv=(k,v)=>{const e=q('[data-k='+k+']');if(e)e.value=v};sv("descPct",pct?String(pct):"");sv("descVal",dv?fmt(dv):"");sv("credUsado",cred?fmt(cred):"");sv("credGrupo",cred&&gd?gd.id:"");sv("indNome",g?g.nome:(gid?(q('[data-k=indNome]')||{}).value||"":""));
     const tot=r2(sub-dv-cred),w=q(".totDescW");if(w){w.hidden=!(dv||cred);q(".totDescL").textContent=[dv?"Desconto indicação "+pctFmt(pct)+"%":"",cred?"Crédito de indicações":""].filter(Boolean).join(" + ");q(".totDesc").textContent="− R$ "+fmt(r2(dv+cred))}
     q(".totGeral").textContent="R$ "+fmt(tot);const nt=q(".ignote");if(nt)nt.remove();
     if(gd){const cr=gCreditos(gd,st.docId);const el=document.createElement("p");el.className="hint ignote";el.style.marginTop="8px";el.innerHTML="🤝 <b>"+esc(gd.nome)+"</b>: crédito de indicações disponível <b>R$ "+fmt(cr.saldo)+"</b>"+(cred?", descontado nesta OS.":isOS?".":". Ele é descontado na OS.");q(".totbox").after(el)}
@@ -2509,7 +2510,7 @@ function FormCtl(type){
     if(q('[data-k=mostraCartao]').value!=="sim"||tot<=0){box.hidden=true;return}
     const rows=parcelTable(tot);box.hidden=false;
     box.innerHTML='<b>Como vai aparecer no PDF</b><table>'+rows.map(r=>'<tr><td>'+r[0]+'</td><td>'+(r[2]?'<small>'+r[2]+'</small>':'')+'</td><td>R$ '+fmt(r[1])+'</td></tr>').join("")+'</table>'+(rows.length<4?'<span class="warn">Coloque as taxas de 2x a 12x em Financeiro → Taxas da maquininha para mostrar as parcelas.</span>':'<small>De 2x em diante, o valor já inclui a taxa da maquininha.</small>')}
-  ["pgto","parcelas","juros","mostraCartao","indPor","data"].forEach(k=>{const e=q('[data-k='+k+']');if(e)e.addEventListener("change",()=>{recalc();saveDraft()})});
+  ["pgto","parcelas","juros","mostraCartao","indPor","data","cliNome","cliTel"].forEach(k=>{const e=q('[data-k='+k+']');if(e)e.addEventListener("change",()=>{recalc();saveDraft()})});
   q(".addMat").onclick=()=>{const el=addMat();saveDraft();el.querySelector("[data-m=nome]").focus()};
   q(".addGrp").onclick=()=>openGroupPicker(api);
   function addGroup(g){qq(".mrow").forEach(r=>{const v=k=>r.querySelector('[data-m='+k+']').value.trim();if(!v("nome")&&!v("preco"))r.remove()});
@@ -2665,7 +2666,7 @@ function FormCtl(type){
     if(isOS&&!f.hFim){setField("hFim",nowTime())}
     const btn=$("#btnGen");btn.disabled=true;btn.textContent="Gerando…";
     try{
-      if(!st.numFixed)st.num=nextFree();const D=snapshot();if(!D.assinadoEm)D.assinadoEm=Date.now();st.assinadoEm=D.assinadoEm;
+      if(!st.numFixed)st.num=nextFree();recalc();const D=snapshot();if(!D.assinadoEm)D.assinadoEm=Date.now();st.assinadoEm=D.assinadoEm;
       const rec=await record(D);
       await showDocPdf(rec,type);
       msg("✓ Salvo na ficha de "+rec.cliNome+" (aba Clientes).","ok");
@@ -3037,7 +3038,7 @@ function renderDetail(){
   const c=clients.find(x=>x.key===cliView);if(!c){cliView=null;renderList();return}
   $("#cliListView").hidden=true;const box=$("#cliDetail");box.hidden=false;
   const s=stats(c.key);const fat=s.os.reduce((t,d)=>t+(d.total||0),0);
-  const kv=[["CPF / CNPJ",c.cliDoc],["WhatsApp / Celular",c.cliTel],["E-mail",c.cliEmail],["Endereço",[c.cliEnd,c.cliBairro].filter(Boolean).join(" – ")],["Cidade / UF",[c.cliCidade,c.cliUf].filter(Boolean).join(" / ")],["CEP",c.cliCep],["Indicação",c.cliRef],["Grupo de indicação",(grupoBy(c.grupo)||{}).nome],["Crédito de indicações",grupoDono(c.key)?"R$ "+fmt(gCreditos(grupoDono(c.key)).saldo)+" ("+grupoDono(c.key).nome+")":""]].filter(x=>x[1]);
+  const kv=[["CPF / CNPJ",c.cliDoc],["WhatsApp / Celular",c.cliTel],["E-mail",c.cliEmail],["Endereço",[c.cliEnd,c.cliBairro].filter(Boolean).join(" – ")],["Cidade / UF",[c.cliCidade,c.cliUf].filter(Boolean).join(" / ")],["CEP",c.cliCep],["Indicação",c.cliRef],["Grupo de indicação",(grupoBy(c.grupo)||{}).nome],["Crédito de indicações",grupoDono(c.key,c.cliTel)?"R$ "+fmt(gCreditos(grupoDono(c.key,c.cliTel)).saldo)+" ("+grupoDono(c.key,c.cliTel).nome+")":""]].filter(x=>x[1]);
   const list=s.ds.filter(d=>docFilter==="all"||d.type===docFilter).sort((a,b)=>(b.data||"").localeCompare(a.data||"")||(b.atualizadoEm||0)-(a.atualizadoEm||0));
   box.innerHTML='<button class="back" type="button" data-act="back">← Todos os clientes</button>'+
   (s.due?'<div class="duebanner">⚠ O último serviço foi em '+br(s.lastOS)+' (há '+s.mo+' meses). Bom momento para oferecer uma manutenção.<div style="margin-top:10px"><button class="btn wa small" type="button" data-act="remind">📲 Enviar lembrete de manutenção</button></div></div>':"")+
@@ -3546,7 +3547,7 @@ $("#teamList").addEventListener("click",async e=>{const b=e.target.closest("[dat
 /* ============================================================
    NUVEM (Supabase): login + sincronização
    ============================================================ */
-const APP_VERSION="Versão 20 · 21/11/2026 · Grupos de indicação e aviso de dia ocupado";
+const APP_VERSION="Versão 21 · 22/11/2026 · Correção do crédito de indicações";
 const SB_URL="https://xipiemiyvrwfxosbfpvl.supabase.co",SB_KEY="sb_publishable_RtUvyM---ErVKDlMnonTVg_AEy9yL5I";
 let sb=null,appStarted=false;
 function fnv(s){let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(36)+s.length.toString(36)}
