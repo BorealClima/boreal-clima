@@ -928,7 +928,7 @@ body.func .adm{display:none!important}
     <label class="f fx-edit">Mudança de valor vale<select id="fxModo"><option value="frente">Deste mês em diante</option><option value="so">Só no mês escolhido</option></select></label>
   </div>
   <p class="hint" id="fxHint" style="margin-top:8px"></p>
-  <div class="actions"><button class="btn danger" id="fxEnd" type="button" hidden>Encerrar</button><span style="flex:1"></span><button class="btn line" data-close>Cancelar</button><button class="btn dark" id="fxSave">Salvar</button></div>
+  <div class="actions"><button class="btn danger" id="fxDel" type="button" hidden>🗑 Excluir deste mês</button><button class="btn line" id="fxEnd" type="button" hidden>Encerrar</button><span style="flex:1"></span><button class="btn line" data-close>Cancelar</button><button class="btn dark" id="fxSave">Salvar</button></div>
 </div></div>
 
 <!-- Confirm modal -->
@@ -3281,7 +3281,7 @@ async function saveFinCfg(){cfg.atualizadoEm=Date.now();LS.set("boreal_cfg",cfg)
 function mesHas(k,ym){const M=finCfg().mes;return!!(M[ym]&&M[ym][k]!=null&&M[ym][k]!=="")}
 function mesVal(k,ym){const M=finCfg().mes;if(k==="rend")return mesHas(k,ym)?Number(M[ym][k])||0:0;
   const ks=Object.keys(M).filter(m=>m<=ym&&mesHas(k,m)).sort();return ks.length?Number(M[ks[ks.length-1]][k])||0:0}
-function fixasMes(ym){return finCfg().fixas.filter(x=>(x.ini||"0000-00")<=ym&&(!x.fim||ym<=x.fim)).map(x=>Object.assign({},x,{v:r2(Number(x.aj&&x.aj[ym]!=null?x.aj[ym]:x.valor)||0)}))}
+function fixasMes(ym){return finCfg().fixas.filter(x=>(x.ini||"0000-00")<=ym&&(!x.fim||ym<=x.fim)&&!(x.skip&&x.skip[ym])).map(x=>Object.assign({},x,{v:r2(Number(x.aj&&x.aj[ym]!=null?x.aj[ym]:x.valor)||0)}))}
 function lancN(x){return Object.assign({},x,{tipo:x.tipo||"empresa",pago:x.pago||"conta",fonte:x.fonte||"boreal",cat:x.cat||(x.tipo?"Outros":"Outros (antigo)"),valor:r2(Number(x.valor)||0)})}
 function lancMes(ym){return saidas.filter(x=>String(x.data||"").slice(0,7)===ym).map(lancN).sort((a,b)=>(a.data||"").localeCompare(b.data||""))}
 function finYMs(upTo){const st=new Set();docs.filter(osDone).forEach(d=>st.add(osYM(d)));saidas.forEach(x=>st.add(String(x.data||"").slice(0,7)));notas.forEach(n=>st.add(String(n.data||"").slice(0,7)));
@@ -3714,8 +3714,8 @@ function renderFixas(){const FX=fixasMes(finYM),all=finCfg().fixas;
     :'<p class="hint" style="margin:4px 0 10px">'+(all.length?"Nenhuma despesa fixa neste mês.":"Nenhuma despesa fixa cadastrada ainda.")+"</p>"}
 function openFix(x){fixEdit=x||null;$("#fxT").textContent=x?"Editar despesa fixa":"Nova despesa fixa";$("#fxCat").innerHTML=CAT_EMP.map(c=>"<option>"+c+"</option>").join("");
   $("#fxNome").value=x?x.nome:"";$("#fxCat").value=x?(x.cat||"Outros"):"Veículo";$("#fxValor").value=x?fmt(x.aj&&x.aj[finYM]!=null?x.aj[finYM]:x.valor):"";$("#fxIni").value=x?x.ini:finYM;$("#fxIni").disabled=!!x;
-  $$("#mFix .fx-edit").forEach(e=>e.hidden=!x);$("#fxModo").options[1].textContent="Só em "+ymLabel(finYM).toLowerCase();$("#fxModo").value="frente";$("#fxEnd").hidden=!x;
-  $("#fxHint").textContent=x?"Encerrar: ela para de entrar a partir do mês seguinte ao escolhido. Os meses anteriores não mudam.":"Ela entra sozinha todo mês a partir do mês escolhido.";openM("#mFix")}
+  $$("#mFix .fx-edit").forEach(e=>e.hidden=!x);$("#fxModo").options[1].textContent="Só em "+ymLabel(finYM).toLowerCase();$("#fxModo").value="frente";$("#fxEnd").hidden=!x;$("#fxDel").hidden=!x;
+  $("#fxDel").textContent="🗑 Excluir de "+ymLabel(finYM).toLowerCase();$("#fxHint").textContent=x?"Excluir: tira a despesa só de "+ymLabel(finYM).toLowerCase()+", os outros meses continuam com ela. Encerrar: ela para de entrar a partir do mês seguinte.":"Ela entra sozinha todo mês a partir do mês escolhido.";openM("#mFix")}
 $("#fixAdd").onclick=()=>openFix(null);
 $("#fixList").addEventListener("click",e=>{const b=e.target.closest("[data-fxedit]");if(b)openFix(finCfg().fixas.find(x=>x.id===b.dataset.fxedit))});
 $("#fxValor").addEventListener("blur",e=>{if(e.target.value.trim())e.target.value=fmt(parseMoney(e.target.value))});
@@ -3727,6 +3727,11 @@ $("#fxSave").onclick=async()=>{const nome=$("#fxNome").value.trim(),valor=parseM
       else if(x.ini>=finYM){x.valor=valor;if(x.aj)Object.keys(x.aj).forEach(m=>{if(m>=finYM)delete x.aj[m]})}
       else{const fimAnt=x.fim;x.fim=ymShift(finYM,-1);F.fixas.push({id:uid(),nome,cat,valor,ini:finYM,fim:fimAnt||"",criadoEm:Date.now()})}}}
   await saveFinCfg();closeM($("#mFix"));renderFin();toast("Despesa fixa salva")};
+$("#fxDel").onclick=async()=>{if(!fixEdit)return;const mes=ymLabel(finYM).toLowerCase();
+  if(!(await ask("Excluir "+fixEdit.nome+" de "+mes+"?","Ela sai só de "+mes+". Os outros meses continuam com ela.","Excluir deste mês")))return;
+  const F=finCfg(),x=F.fixas.find(y=>y.id===fixEdit.id);if(!x)return;
+  if(x.ini===finYM&&x.fim===finYM)F.fixas=F.fixas.filter(y=>y.id!==x.id);else{x.skip=x.skip||{};x.skip[finYM]=true;if(x.aj)delete x.aj[finYM]}
+  await saveFinCfg();closeM($("#mFix"));renderFin();toast(fixEdit.nome+" excluída de "+mes)};
 $("#fxEnd").onclick=async()=>{if(!fixEdit)return;if(!(await ask("Encerrar "+fixEdit.nome+"?","Ela conta até "+ymLabel(finYM).toLowerCase()+" e para de entrar nos meses seguintes. Os meses anteriores não mudam.","Encerrar")))return;
   const F=finCfg(),x=F.fixas.find(y=>y.id===fixEdit.id);if(x.ini>finYM)F.fixas=F.fixas.filter(y=>y.id!==x.id);else x.fim=finYM;await saveFinCfg();closeM($("#mFix"));renderFin();toast("Despesa fixa encerrada")};
 
@@ -3765,7 +3770,7 @@ $("#teamList").addEventListener("click",async e=>{const b=e.target.closest("[dat
 /* ============================================================
    NUVEM (Supabase): login + sincronização
    ============================================================ */
-const APP_VERSION="Versão 25 · 22/11/2026 · Taxa da maquininha logo abaixo da receita bruta";
+const APP_VERSION="Versão 27 · 22/11/2026 · Excluir despesa fixa só do mês escolhido";
 const SB_URL="https://xipiemiyvrwfxosbfpvl.supabase.co",SB_KEY="sb_publishable_RtUvyM---ErVKDlMnonTVg_AEy9yL5I";
 let sb=null,appStarted=false;
 function fnv(s){let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(36)+s.length.toString(36)}
