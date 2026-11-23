@@ -106,6 +106,11 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 
 .lbtns{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin-bottom:12px}.lbtns .btn{min-height:48px}
 .hist{display:grid;gap:6px;margin-top:10px}.hist>div{display:grid;grid-template-columns:70px 1fr 110px;gap:8px;align-items:center;font-size:13px}
 .hist .hb{height:10px;border-radius:5px;background:#D9E3EF;position:relative;overflow:hidden}.hist .hb i{position:absolute;left:0;top:0;bottom:0;background:var(--blue)}.hist .hb em{position:absolute;left:0;top:0;bottom:0;background:#17905A}
+.mrow.serv{background:#F3F8FF;border-radius:10px;padding:10px;margin:6px 0;border-bottom:0}
+.mrow.serv .mname{color:var(--blue)}
+.srow{display:grid;grid-template-columns:minmax(0,1fr) 140px 40px;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
+.srow-h{display:grid;grid-template-columns:minmax(0,1fr) 140px 40px;gap:8px;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;padding:4px 0}
+.srow .rm{width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:#fff;color:#B42318;font-weight:700}
 .taxgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin-top:10px}
 .ck{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
 .ck:last-child{border-bottom:0}
@@ -404,10 +409,10 @@ body.func .adm{display:none!important}
   </section>
 
   <section class="card">
-    <h2><span class="n">5</span>Peças e materiais<span class="right hbtns"><button class="btn ghost small addGrp" type="button">+ Grupo</button><button class="btn ghost small addMat" type="button">+ Item</button></span></h2>
-    <p class="hint">Digite o nome do material: se ele estiver na sua tabela (⚙️ Configurações), o valor entra sozinho. Use <b>+ Grupo</b> para colocar um kit inteiro de uma vez.</p>
+    <h2><span class="n">5</span>Serviços, peças e materiais<span class="right hbtns"><button class="btn ghost small addGrp" type="button">+ Grupo</button><button class="btn ghost small addServ" type="button">+ Serviço</button><button class="btn ghost small addMat" type="button">+ Item</button></span></h2>
+    <p class="hint">Use <b>+ Serviço</b> para escolher um serviço da sua tabela (o valor entra como está, sem os 20%). Use <b>+ Item</b> para materiais e peças (entram com a margem) e <b>+ Grupo</b> para um kit inteiro de uma vez.</p>
     <div class="matList"></div>
-    <div class="mtot"><span>Total de materiais</span><b class="matTotal">R$ 0,00</b></div>
+    <div class="mtot"><span class="matTotL">Total de materiais</span><b class="matTotal">R$ 0,00</b></div>
   </section>
 
   <section class="card">
@@ -420,7 +425,7 @@ body.func .adm{display:none!important}
       <input type="hidden" data-k="descPct"><input type="hidden" data-k="descVal"><input type="hidden" data-k="credUsado"><input type="hidden" data-k="indNome"><input type="hidden" data-k="credGrupo">
       <label class="f wide">Pagamento no cartão (aparece no PDF)<select data-k="mostraCartao"><option value="">Não mostrar para o cliente</option><option value="sim">Mostrar: Pix, débito e crédito à vista sem acréscimo; 2x a 12x com a taxa da maquininha</option></select></label>
     </div>
-    <div class="totbox"><div>Mão de obra<b class="totMo">R$ 0,00</b></div><div>Peças e materiais<b class="totMat">R$ 0,00</b></div><div class="totDescW" hidden><span class="totDescL">Desconto</span><b class="totDesc">− R$ 0,00</b></div><div class="big">Total geral<b class="totGeral">R$ 0,00</b></div></div>
+    <div class="totbox"><div><span class="totMoL">Mão de obra</span><b class="totMo">R$ 0,00</b></div><div>Peças e materiais<b class="totMat">R$ 0,00</b></div><div class="totDescW" hidden><span class="totDescL">Desconto</span><b class="totDesc">− R$ 0,00</b></div><div class="big">Total geral<b class="totGeral">R$ 0,00</b></div></div>
     <div class="cardbox" hidden></div>
   </section>
 
@@ -511,10 +516,10 @@ body.func .adm{display:none!important}
   </section>
 
   <section class="card">
-    <h2><span class="n">7</span>Peças e materiais<span class="right hbtns"><button class="btn ghost small addGrp" type="button">+ Grupo</button><button class="btn ghost small addMat" type="button">+ Item</button></span></h2>
-    <p class="hint">Digite o nome do material: se ele estiver na sua tabela (⚙️ Configurações), o valor entra sozinho. Use <b>+ Grupo</b> para colocar um kit inteiro de uma vez.</p>
+    <h2><span class="n">7</span>Serviços, peças e materiais<span class="right hbtns"><button class="btn ghost small addGrp" type="button">+ Grupo</button><button class="btn ghost small addServ" type="button">+ Serviço</button><button class="btn ghost small addMat" type="button">+ Item</button></span></h2>
+    <p class="hint">Use <b>+ Serviço</b> para escolher um serviço da sua tabela (o valor entra como está, sem os 20%). Use <b>+ Item</b> para materiais e peças (entram com a margem) e <b>+ Grupo</b> para um kit inteiro de uma vez.</p>
     <div class="matList"></div>
-    <div class="mtot"><span>Total de materiais</span><b class="matTotal">R$ 0,00</b></div>
+    <div class="mtot"><span class="matTotL">Total de materiais</span><b class="matTotal">R$ 0,00</b></div>
   </section>
 
   <section class="card">
@@ -539,7 +544,7 @@ body.func .adm{display:none!important}
       <label class="f">Indicado por (grupo)<select data-k="indPor" class="igSel"><option value="">— Nenhum —</option></select></label>
       <input type="hidden" data-k="descPct"><input type="hidden" data-k="descVal"><input type="hidden" data-k="credUsado"><input type="hidden" data-k="indNome"><input type="hidden" data-k="credGrupo">
     </div>
-    <div class="totbox"><div>Mão de obra<b class="totMo">R$ 0,00</b></div><div>Peças e materiais<b class="totMat">R$ 0,00</b></div><div class="totDescW" hidden><span class="totDescL">Desconto</span><b class="totDesc">− R$ 0,00</b></div><div class="big"><span class="totLbl">Total geral</span><b class="totGeral">R$ 0,00</b></div></div>
+    <div class="totbox"><div><span class="totMoL">Mão de obra</span><b class="totMo">R$ 0,00</b></div><div>Peças e materiais<b class="totMat">R$ 0,00</b></div><div class="totDescW" hidden><span class="totDescL">Desconto</span><b class="totDesc">− R$ 0,00</b></div><div class="big"><span class="totLbl">Total geral</span><b class="totGeral">R$ 0,00</b></div></div>
     <div class="cardbox" hidden></div>
   </section>
 
@@ -663,6 +668,14 @@ body.func .adm{display:none!important}
       <p class="hint">Coloque a taxa que a sua maquininha cobra em cada caso. Na OS, quando escolher <b>com juros</b>, o app soma a taxa no valor para você receber o valor cheio. Quando escolher <b>sem juros</b>, ou no débito, a taxa sai do <b>Caixa da Boreal</b>. Tudo é salvo sozinho.</p>
       <div class="taxgrid"><label class="f">Débito %<input type="number" step="0.01" min="0" inputmode="decimal" data-tx="deb"></label><label class="f">Crédito 1x %<input type="number" step="0.01" min="0" inputmode="decimal" data-tx="1"></label><label class="f">Crédito 2x %<input type="number" step="0.01" min="0" inputmode="decimal" data-tx="2"></label><label class="f">Crédito 3x %<input type="number" step="0.01" min="0" inputmode="decimal" data-tx="3"></label><label class="f">Crédito 4x %<input type="number" step="0.01" min="0" inputmode="decimal" data-tx="4"></label><label class="f">Crédito 5x %<input type="number" step="0.01" min="0" inputmode="decimal" data-tx="5"></label><label class="f">Crédito 6x %<input type="number" step="0.01" min="0" inputmode="decimal" data-tx="6"></label><label class="f">Crédito 7x %<input type="number" step="0.01" min="0" inputmode="decimal" data-tx="7"></label><label class="f">Crédito 8x %<input type="number" step="0.01" min="0" inputmode="decimal" data-tx="8"></label><label class="f">Crédito 9x %<input type="number" step="0.01" min="0" inputmode="decimal" data-tx="9"></label><label class="f">Crédito 10x %<input type="number" step="0.01" min="0" inputmode="decimal" data-tx="10"></label><label class="f">Crédito 11x %<input type="number" step="0.01" min="0" inputmode="decimal" data-tx="11"></label><label class="f">Crédito 12x %<input type="number" step="0.01" min="0" inputmode="decimal" data-tx="12"></label></div>
     </details>
+  </section>
+
+  <section class="card">
+    <h2>Serviços e preços<span class="right savedtag" id="srvSaved"></span></h2>
+    <p class="hint">Cadastre seus serviços e o valor que você cobra. No orçamento e na OS, toque em <b>+ Serviço</b> e escolha: o valor entra <b>do jeito que está aqui</b>, sem os 20%. Toque numa categoria para abrir. Tudo é salvo sozinho.</p>
+    <input type="search" id="srvSearch" placeholder="Buscar serviço…" style="margin-bottom:10px">
+    <div id="cfgServs"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px"><button class="btn ghost small" type="button" id="srvAddCat">+ Nova categoria</button></div>
   </section>
 
   <section class="card">
@@ -2350,6 +2363,30 @@ function margem(){const v=Number(cfg.margem);return cfg.margem===""||cfg.margem=
 function matCusto(m){if(!m)return 0;if(m.custo!=null&&m.custo!=="")return Number(m.custo)||0;return m.preco?r2(m.preco/(1+margem()/100)):0}
 function venda(c){return r2((Number(c)||0)*(1+margem()/100))}
 function matVenda(m){return m&&m.venda!=null?Number(m.venda)||0:venda(matCusto(m))}
+const SERV_PADRAO=[["Instalação",["Instalação split 9.000 BTUs","Instalação split 12.000 BTUs","Instalação split 18.000 BTUs","Instalação split 24.000 BTUs","Instalação split 30.000 BTUs ou mais","Instalação piso-teto","Desinstalação de split","Reinstalação (mudança de lugar)"]],
+  ["Limpeza e manutenção",["Higienização split 9.000/12.000 BTUs","Higienização split 18.000/24.000 BTUs","Higienização piso-teto / cassete","Manutenção preventiva","Limpeza de dreno"]],
+  ["Reparos",["Visita técnica / diagnóstico","Carga de gás (mão de obra)","Troca de capacitor (mão de obra)","Solda e correção de vazamento","Troca de placa (mão de obra)"]]];
+function servList(){return Array.isArray(cfg.servicos)?cfg.servicos:[]}
+function findServ(name){const n=norm(name);return n?servList().find(x=>norm(x.nome)===n):null}
+function srvRow(x,box){const r=document.createElement("div");r.className="srow";r.innerHTML='<input type="text" data-sv="nome" placeholder="Nome do serviço"><input type="text" data-sv="valor" inputmode="decimal" placeholder="0,00"><button class="rm" type="button" aria-label="Remover">✕</button>';
+  r.querySelector("[data-sv=nome]").value=x.nome||"";const v=r.querySelector("[data-sv=valor]");v.value=x.valor?fmt(x.valor):"";
+  v.addEventListener("blur",()=>{if(v.value.trim())v.value=fmt(parseMoney(v.value))});r.querySelector(".rm").onclick=()=>{const c=r.closest(".mcat");r.remove();srvCount(c);srvSaveSoon()};box.appendChild(r);srvCount(r.closest(".mcat"));return r}
+function srvCount(c){if(!c)return;const n=c.querySelectorAll(".sitems .srow").length;c.querySelector(".mcc").textContent=n+" serviço"+(n===1?"":"s")}
+function srvCatBox(name,items,open){const el=document.createElement("details");el.className="mcat";if(open)el.open=true;
+  el.innerHTML='<summary><span class="mcn"></span><span class="mcc"></span></summary><div class="mcbody"><div class="mchead"><input type="text" data-scat placeholder="Nome da categoria"><button class="rm" type="button" data-delscat>Excluir categoria</button></div><div class="srow-h"><span>Serviço</span><span>Valor (R$)</span><span></span></div><div class="sitems"></div><button class="btn ghost small" type="button" data-addsrv>+ Adicionar serviço</button></div>';
+  const ni=el.querySelector("[data-scat]");ni.value=name;el.querySelector(".mcn").textContent=name;ni.addEventListener("input",()=>{el.querySelector(".mcn").textContent=ni.value||"Sem nome"});
+  const box=el.querySelector(".sitems");(items||[]).forEach(x=>srvRow(x,box));
+  el.querySelector("[data-addsrv]").onclick=()=>srvRow({},box).querySelector("input").focus();
+  el.querySelector("[data-delscat]").onclick=async()=>{const n=box.querySelectorAll(".srow").length;if(await ask("Excluir a categoria "+(ni.value||"")+"?",n?"Os "+n+" serviços dela também saem da tabela.":"Ela sai da tabela.","Excluir")){el.remove();srvSaveSoon()}};
+  $("#cfgServs").appendChild(el);srvCount(el);return el}
+function renderCfgServs(){$("#cfgServs").innerHTML="";let list=servList();if(!cfg.servicosV1&&!list.length)list=SERV_PADRAO.flatMap(([c,ns])=>ns.map(n=>({nome:n,valor:0,cat:c})));
+  const order=[],map={};list.forEach(x=>{const c=x.cat||"Outros";if(!map[c]){map[c]=[];order.push(c)}map[c].push(x)});if(!order.length){order.push("Serviços");map["Serviços"]=[{}]}
+  order.forEach(c=>srvCatBox(c,map[c],false));$("#srvSearch").value=""}
+function readCfgServs(){return $$("#cfgServs .mcat").flatMap(el=>{const cat=el.querySelector("[data-scat]").value.trim()||"Outros";
+  return Array.from(el.querySelectorAll(".sitems .srow")).map(r=>({nome:r.querySelector("[data-sv=nome]").value.trim(),valor:parseMoney(r.querySelector("[data-sv=valor]").value),cat}))}).filter(x=>x.nome)}
+let srvTmr=null,srvSusp=false;
+function srvSaveSoon(){if(srvSusp)return;$("#srvSaved").textContent="Salvando…";clearTimeout(srvTmr);srvTmr=setTimeout(srvSaveNow,800)}
+function srvSaveNow(){clearTimeout(srvTmr);srvTmr=null;cfg.servicos=readCfgServs();cfg.servicosV1=true;cfg.atualizadoEm=Date.now();LS.set("boreal_cfg",cfg);DB.mark("cfg","main");$("#srvSaved").textContent="✓ Salvo"}
 function findMat(name){const n=norm(name);return n?(cfg.materiais||[]).find(m=>norm(m.nome)===n):null}
 function initials(n){const p=String(n||"?").trim().split(/\s+/);return ((p[0]||"?")[0]+(p.length>1?p[p.length-1][0]:"")).toUpperCase()}
 function waNum(t){const d=String(t||"").replace(/\D/g,"");return d.length>=10&&d.length<=11?"55"+d:d}
@@ -2530,8 +2567,8 @@ function FormCtl(type){
   function setField(k,v){const i=q('[data-k="'+k+'"]');if(!i)return;if(i.tagName==="SELECT"&&v&&![...i.options].some(o=>o.value===v)){const o=document.createElement("option");o.textContent=v;i.appendChild(o)}i.value=v==null?"":v;if(i.tagName==="SELECT"&&i.selectedIndex<0)i.selectedIndex=0}
 
   /* materials */
-  function addMat(d){d=d||{};const el=document.createElement("div");el.className="mrow";
-    el.innerHTML='<div class="f mname">Material / peça<div class="mwrap"><input type="text" data-m="nome" autocomplete="off" placeholder="Digite o nome"><div class="sug"></div></div></div>'+
+  function addMat(d){d=d||{};const isSv=d.tipo==="serv";const el=document.createElement("div");el.className="mrow"+(isSv?" serv":"");
+    el.innerHTML='<div class="f mname">'+(isSv?"🔧 Serviço":"Material / peça")+'<div class="mwrap"><input type="text" data-m="nome" autocomplete="off" placeholder="'+(isSv?"Digite o serviço":"Digite o nome")+'"><input type="hidden" data-m="tipo" value="'+(isSv?"serv":"")+'"><div class="sug"></div></div></div>'+
     '<label class="f">Qtd<input type="number" data-m="qtd" inputmode="decimal" min="0" step="1"></label>'+
     '<label class="f">Valor unit. (R$)<input type="text" data-m="preco" inputmode="decimal" placeholder="0,00"></label>'+
     '<div class="f msub">Subtotal<div class="sub">R$ 0,00</div></div>'+
@@ -2539,6 +2576,17 @@ function FormCtl(type){
     const nome=el.querySelector('[data-m=nome]'),qtd=el.querySelector('[data-m=qtd]'),preco=el.querySelector('[data-m=preco]'),sug=el.querySelector(".sug");
     nome.value=d.nome||"";qtd.value=d.qtd!=null&&d.qtd!==""?String(d.qtd):"1";preco.value=typeof d.preco==="number"?(d.preco?fmt(d.preco):""):(d.preco||"");
     if(d.custo!=null&&d.custo!=="")el.dataset.custo=d.custo;
+    if(isSv){
+      const pickS=x=>{nome.value=x.nome;preco.value=x.valor?fmt(x.valor):"";sug.classList.remove("open");recalc();saveDraft();qtd.focus();qtd.select&&qtd.select()};
+      const showS=()=>{const n=norm(nome.value);const list=servList().filter(x=>!n||norm(x.nome).includes(n)).slice(0,8);
+        if(!list.length||(list.length===1&&norm(list[0].nome)===n)){sug.classList.remove("open");return}
+        sug.innerHTML="";list.forEach(x=>{const b=document.createElement("button");b.type="button";b.innerHTML=esc(x.nome)+"<span>"+(x.valor?"R$ "+fmt(x.valor):"sem preço")+"</span>";
+          b.addEventListener("pointerdown",e=>{e.preventDefault();pickS(x)});b.addEventListener("click",e=>{e.preventDefault();pickS(x)});sug.appendChild(b)});sug.classList.add("open")};
+      nome.addEventListener("input",()=>{const x=findServ(nome.value);if(x&&x.valor){preco.value=fmt(x.valor);recalc()}showS()});nome.addEventListener("focus",showS);
+      nome.addEventListener("blur",()=>{const x=findServ(nome.value);if(x&&nome.value!==x.nome){nome.value=x.nome;saveDraft()}setTimeout(()=>sug.classList.remove("open"),180)});
+      qtd.addEventListener("input",recalc);preco.addEventListener("input",recalc);preco.addEventListener("blur",()=>{if(preco.value.trim()){preco.value=fmt(parseMoney(preco.value));saveDraft()}});
+      el.querySelector(".mrm").onclick=()=>{el.remove();if(!qq(".mrow").length)addMat();recalc();saveDraft()};
+      q(".matList").appendChild(el);recalc();return el}
     function pick(m){const c=matCusto(m),v=matVenda(m);nome.value=m.nome;preco.value=v?fmt(v):"";if(!isFunc())el.dataset.custo=c;else delete el.dataset.custo;sug.classList.remove("open");recalc();saveDraft();qtd.focus();qtd.select&&qtd.select()}
     function showSug(){const n=norm(nome.value);const list=(cfg.materiais||[]).filter(m=>!n||norm(m.nome).includes(n)).slice(0,8);
       if(!list.length||(list.length===1&&norm(list[0].nome)===n)){sug.classList.remove("open");return}
@@ -2549,13 +2597,13 @@ function FormCtl(type){
     nome.addEventListener("blur",()=>{const m=findMat(nome.value);if(m&&nome.value!==m.nome){nome.value=m.nome;saveDraft()}setTimeout(()=>sug.classList.remove("open"),180)});
     qtd.addEventListener("input",recalc);preco.addEventListener("input",recalc);
     preco.addEventListener("blur",()=>{if(preco.value.trim()){preco.value=fmt(parseMoney(preco.value));saveDraft()}});
-    el.querySelector(".mrm").onclick=()=>{if(qq(".mrow").length<=1){nome.value="";qtd.value="1";preco.value="";delete el.dataset.custo}else el.remove();recalc();saveDraft()};
+    el.querySelector(".mrm").onclick=()=>{if(qq(".mrow:not(.serv)").length<=1&&!qq(".mrow.serv").length){nome.value="";qtd.value="1";preco.value="";delete el.dataset.custo}else el.remove();recalc();saveDraft()};
     q(".matList").appendChild(el);recalc();return el}
   function getMats(){return qq(".mrow").map(r=>{const g=k=>r.querySelector('[data-m='+k+']').value.trim();const qv=g("qtd")===""?1:Number(String(g("qtd")).replace(",","."))||0;const p=parseMoney(g("preco"));
-    const cs=r.dataset.custo;return{nome:g("nome"),qtd:qv,preco:p,sub:qv*p,custo:cs!=null&&cs!==""?Number(cs):null}}).filter(m=>m.nome||m.preco)}
-  function recalc(){let t=0;qq(".mrow").forEach(r=>{const qv=Number(String(r.querySelector('[data-m=qtd]').value||"1").replace(",","."))||0;const p=parseMoney(r.querySelector('[data-m=preco]').value);
-    const s=qv*p;t+=s;r.querySelector(".sub").textContent="R$ "+fmt(s)});const mo=parseMoney(q('[data-k="valor"]').value);
-    q(".matTotal").textContent="R$ "+fmt(t);q(".totMat").textContent="R$ "+fmt(t);q(".totMo").textContent="R$ "+fmt(mo);const sub=r2(t+mo),dt=(q('[data-k="data"]')||{}).value||today();
+    const cs=r.dataset.custo,tp=g("tipo");return tp==="serv"?{nome:g("nome"),qtd:qv,preco:p,sub:qv*p,tipo:"serv",custo:0}:{nome:g("nome"),qtd:qv,preco:p,sub:qv*p,custo:cs!=null&&cs!==""?Number(cs):null}}).filter(m=>m.nome||m.preco)}
+  function recalc(){let t=0,svT=0;qq(".mrow").forEach(r=>{const qv=Number(String(r.querySelector('[data-m=qtd]').value||"1").replace(",","."))||0;const p=parseMoney(r.querySelector('[data-m=preco]').value);
+    const s=qv*p;if(r.classList.contains("serv"))svT+=s;else t+=s;r.querySelector(".sub").textContent="R$ "+fmt(s)});svT=r2(svT);const mo=r2(parseMoney(q('[data-k="valor"]').value)+svT);
+    q(".matTotal").textContent=svT?"R$ "+fmt(svT)+" + R$ "+fmt(t):"R$ "+fmt(t);q(".matTotL").textContent=svT?"Serviços + materiais":"Total de materiais";q(".totMat").textContent="R$ "+fmt(t);q(".totMo").textContent="R$ "+fmt(mo);q(".totMoL").textContent=svT?"Serviços e mão de obra":"Mão de obra";const sub=r2(t+mo),dt=(q('[data-k="data"]')||{}).value||today();
     const ip=q('[data-k=indPor]');if(ip&&ip.options.length!==grupos().length+1+(ip.value&&!grupoBy(ip.value)?1:0))igOpts(ip);
     const gid=ip?ip.value:"",g=grupoBy(gid),pct=g&&gAtivo(g,dt)?(Number(g.desc)||0):0,dv=r2(sub*pct/100);
     let cred=0;const gd=isOS?grupoDono(norm((q('[data-k="cliNome"]')||{}).value||""),(q('[data-k="cliTel"]')||{}).value):null;if(gd)cred=Math.min(gCreditos(gd,st.docId).saldo,r2(sub-dv));cred=Math.max(0,r2(cred));
@@ -2581,6 +2629,7 @@ function FormCtl(type){
     box.innerHTML='<b>Como vai aparecer no PDF</b><table>'+rows.map(r=>'<tr><td>'+r[0]+'</td><td>'+(r[2]?'<small>'+r[2]+'</small>':'')+'</td><td>R$ '+fmt(r[1])+'</td></tr>').join("")+'</table>'+(rows.length<4?'<span class="warn">Coloque as taxas de 2x a 12x em Financeiro → Taxas da maquininha para mostrar as parcelas.</span>':'<small>De 2x em diante, o valor já inclui a taxa da maquininha.</small>')}
   ["pgto","parcelas","juros","mostraCartao","indPor","data","cliNome","cliTel"].forEach(k=>{const e=q('[data-k='+k+']');if(e)e.addEventListener("change",()=>{recalc();saveDraft()})});
   q(".addMat").onclick=()=>{const el=addMat();saveDraft();el.querySelector("[data-m=nome]").focus()};
+  q(".addServ").onclick=()=>{qq(".mrow:not(.serv)").forEach(r=>{const v=k=>r.querySelector('[data-m='+k+']').value.trim();if(!v("nome")&&!v("preco"))r.remove()});const el=addMat({tipo:"serv"});const ml=q(".matList");ml.insertBefore(el,ml.querySelector(".mrow:not(.serv)"));saveDraft();el.querySelector("[data-m=nome]").focus()};
   q(".addGrp").onclick=()=>openGroupPicker(api);
   function addGroup(g){qq(".mrow").forEach(r=>{const v=k=>r.querySelector('[data-m='+k+']').value.trim();if(!v("nome")&&!v("preco"))r.remove()});
     (g.itens||[]).forEach(it=>{addMat({nome:it.nome,qtd:it.qtd||1,preco:grpItemVenda(it),custo:isFunc()?null:grpItemCusto(it)})});
@@ -2819,17 +2868,17 @@ function pdfEquip(d,eqs){if(!eqs.length)return;d.section("Equipamentos");
 function pdfServ(d,svc,title){d.section(title);if(!svc.length)return;d.ensure(60);let x=MX,y=d.y;
   svc.forEach(s=>{d.font("700",20);const w=d.g.measureText(s).width+40;if(x+w>MX+CW){x=MX;y+=56;if(y+56>PH-FOOT-10){d.addPage(false);y=d.y}}
     d.g.fillStyle=C.navy;d.rr(x,y,w,44,22);d.g.fill();d.text(s,x+20,y+12,"700",20,"#fff");x+=w+12});d.y=y+70}
-function pdfMats(d,mats){let matTot=0;if(!mats.length)return 0;d.section("Peças e materiais");
-  const cols=[["Item",CW-560,"left"],["Qtd",120,"right"],["Valor unit.",210,"right"],["Subtotal",230,"right"]];
+function pdfMats(d,mats,serv){let matTot=0;if(!mats.length)return 0;d.section(serv?"Serviços":"Peças e materiais");
+  const cols=[[serv?"Serviço":"Item",CW-560,"left"],["Qtd",120,"right"],["Valor unit.",210,"right"],["Subtotal",230,"right"]];
   const head=()=>{let x=MX;d.g.fillStyle=C.ice;d.rr(MX,d.y,CW,44,8);d.g.fill();cols.forEach(([t,w,al])=>{d.text(t.toUpperCase(),al==="right"?x+w-14:x+14,d.y+13,"700",16,C.navy,al);x+=w});d.y+=50};
   d.ensure(110);head();
   mats.forEach(m=>{matTot+=m.sub;const ls=d.wrap(m.nome||"—",cols[0][1]-28,"500",21);const h=ls.length*28+20;if(d.ensure(h))head();
     ls.forEach((l,j)=>d.text(l,MX+14,d.y+10+j*28,"500",21,C.text));let x=MX+cols[0][1];
     [String(m.qtd).replace(".",","),"R$ "+fmt(m.preco),"R$ "+fmt(m.sub)].forEach((v,k)=>{const w=cols[k+1][1];d.text(v,x+w-14,d.y+10,k===2?"700":"500",21,C.text,"right");x+=w});
     d.y+=h;d.g.fillStyle=C.line;d.g.fillRect(MX,d.y,CW,1.5)});
-  d.ensure(60);d.y+=12;d.text("Total de materiais",PW-MX-260,d.y+4,"600",20,C.muted,"right");d.text("R$ "+fmt(matTot),PW-MX-14,d.y,"800",26,C.navy,"right");d.y+=64;return matTot}
+  d.ensure(60);d.y+=12;d.text(serv?"Total de serviços":"Total de materiais",PW-MX-260,d.y+4,"600",20,C.muted,"right");d.text("R$ "+fmt(matTot),PW-MX-14,d.y,"800",26,C.navy,"right");d.y+=64;return matTot}
 function pdfTotals(d,mo,matTot,desc,juros){desc=r2(desc||0);juros=r2(juros||0);const sub=mo+matTot;if(sub<=0)return;const tot=r2(sub-desc+juros);d.ensure(130);
-  const boxes=[];if(matTot>0&&mo>0){boxes.push(["Mão de obra",mo],["Peças e materiais",matTot])}else if(desc>0||juros>0)boxes.push(["Valor do serviço",sub]);if(desc>0)boxes.push(["Desconto",-desc]);if(juros>0)boxes.push(["Juros maquininha",juros,"+"]);boxes.push([juros>0?"Total com juros":"Total geral",tot]);
+  const boxes=[];if(matTot>0&&mo>0){boxes.push(["Serviços / mão de obra",mo],["Peças e materiais",matTot])}else if(desc>0||juros>0)boxes.push(["Valor do serviço",sub]);if(desc>0)boxes.push(["Desconto",-desc]);if(juros>0)boxes.push(["Juros maquininha",juros,"+"]);boxes.push([juros>0?"Total com juros":"Total geral",tot]);
   const n=boxes.length,gap=14,bw=(CW-gap*(n-1))/n,fs=n>4?24:n>3?28:34;
   boxes.forEach((b,i)=>{const x=MX+i*(bw+gap),big=i===boxes.length-1;d.g.fillStyle=big?C.navy:C.ice;d.rr(x,d.y,bw,96,12);d.g.fill();
     d.text(b[0].toUpperCase(),x+20,d.y+16,"700",16,big?"rgba(255,255,255,.75)":C.muted);d.text((b[1]<0?"− ":b[2]==="+"?"+ ":"")+"R$ "+fmt(Math.abs(b[1])),x+20,d.y+44,"800",fs,big?"#fff":(b[1]<0?"#B42318":C.navy))});d.y+=124}
@@ -2878,15 +2927,16 @@ async function renderPDF(D){
       meas.forEach((m,i)=>{const x=MX+i*(gw+14);d.g.fillStyle=C.ice;d.rr(x,d.y,gw,86,12);d.g.fill();d.text(m[0],x+16,d.y+14,"600",16,C.muted);d.text(m[1],x+16,d.y+42,"800",28,C.navy)});d.y+=112}
   }
 
-  const matTot=pdfMats(d,D.mats||[]);
+  const servTot=pdfMats(d,(D.mats||[]).filter(m=>m.tipo==="serv"),true);
+  const matTot=pdfMats(d,(D.mats||[]).filter(m=>m.tipo!=="serv"));
 
   if(isOS&&(f.obs||f.recom)){d.section("Observações");
     [["Problemas encontrados / serviço executado",f.obs],["Recomendações ao cliente",f.recom]].forEach(([t,v])=>{if(!v)return;d.ensure(70);d.text(t.toUpperCase(),MX,d.y,"700",16,C.muted);d.y+=30;d.para(v,22);d.y+=14})}
 
   d.section(isOS?"Valores e garantia":"Valores");
   const dscV=parseMoney(f.descVal),crV=parseMoney(f.credUsado);
-  const totDoc=r2(parseMoney(f.valor)+matTot-dscV-crV),ciP=isOS?cardInfo(f,totDoc):null;
-  pdfTotals(d,parseMoney(f.valor),matTot,dscV+crV,ciP&&ciP.cli?ciP.acres:0);
+  const moDoc=r2(parseMoney(f.valor)+servTot),totDoc=r2(moDoc+matTot-dscV-crV),ciP=isOS?cardInfo(f,totDoc):null;
+  pdfTotals(d,moDoc,matTot,dscV+crV,ciP&&ciP.cli?ciP.acres:0);
   if(dscV||crV)d.fields([dscV?["Desconto por indicação",(f.indNome||"Indicação")+" · "+pctFmt(Number(f.descPct)||0)+"% = R$ "+fmt(dscV)]:null,crV?["Crédito de indicações usado","R$ "+fmt(crV)]:null].filter(Boolean),2);
   if(ciP&&ciP.cli)d.fields([["Pagamento no cartão de crédito",ciP.n>1?ciP.n+"x de R$ "+fmt(ciP.parc)+" (total R$ "+fmt(ciP.total)+")":"À vista · R$ "+fmt(ciP.total)],["Juros da maquininha","Taxa de "+pctFmt(ciP.pct)+"% da operadora = R$ "+fmt(ciP.acres)]],2);
   if(!isOS&&f.mostraCartao==="sim"&&totDoc>0){const rows=parcelTable(totDoc),rh=40;d.ensure(70+rows.length*rh);
@@ -3172,7 +3222,7 @@ async function convertToOS(orc,ag){
   const o=ctl.os,P=orc.payload||{},pf=P.f||{};
   if(o.hasUnsaved()&&!(await ask("Substituir a OS que está na tela?","A OS em andamento ainda não foi gerada e será descartada para abrir o orçamento Nº "+pad(orc.num,4)+".","Substituir")))return;
   const f={};CLI_KEYS.forEach(k=>{if(pf[k])f[k]=pf[k]});f.cliAnt="Sim";if(pf.valor)f.valor=fmt(parseMoney(pf.valor));if(pf.garantia)f.garantia=pf.garantia;if(pf.tecnico)f.tecnico=pf.tecnico;if(ag&&ag.hora)f.hIni=ag.hora;if(pf.indPor)f.indPor=pf.indPor;
-  const mats=(P.mats||[]).map(m=>({nome:m.nome,qtd:m.qtd,preco:typeof m.preco==="number"?m.preco:parseMoney(m.preco),custo:m.custo}));
+  const mats=(P.mats||[]).map(m=>({nome:m.nome,qtd:m.qtd,preco:typeof m.preco==="number"?m.preco:parseMoney(m.preco),custo:m.custo,tipo:m.tipo}));
   o.fresh({f,eq:(P.eq||[]).map(e=>Object.assign({},e)),svc:(P.svc||[]).slice(),mats,refOrc:orc.num,refOrcId:orc.id,refAg:ag?ag.id:null,contrato:ag&&ag.contratoId?((contratos.find(x=>x.id===ag.contratoId)||{}).nome||ag.ctNome||"Contrato"):null,num:orc.num,numFixed:true,sigTec:cfg.sig||P.sigTec||""});
   orc.status="aprovado";orc.osNum=o.st.num;orc.atualizadoEm=Date.now();await DB.put("docs",orc);await refresh();
   showTab("os");const nm=o.matCount();toast("Orçamento Nº "+pad(orc.num,4)+" virou a OS Nº "+o.numStr()+": "+nm+" ite"+(nm===1?"m":"ns")+" de material, total R$ "+fmt(o.recalc()));
@@ -3261,10 +3311,10 @@ let finYM=ymNow();
 function osDone(d){return d.type==="os"&&d.payload&&!!d.payload.sigCli}
 function osYM(d){return String(((d.payload||{}).f||{}).data||d.data||"").slice(0,7)}
 function finOS(d){const P=d.payload||{},f=P.f||{},mg=margem();let custo=0,mk=0,mat=0,est=false;
-  (P.mats||[]).forEach(m=>{const q=Number(m.qtd)||0,p=Number(m.preco)||0;let c=m.custo;
+  let srv=0;(P.mats||[]).forEach(m=>{const q=Number(m.qtd)||0,p=Number(m.preco)||0;if(m.tipo==="serv"){srv+=p*q;return}let c=m.custo;
     if(c==null||c===""){const cm=findMat(m.nome);if(cm&&matCusto(cm))c=matCusto(cm);else{c=p/(1+mg/100);est=true}}
     c=Number(c)||0;custo+=c*q;mk+=(p-c)*q;mat+=p*q});
-  const mo=parseMoney(f.valor),dsc=r2(parseMoney(f.descVal)+parseMoney(f.credUsado)),liq=r2(mat+mo-dsc);const ci=cardInfo(f,liq);
+  const mo=r2(parseMoney(f.valor)+srv),dsc=r2(parseMoney(f.descVal)+parseMoney(f.credUsado)),liq=r2(mat+mo-dsc);const ci=cardInfo(f,liq);
   return{id:d.id,num:d.num,data:f.data||d.data,cliente:f.cliNome||d.cliNome,pg:f.pgSit||"",pgto:f.pgto||"",svc:(P.svc||[]).join(", "),bruto:liq,desc:dsc,custo:r2(custo),markup:r2(mk),mo:r2(mo),taxa:ci?ci.fee:0,juros:ci&&ci.cli?ci.acres:0,est}}
 function finMonthBase(ym){const os=docs.filter(d=>osDone(d)&&osYM(d)===ym).map(finOS).sort((a,b)=>(a.data||"").localeCompare(b.data||"")||(a.num-b.num));
   let bruto=0,custo=0,markup=0;os.forEach(o=>{bruto+=o.bruto;custo+=o.custo;markup+=o.markup});
@@ -3421,7 +3471,7 @@ function pixTestUI(){const b=$("#pixTest");if(!pixCfg()){b.hidden=true;return}b.
 let pixTmr=null;$("#pg-fin").addEventListener("input",e=>{if(!e.target.matches("[data-px]"))return;$("#pixSaved").textContent="Salvando…";clearTimeout(pixTmr);pixTmr=setTimeout(()=>{const p={};$$("#pg-fin [data-px]").forEach(i=>p[i.dataset.px]=i.value.trim());
   cfg.pix=p;cfg.atualizadoEm=Date.now();LS.set("boreal_cfg",cfg);DB.mark("cfg","main");$("#pixSaved").textContent="✓ Salvo";pixTestUI()},700)});
 $("#pg-fin").addEventListener("change",e=>{if(e.target.matches("select[data-px]"))e.target.dispatchEvent(new Event("input",{bubbles:true}))});
-function renderFinEditors(){if(finTmr)finSaveNow();finSuspend=true;$("#finMargem").value=margem();renderTaxas();renderPix();renderCfgMats(cfg.materiais);$("#cfgGroups").innerHTML="";(cfg.grupos||[]).forEach(cfgGroupCard);
+function renderFinEditors(){if(finTmr)finSaveNow();if(srvTmr)srvSaveNow();finSuspend=true;srvSusp=true;renderCfgServs();setTimeout(()=>{srvSusp=false},0);$("#finMargem").value=margem();renderTaxas();renderPix();renderCfgMats(cfg.materiais);$("#cfgGroups").innerHTML="";(cfg.grupos||[]).forEach(cfgGroupCard);
   setTimeout(()=>{finSuspend=false},0)}
 function finSaveSoon(){if(finSuspend)return;$("#finSaved").textContent="Salvando…";clearTimeout(finTmr);finTmr=setTimeout(finSaveNow,800)}
 function finSaveNow(){clearTimeout(finTmr);finTmr=null;cfg.materiais=readCfgMats();cfg.grupos=readGroups();const mg=Number($("#finMargem").value);cfg.margem=isNaN(mg)?20:mg;
@@ -3429,8 +3479,11 @@ function finSaveNow(){clearTimeout(finTmr);finTmr=null;cfg.materiais=readCfgMats
 const finObs=new MutationObserver(()=>finSaveSoon());finObs.observe($("#cfgMats"),{childList:true,subtree:true});finObs.observe($("#cfgGroups"),{childList:true,subtree:true});
 ["#cfgMats","#cfgGroups"].forEach(s=>$(s).addEventListener("input",finSaveSoon));
 $("#finMargem").addEventListener("input",()=>{$$("#cfgMats .crow").forEach(r=>{const c=parseMoney(r.querySelector("[data-cm=custo]").value);r.querySelector(".mv").textContent=c?"R$ "+fmt(r2(c*(1+(Number($("#finMargem").value)||0)/100))):"—"});finSaveSoon()});
-window.addEventListener("pagehide",()=>{if(finTmr)finSaveNow()});
-document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden"&&finTmr)finSaveNow()});
+window.addEventListener("pagehide",()=>{if(finTmr)finSaveNow();if(srvTmr)srvSaveNow()});
+$("#cfgServs").addEventListener("input",srvSaveSoon);
+$("#srvAddCat").onclick=()=>{const el=srvCatBox("Nova categoria",[{}],true);const i=el.querySelector("[data-scat]");i.focus();i.select();srvSaveSoon()};
+$("#srvSearch").addEventListener("input",e=>{const qv=norm(e.target.value);$$("#cfgServs .mcat").forEach(el=>{let any=false;el.querySelectorAll(".sitems .srow").forEach(r=>{const ok=!qv||norm(r.querySelector("[data-sv=nome]").value).includes(qv);r.hidden=!ok;if(ok)any=true});el.hidden=!!qv&&!any;el.open=!!qv&&any})});
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden"){if(finTmr)finSaveNow();if(srvTmr)srvSaveNow()}});
 function migrateCusto(){const mg=margem();(cfg.materiais||[]).forEach(m=>{if(m.custo==null){m.custo=m.preco?r2(m.preco/(1+mg/100)):0}delete m.preco});
   (cfg.grupos||[]).forEach(g=>(g.itens||[]).forEach(i=>{if(i.custo==null){i.custo=grpItemCusto(i)}delete i.preco}));
   cfg.custoV1=true;cfg.atualizadoEm=Date.now();LS.set("boreal_cfg",cfg);DB.mark("cfg","main");if(tab==="fin"&&!finEditing())renderFinEditors()}
@@ -3756,7 +3809,7 @@ function renderPainel(){const cur=ymNow(),months=[];for(let i=11;i>=0;i--)months
 
 /* equipe */
 function cfgPublico(){return{nome:cfg.nome,cnpj:cfg.cnpj,tel:cfg.tel,email:cfg.email,end:cfg.end,site:cfg.site,logo:cfg.logo,meses:cfg.meses,garantiaPadrao:cfg.garantiaPadrao,googleLink:cfg.googleLink,taxas:cfg.taxas||null,pix:cfg.pix||null,indGrupos:grupos(),atualizadoEm:cfg.atualizadoEm,
-  materiais:(cfg.materiais||[]).map(m=>({nome:m.nome,cat:m.cat,venda:matVenda(m)})),grupos:(cfg.grupos||[]).map(g=>({nome:g.nome,itens:(g.itens||[]).map(i=>({nome:i.nome,qtd:i.qtd,venda:grpItemVenda(i)}))}))}}
+  servicos:servList().map(x=>({nome:x.nome,cat:x.cat,valor:x.valor})),materiais:(cfg.materiais||[]).map(m=>({nome:m.nome,cat:m.cat,venda:matVenda(m)})),grupos:(cfg.grupos||[]).map(g=>({nome:g.nome,itens:(g.itens||[]).map(i=>({nome:i.nome,qtd:i.qtd,venda:grpItemVenda(i)}))}))}}
 async function loadTeam(){const el=$("#teamList");if(!sb||!navigator.onLine){el.innerHTML='<p class="hint">Conecte à internet para ver a equipe.</p>';return}
   el.innerHTML='<p class="hint">Carregando…</p>';const {data,error}=await sb.from("membros").select("user_id,email,nome,papel");
   if(error){el.innerHTML='<p class="msg show info">Para usar funcionários, rode antes o comando <b>supabase-funcionarios.sql</b> no SQL Editor do Supabase.</p>';return}
@@ -3770,7 +3823,7 @@ $("#teamList").addEventListener("click",async e=>{const b=e.target.closest("[dat
 /* ============================================================
    NUVEM (Supabase): login + sincronização
    ============================================================ */
-const APP_VERSION="Versão 27 · 22/11/2026 · Excluir despesa fixa só do mês escolhido";
+const APP_VERSION="Versão 28 · 23/11/2026 · Tabela de serviços";
 const SB_URL="https://xipiemiyvrwfxosbfpvl.supabase.co",SB_KEY="sb_publishable_RtUvyM---ErVKDlMnonTVg_AEy9yL5I";
 let sb=null,appStarted=false;
 function fnv(s){let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(36)+s.length.toString(36)}
