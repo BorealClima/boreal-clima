@@ -111,6 +111,14 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 
 .srow{display:grid;grid-template-columns:minmax(0,1fr) 140px 40px;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
 .srow-h{display:grid;grid-template-columns:minmax(0,1fr) 140px 40px;gap:8px;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;padding:4px 0}
 .srow .rm{width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:#fff;color:#B42318;font-weight:700}
+.mpref{background:#EEF5FF;border:1px solid #CFE0FA;border-radius:12px;padding:10px 14px;font-size:14px;color:#1E3A5F;margin:2px 0 12px}.mpref b{color:var(--navy)}.mpref:empty{display:none}
+.mpout{font-size:14px;font-weight:700;color:var(--blue);margin:-2px 0 10px;min-height:2px}
+.mpg{padding:12px 14px;border-radius:12px;font-size:16px;margin-bottom:10px}.mpg-ok{background:#E7F6EE;color:#0E6B3F}.mpg-at{background:#FFF4E5;color:#8A5800}.mpg-cu{background:#FDECEC;color:#B42318}
+.mpr{border:1px solid var(--line);border-left:6px solid #B8C4D3;border-radius:12px;padding:10px 14px;margin-bottom:8px;background:#fff}
+.mpr-ok{border-left-color:#17905A}.mpr-at{border-left-color:#E0A100}.mpr-cu{border-left-color:#B42318}
+.mpr-h{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.mpr-h>span:first-child{flex:1;min-width:160px;font-weight:700}.mpr-h b{font-size:18px;color:var(--navy)}
+.mpr-m{font-size:14px;color:#3B4A5E;margin-top:4px}.mpr-m small{color:var(--muted)}
+.pill.mp{background:#E2F5F4;color:#0B6F6F}
 .taxgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin-top:10px}
 .ck{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
 .ck:last-child{border-bottom:0}
@@ -349,6 +357,7 @@ body.func .adm{display:none!important}
     <button class="tab" data-tab="ag" role="tab">Agenda <span class="cnt" id="cntAg" hidden>0</span></button>
     <button class="tab" data-tab="orc" role="tab">Orçamento</button>
     <button class="tab" data-tab="os" role="tab">Ordem de Serviço</button>
+    <button class="tab" data-tab="mp" role="tab">Manutenção preventiva</button>
     <button class="tab adm" data-tab="fin" role="tab">Financeiro</button>
     <button class="tab adm" data-tab="pn" role="tab">Painel</button>
   </nav>
@@ -573,6 +582,83 @@ body.func .adm{display:none!important}
 
 
 <!-- =================== ABA 4 · FINANCEIRO =================== -->
+<main class="page" id="pg-mp">
+  <section class="card">
+    <h2><span class="n">1</span>Cliente</h2>
+    <div class="grid">
+      <label class="f wide">Nome do cliente<input type="text" data-mp="cliNome" list="cliNames" autocomplete="off" placeholder="Digite ou escolha um cliente"></label>
+      <label class="f">WhatsApp<input type="tel" data-mp="cliTel" placeholder="(19) 99999-9999"></label>
+      <label class="f">Cidade / UF<input type="text" data-mp="cliCidade"></label>
+      <label class="f wide">Endereço<input type="text" data-mp="cliEnd"></label>
+    </div>
+  </section>
+  <section class="card">
+    <h2><span class="n">2</span>Equipamento</h2>
+    <div id="mpHist"></div>
+    <div class="grid">
+      <label class="f wide">Identificação da máquina<input type="text" data-mp="eqId" list="mpEqNames" autocomplete="off" placeholder="Ex.: Split da sala, Quarto casal, Salão 1"></label>
+      <label class="f">Tipo<select data-mp="tipo"><option>Split hi-wall</option><option>Piso-teto</option><option>Cassete</option><option>Janela</option><option>Multi-split</option><option>Outro</option></select></label>
+      <label class="f">Tecnologia<select data-mp="tec"><option>Inverter</option><option>Convencional (on/off)</option></select></label>
+      <label class="f">Fluido refrigerante (gás)<select data-mp="gas"><option>R-410A</option><option>R-32</option><option>R-22</option></select></label>
+      <label class="f">Capacidade (BTU/h)<select data-mp="btus"><option value="">—</option><option>7.000</option><option>9.000</option><option>12.000</option><option>18.000</option><option>22.000</option><option>24.000</option><option>30.000</option><option>36.000</option><option>48.000</option><option>58.000</option><option>60.000</option></select></label>
+      <label class="f">Marca<input type="text" data-mp="marca"></label>
+      <label class="f">Modelo<input type="text" data-mp="modelo"></label>
+      <label class="f">Tensão nominal<select data-mp="vnom"><option value="220">220 V</option><option value="127">127 V</option><option value="380">380 V</option></select></label>
+      <label class="f">Corrente nominal da placa (A)<input type="text" inputmode="decimal" data-mp="inom" placeholder="Ex.: 5,2"></label>
+    </div>
+    <datalist id="mpEqNames"></datalist>
+  </section>
+  <section class="card">
+    <h2><span class="n">3</span>Condições</h2>
+    <div class="grid">
+      <label class="f">Data<input type="date" data-mp="data"></label>
+      <label class="f">Temperatura do ambiente interno (°C)<input type="text" inputmode="decimal" data-mp="tint" placeholder="Opcional"></label>
+      <label class="f">Técnico<input type="text" data-mp="tecnico"></label>
+    </div>
+  </section>
+  <section class="card">
+    <h2><span class="n">4</span>Medições</h2>
+    <p class="hint">Meça com o aparelho em refrigeração há pelo menos 15 minutos. No <b>inverter</b>, use o modo teste ou a temperatura mínima com ventilação alta, para o compressor ficar em alta rotação. O app mostra as pressões esperadas para o gás e a temperatura ambiente, e calcula sozinho o superaquecimento e o Delta T.</p>
+    <h3 class="fint">Unidade interna (ar)</h3>
+    <div class="grid">
+      <label class="f">Temperatura de retorno / entrada de ar (°C)<input type="text" inputmode="decimal" data-mp="tret" placeholder="Ex.: 25"></label>
+      <label class="f">Temperatura de insuflamento / saída de ar (°C)<input type="text" inputmode="decimal" data-mp="tins" placeholder="Ex.: 14"></label>
+    </div><div class="mpout" id="mpDtOut"></div>
+    <h3 class="fint">Parte elétrica</h3>
+    <div class="grid">
+      <label class="f">Tensão de chegada na máquina (V)<input type="text" inputmode="decimal" data-mp="v" placeholder="Ex.: 218"></label>
+      <label class="f">Corrente do compressor (A)<input type="text" inputmode="decimal" data-mp="a" placeholder="Ex.: 4,8"></label>
+    </div>
+    <h3 class="fint">Pressões e temperaturas do gás</h3>
+    <div class="grid">
+      <label class="f">Temperatura ambiente externa (°C)<input type="text" inputmode="decimal" data-mp="text" placeholder="Ex.: 30"></label>
+      <label class="f">Unidade do manifold<select data-mp="un" id="mpUn"><option value="psi">psi</option><option value="bar">bar</option></select></label>
+    </div>
+    <div class="mpref" id="mpRepOut"></div>
+    <div class="grid">
+      <label class="f">Pressão de repouso, desligado (<span class="mp-un">psi</span>)<input type="text" inputmode="decimal" data-mp="prep" placeholder="Com a máquina parada há 15 min"></label>
+      <label class="f">Pressão de trabalho, ligado (<span class="mp-un">psi</span>)<input type="text" inputmode="decimal" data-mp="pbaixa" placeholder="Na válvula de serviço (baixa)"></label>
+      <label class="f">Temperatura do tubo de sucção (°C)<input type="text" inputmode="decimal" data-mp="tsuc" placeholder="Tubo grosso, na condensadora"></label>
+    </div><div class="mpout" id="mpTevOut"></div>
+    <div class="grid">
+      <label class="f">Pressão de alta, opcional (<span class="mp-un">psi</span>)<input type="text" inputmode="decimal" data-mp="palta" placeholder="Se tiver tomada de alta"></label>
+      <label class="f">Temperatura do tubo de descarga (°C)<input type="text" inputmode="decimal" data-mp="tdesc" placeholder="A 5–10 cm do compressor"></label>
+    </div><div class="mpout" id="mpTcoOut"></div>
+  </section>
+  <section class="card">
+    <h2><span class="n">5</span>Resultados e diagnóstico</h2>
+    <div id="mpRes"></div>
+  </section>
+  <section class="card">
+    <h2><span class="n">6</span>Observações</h2>
+    <div class="grid">
+      <label class="f wide">Observações do técnico<textarea data-mp="obs" rows="3" placeholder="O que foi feito: limpeza de filtros, serpentina, dreno…"></textarea></label>
+      <label class="f wide">Recomendações ao cliente<textarea data-mp="rec" rows="3"></textarea></label>
+    </div>
+    <div class="actions" style="margin-top:14px"><button class="btn line" type="button" id="mpClear">Limpar</button><span style="flex:1"></span><button class="btn primary" type="button" id="mpGen">✓ Finalizar e salvar na ficha</button></div>
+  </section>
+</main>
+
 <main class="page" id="pg-fin">
   <section class="card">
     <div class="finhead">
@@ -3012,7 +3098,7 @@ let review=null,dlNs=null;
 if(window.claude&&typeof window.claude.use==="function"){window.claude.use("downloads").then(ns=>{dlNs=ns}).catch(()=>{})}
 function slug(s){return (s||"cliente").normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^A-Za-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,40)||"cliente"}
 function msg(t,kind){const m=$("#revMsg");m.className="msg show "+kind;m.textContent=t}
-async function showDocPdf(rec,from){
+async function showDocPdf(rec,from){if(rec&&rec.type==="mp")return showMpPdf(rec);
   await ensurePhotos(rec);
   const D=rec.payload,isOS=rec.type==="os";const pages=await renderPDF(D);
   const name=(isOS?"OS-":"Orcamento-")+pad(rec.num,4)+"_"+slug(D.f.cliNome)+"_"+(D.f.data||today())+".pdf";
@@ -3039,15 +3125,15 @@ $("#btnSave").onclick=async()=>{if(!review)return;
   try{const r=await saveFile(review.pdf,review.name);if(r==="abort"){msg("Cancelado.","info");return}
     review.saved=true;msg(r==="shared"?"PDF enviado/compartilhado.":"PDF salvo. Agora é só anexar no WhatsApp do cliente.","ok")}
   catch(e){const c=e&&e.code;msg(c==="rate_limited"?"Já tem uma confirmação aberta — tente de novo em instantes.":"Não foi possível salvar aqui ("+(c||e.message||"erro")+").","err")}};
-$("#btnNew2").onclick=async()=>{const t=review&&review.from;closeM($("#mReview"));if(t)await ctl[t].newDoc(false)};
+$("#btnNew2").onclick=async()=>{const t=review&&review.from;closeM($("#mReview"));if(t==="mp"){mpDefaults();$("#mpUn").dataset.prev="psi";mpSave();mpRender();window.scrollTo(0,0);return}if(t)await ctl[t].newDoc(false)};
 
 /* ============================================================
    ABA CLIENTES
    ============================================================ */
 let cliView=null,docFilter="all";
-function stats(key){const ds=docs.filter(d=>d.cli===key);const os=ds.filter(d=>d.type==="os");const lastOS=os.reduce((m,d)=>(d.data||"")>m?d.data:m,"");const mo=lastOS?monthsSince(lastOS):0;
+function stats(key){const ds=docs.filter(d=>d.cli===key);const os=ds.filter(d=>d.type==="os");const lastOS=ds.filter(d=>d.type==="os"||d.type==="mp").reduce((m,d)=>(d.data||"")>m?d.data:m,"");const mo=lastOS?monthsSince(lastOS):0;
   const cl=clients.find(x=>x.key===key)||{};const lem=cl.lembreteEm||"";const ref=lem>lastOS?lem:lastOS;
-  return{ds,os,orc:ds.filter(d=>d.type==="orc"),last:ds.reduce((m,d)=>Math.max(m,d.atualizadoEm||0),0),lastOS,mo,lem,due:!!lastOS&&monthsSince(ref)>=6,reminded:!!lastOS&&!!lem&&lem>=lastOS&&monthsSince(lem)<6}}
+  return{ds,os,mp:ds.filter(d=>d.type==="mp"),orc:ds.filter(d=>d.type==="orc"),last:ds.reduce((m,d)=>Math.max(m,d.atualizadoEm||0),0),lastOS,mo,lem,due:!!lastOS&&monthsSince(ref)>=6,reminded:!!lastOS&&!!lem&&lem>=lastOS&&monthsSince(lem)<6}}
 function maintMsg(c,s){const fn=first(c.cliNome),emp=cfg.nome||"Boreal Clima";
   const last=s.os.slice().sort((a,b)=>(b.data||"").localeCompare(a.data||""))[0];const SV={"Instalação":"a instalação","Limpeza / Higienização":"a limpeza e higienização","Manutenção preventiva":"a manutenção preventiva","Manutenção corretiva":"a manutenção corretiva","Carga de gás":"a carga de gás","Desinstalação":"a desinstalação","Visita técnica / Orçamento":"uma visita técnica"};
   const svc=last&&last.svc&&last.svc.length?last.svc.map(x=>SV[x]||x.toLowerCase()).join(" e "):"";
@@ -3169,8 +3255,11 @@ function renderDetail(){
   '<button class="btn line small" data-act="agendar">📅 Agendar</button><button class="btn line small" data-act="edit">Editar dados</button></div></section>'+
   garBanner(s)+agCliBox(c)+
   '<div class="stats"><div>Ordens de serviço<b>'+s.os.length+'</b></div><div>Orçamentos<b>'+s.orc.length+'</b></div><div>Total em OS<b>R$ '+fmt(fat)+"</b></div></div>"+
-  '<div class="filt">'+[["all","Todos ("+s.ds.length+")"],["orc","Orçamentos ("+s.orc.length+")"],["os","Ordens de serviço ("+s.os.length+")"]].map(([k,l])=>'<button class="chip" type="button" data-filt="'+k+'" aria-pressed="'+(docFilter===k)+'">'+l+"</button>").join("")+"</div>"+
-  (list.length?list.map(d=>{const P=d.payload||{},f=P.f||{};const sub=[(d.svc||[]).join(" · ")||"Serviço não informado"];
+  '<div class="filt">'+[["all","Todos ("+s.ds.length+")"],["orc","Orçamentos ("+s.orc.length+")"],["os","Ordens de serviço ("+s.os.length+")"]].concat(s.mp.length?[["mp","Preventivas ("+s.mp.length+")"]]:[]).map(([k,l])=>'<button class="chip" type="button" data-filt="'+k+'" aria-pressed="'+(docFilter===k)+'">'+l+"</button>").join("")+"</div>"+
+  (list.length?list.map(d=>{const P=d.payload||{},f=P.f||{};
+      if(d.type==="mp"){const g=P.geral;return'<div class="doc mp"><div class="dh"><span class="pill mp">PREVENTIVA</span><span class="dt">'+esc(f.eqId||"Equipamento")+'</span><span class="dd">'+br(d.data)+"</span>"+(g?'<span class="pill '+ST[g][1]+'">'+ST[g][0]+"</span>":"")+'</div><div class="ds">'+esc([f.tipo,f.btus?f.btus+" BTU/h":"",f.gas,f.marca].filter(Boolean).join(" · "))+'</div><div class="da">'+
+        '<button class="btn ghost small" data-act="pdf" data-id="'+d.id+'">📄 Ver relatório</button><button class="btn line small" data-act="mpopen" data-id="'+d.id+'">✎ Abrir</button><button class="btn danger small" data-act="del" data-id="'+d.id+'">Excluir</button></div></div>'}
+      const sub=[(d.svc||[]).join(" · ")||"Serviço não informado"];
       if(d.type==="orc"&&validadeOf(d))sub.push((isExpired(d)?"venceu em ":"válido até ")+br(validadeOf(d)));if(d.type==="os"&&d.refOrc)sub.push("do orçamento Nº "+pad(d.refOrc,4));
       const rel=orcReleased(d),canConv=d.type==="orc"&&orcHolds(d)&&d.status!=="aprovado",aceitoSemOS=d.type==="orc"&&d.status==="aprovado"&&!d.osNum;
       if(rel)sub.push(d.status==="recusado"?"não fechou: o número "+pad(d.num,4)+" foi liberado":"o número "+pad(d.num,4)+" foi liberado");
@@ -3201,6 +3290,8 @@ $("#cliDetail").addEventListener("click",async e=>{
     for(const x of stats(c.key).ds)await DB.del("docs",x.id);await DB.del("clients",c.key);cliView=null;await refresh();toast("Cliente excluído");return}
   if(!d)return;
   if(act==="pdf"){b.disabled=true;try{await showDocPdf(d,null)}catch(err){console.error(err);toast("Erro ao gerar o PDF")}finally{b.disabled=false}return}
+  if(act==="mpopen")return mpOpen(d);
+  if(act==="del"&&d.type==="mp"){if(!(await ask("Excluir este relatório de preventiva?",(((d.payload||{}).f||{}).eqId||"")+" · "+br(d.data)+". Ele sai da ficha de "+c.cliNome+".","Excluir")))return;await DB.del("docs",d.id);await refresh();toast("Relatório excluído");return}
   if(act==="open"){await ensurePhotos(d);const C2=ctl[d.type];if(C2.hasUnsaved()&&C2.st.docId!==d.id&&!(await ask("Substituir o que está na tela?","Há "+(d.type==="os"?"uma OS":"um orçamento")+" em andamento que ainda não foi gerado. Ele será descartado.","Substituir")))return;
     C2.applyData(Object.assign({},d.payload,{docId:d.id,num:d.num}));C2.st.dirty=false;C2.flush();showTab(d.type);toast("Editando "+(d.type==="os"?"OS":"orçamento")+" Nº "+pad(d.num,4));return}
   if(act==="conv")return convertToOS(d,agenda.find(a=>a.orcId===d.id&&agActive(a)));
@@ -3286,11 +3377,11 @@ function setDockLabel(){$("#btnGen").textContent=tab==="orc"?"Gerar orçamento":
 function showTab(t){if(isFunc()&&["fin","pn"].includes(t))t="cli";tab=t;LS.set("boreal_tab",t);
   $$(".tab").forEach(b=>{b.classList.toggle("on",b.dataset.tab===t);b.setAttribute("aria-selected",b.dataset.tab===t)});
   $$(".page").forEach(p=>p.classList.toggle("on",p.id==="pg-"+t));
-  const noDock=["cli","fin","ag","pn"].includes(t);$(".dock").hidden=noDock;$("#hdrNum").hidden=noDock;$("#btnNew").hidden=t==="fin"||t==="pn";
-  $("#hdrSub").textContent={cli:"Clientes",orc:"Orçamento",os:"Ordem de Serviço",fin:"Financeiro",ag:"Agenda",pn:"Painel"}[t];
+  const noDock=["cli","fin","ag","pn","mp"].includes(t);$(".dock").hidden=noDock;$("#hdrNum").hidden=noDock;$("#btnNew").hidden=t==="fin"||t==="pn"||t==="mp";
+  $("#hdrSub").textContent={cli:"Clientes",orc:"Orçamento",os:"Ordem de Serviço",fin:"Financeiro",ag:"Agenda",pn:"Painel",mp:"Manutenção preventiva"}[t];if(t==="mp")mpRender();
   if(t!=="fin"&&t!=="pn")$("#btnNew").title=$("#btnNew").ariaLabel={cli:"Novo cliente",orc:"Novo orçamento",os:"Nova OS",ag:"Agendar serviço"}[t];
   setDockLabel();
-  if(t==="cli")renderClientes();else if(t==="fin"){renderFin();renderFinEditors()}else if(t==="ag")renderAgenda();else if(t==="pn")renderPainel();else requestAnimationFrame(()=>ctl[t].onShow());
+  if(t==="cli")renderClientes();else if(t==="fin"){renderFin();renderFinEditors()}else if(t==="ag")renderAgenda();else if(t==="pn")renderPainel();else if(t==="mp")mpRender();else if(ctl[t])requestAnimationFrame(()=>ctl[t].onShow());
   window.scrollTo(0,0)}
 $$(".tab").forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
 $("#btnNew").onclick=()=>{if(tab==="cli")openClientModal(null);else if(tab==="ag")openAg(null);else if(ctl[tab])ctl[tab].newDoc(true)};
@@ -3788,6 +3879,138 @@ $("#fxDel").onclick=async()=>{if(!fixEdit)return;const mes=ymLabel(finYM).toLowe
 $("#fxEnd").onclick=async()=>{if(!fixEdit)return;if(!(await ask("Encerrar "+fixEdit.nome+"?","Ela conta até "+ymLabel(finYM).toLowerCase()+" e para de entrar nos meses seguintes. Os meses anteriores não mudam.","Encerrar")))return;
   const F=finCfg(),x=F.fixas.find(y=>y.id===fixEdit.id);if(x.ini>finYM)F.fixas=F.fixas.filter(y=>y.id!==x.id);else x.fim=finYM;await saveFinCfg();closeM($("#mFix"));renderFin();toast("Despesa fixa encerrada")};
 
+const PT_T=[-30,-28,-26,-24,-22,-20,-18,-16,-14,-12,-10,-8,-6,-4,-2,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65];
+const PT={"R-22":{L:[163,178,193,209,226,245,264,285,307,330,354,380,407,436,466,499,515,532,549,567,585,603,622,642,661,682,703,724,745,768,790,813,837,861,886,911,937,963,990,1017,1045,1073,1102,1132,1162,1193,1224,1256,1289,1322,1356,1390,1426,1461,1498,1535,1573,1611,1650,1690,1731,1771,1814,1856,1900,1944,1989,2034,2081,2129,2176,2230,2274,2326,2377,2429,2482,2535,2590,2646,2702],V:null},"R-410A":{L:[271,294,318,344,372,401,432,464,499,535,574,614,657,702,749,799,825,851,878,906,934,963,993,1023,1054,1086,1118,1151,1185,1220,1255,1291,1328,1366,1404,1444,1484,1525,1567,1609,1653,1697,1743,1789,1836,1884,1933,1983,2034,2086,2139,2193,2248,2304,2361,2419,2479,2539,2600,2663,2726,2791,2857,2924,2992,3061,3132,3204,3277,3351,3427,3503,3581,3661,3741,3823,3907,3991,4077,4165,4253],V:[270,293,317,343,371,400,430,463,497,534,572,613,655,700,747,797,822,848,875,903,931,960,989,1020,1050,1082,1114,1147,1181,1216,1251,1287,1324,1361,1400,1439,1479,1520,1561,1604,1647,1692,1737,1783,1830,1878,1927,1977,2027,2079,2132,2186,2241,2296,2353,2411,2470,2530,2591,2654,2717,2782,2847,2914,2982,3052,3122,3194,3267,3341,3416,3493,3571,3651,3732,3814,3897,3982,4068,4156,4245]},"R-32":{L:[273,297,322,348,376,406,437,471,506,543,583,624,668,714,762,813,840,867,894,923,951,981,1012,1043,1074,1107,1140,1174,1209,1245,1281,1318,1356,1395,1434,1475,1516,1558,1601,1645,1690,1735,1782,1830,1878,1928,1978,2029,2082,2135,2190,2245,2302,2360,2418,2478,2539,2601,2665,2729,2795,2862,2930,2999,3069,3141,3214,3289,3364,3442,3520,3600,3681,3764,3848,3933,4020,4109,4199,4291,4384],V:null}};
+/* ============================================================
+   MANUTENÇÃO PREVENTIVA · relatório de medições
+   ============================================================ */
+const ATM=101.325;
+function ptInterp(xs,ys,x){if(x==null||isNaN(x))return null;if(x<=xs[0])return ys[0]+(x-xs[0])*(ys[1]-ys[0])/(xs[1]-xs[0]);const n=xs.length;
+  if(x>=xs[n-1])return ys[n-1]+(x-xs[n-1])*(ys[n-1]-ys[n-2])/(xs[n-1]-xs[n-2]);for(let i=1;i<n;i++)if(x<=xs[i])return ys[i-1]+(x-xs[i-1])*(ys[i]-ys[i-1])/(xs[i]-xs[i-1]);return null}
+function ptCol(gas,k){const g=PT[gas]||PT["R-410A"];return(k==="V"&&g.V)?g.V:g.L}
+function tSat(gas,kpaAbs,k){if(kpaAbs==null||isNaN(kpaAbs)||kpaAbs<=0)return null;return ptInterp(ptCol(gas,k),PT_T,kpaAbs)}
+function pSat(gas,t,k){if(t==null||isNaN(t))return null;return ptInterp(PT_T,ptCol(gas,k),t)}
+function toAbs(v,un){if(v==null||isNaN(v))return null;return un==="bar"?v*100+ATM:v*6.894757+ATM}
+function fromAbs(k,un){if(k==null)return null;return un==="bar"?(k-ATM)/100:(k-ATM)/6.894757}
+const num1=v=>v==null||isNaN(v)?"—":(Math.round(v*10)/10).toFixed(1).replace(".",",");
+const mpN=v=>{if(v==null)return null;const s=String(v).trim().replace(",",".");if(s==="")return null;const n=Number(s);return isNaN(n)?null:n};
+const MP_KEYS=["cliNome","cliTel","cliEnd","cliCidade","eqId","tipo","marca","modelo","btus","tec","gas","vnom","inom","data","text","tint","tret","tins","v","a","un","prep","pbaixa","tsuc","palta","tliq","tdesc","obs","rec","tecnico"];
+const ST={ok:["OK","ok"],at:["Atenção","warn"],cu:["Cuidado","bad"]};
+function band(v,okLo,okHi,atLo,atHi){if(v==null)return null;if(v>=okLo&&v<=okHi)return"ok";if(v>=atLo&&v<=atHi)return"at";return"cu"}
+function mpWork(gas,text,un){let lo=2,hi=10;if(text!=null){if(text<=25){lo=1;hi=8}else if(text>35){lo=3;hi=12}}
+  return{lo,hi,plo:fromAbs(pSat(gas,lo,"V"),un),phi:fromAbs(pSat(gas,hi,"V"),un)}}
+function mpCalc(f){const un=f.un||"psi",gas=f.gas||"R-410A",R=[];const n=k=>mpN(f[k]);
+  const tret=n("tret"),tins=n("tins"),V=n("v"),A=n("a"),vnom=n("vnom"),inom=n("inom"),text=n("text");
+  const prep=n("prep"),pb=n("pbaixa"),tsuc=n("tsuc"),pa=n("palta"),tdesc=n("tdesc");
+  const add=(id,lab,val,unit,st,ref,msg)=>R.push({id,lab,val,unit,st,ref,msg});
+  // ΔT
+  if(tret!=null&&tins!=null){const dt=tret-tins,st=band(dt,8,13,6,16);
+    add("dt","Delta T (retorno − insuflamento)",dt,"°C",st,"8 a 13 °C",st==="ok"?"Troca de calor normal na evaporadora.":dt<8?"Pouca troca de calor: pode ser falta de fluido, compressor fraco, ou serpentina e filtro muito sujos.":"Pouca vazão de ar: filtro ou serpentina sujos, ventilador em velocidade baixa ou início de congelamento.")}
+  // tensão
+  if(V!=null&&vnom){const d=(V-vnom)/vnom*100,st=band(Math.abs(d),0,5,5,10);
+    add("v","Tensão de chegada",V,"V",st,vnom+" V ±5%",st==="ok"?"Tensão dentro do normal.":(d<0?"Tensão baixa ("+num1(d)+"%): ":"Tensão alta (+"+num1(d)+"%): ")+"verifique a rede, o disjuntor e as conexões. Fora de ±10% pode danificar o compressor e a placa.")}
+  // corrente
+  if(A!=null&&inom){const p=A/inom*100;let st=p<=100?"ok":p<=110?"at":"cu",msg=st==="ok"?"Corrente dentro da nominal ("+Math.round(p)+"% da placa).":"Corrente acima da nominal ("+Math.round(p)+"% da placa): condensadora suja, excesso de fluido, tensão baixa ou compressor forçando.";
+    if(p<45&&f.tec!=="Inverter"){st="at";msg="Corrente muito baixa ("+Math.round(p)+"% da placa): possível falta de fluido ou compressor com baixa compressão."}
+    add("a","Corrente do compressor",A,"A",st,"até "+num1(inom)+" A (placa)",msg)}
+  // repouso
+  if(prep!=null){const kp=toAbs(prep,un);let st=null,msg="Sem a temperatura ambiente externa não dá para comparar.",ref="";
+    if(text!=null){const ps=pSat(gas,text,"V");const d=(kp-ps)/ps*100;st=band(Math.abs(d),0,10,10,20);ref="≈ "+num1(fromAbs(ps,un))+" "+un+" ("+gas+" a "+num1(text)+" °C)";
+      msg=st==="ok"?"Dentro do padrão: a pressão parada bate com a temperatura ambiente, há fluido no sistema e sem sinal de ar.":(st==="at"?"Um pouco fora do padrão ("+(d>0?"+":"")+num1(d)+"%). ":"Fora do padrão ("+(d>0?"+":"")+num1(d)+"%). ")+(d>0?"Acima do esperado: pode haver ar ou incondensáveis, o fluido pode não ser o informado, ou a máquina não ficou parada tempo suficiente.":"Abaixo do esperado: pouco fluido no sistema (pode estar quase vazio). Procure vazamento.")}
+    add("prep","Pressão de repouso",prep,un,st,ref,msg)}
+  // trabalho (baixa)
+  let tev=null;if(pb!=null){tev=tSat(gas,toAbs(pb,un),"V");const W=mpWork(gas,text,un);const st=band(tev,W.lo,W.hi,W.lo-2,W.hi+3);
+    add("pb","Pressão de trabalho",pb,un,st,num1(W.plo)+" a "+num1(W.phi)+" "+un+" ("+gas+(text!=null?" com "+num1(text)+" °C lá fora":"")+") · evaporação "+num1(tev)+" °C",
+      st==="ok"?"Dentro do padrão para este gás e esta temperatura ambiente.":tev<W.lo?(st==="at"?"Um pouco abaixo do padrão. ":"Abaixo do padrão. ")+"Pode ser falta de fluido, pouco ar na evaporadora (filtro ou serpentina sujos) ou restrição no capilar/filtro."+(tev<0?" Com evaporação abaixo de 0 °C a serpentina congela.":""):(st==="at"?"Um pouco acima do padrão. ":"Acima do padrão. ")+"Pode ser excesso de fluido, compressor com baixa compressão ou carga térmica muito alta no ambiente.")}
+  if(tev!=null&&tsuc!=null){const sa=tsuc-tev,st=band(sa,4,8,2,12);
+    add("sa","Superaquecimento",sa,"K",st,"4 a 8 K",st==="ok"?"Carga de fluido adequada.":sa<4?"Superaquecimento baixo: excesso de fluido ou pouca troca na evaporadora. Risco de líquido voltar ao compressor.":"Superaquecimento alto: falta de fluido (vazamento), restrição no capilar/filtro ou válvula de expansão fechando.")}
+  // condensação (opcional)
+  let tco=null;if(pa!=null){tco=tSat(gas,toAbs(pa,un),"L");let st=null,ref="",msg="Calculada pela pressão de alta.";
+    if(text!=null){const ap=tco-text;st=band(ap,8,18,5,22);ref="8 a 18 K acima da externa ("+num1(ap)+" K)";
+      msg=st==="ok"?"Condensação normal para a temperatura externa.":ap>18?"Condensação alta: condensadora suja, ventilador fraco, ar recirculando, excesso de fluido ou ar no sistema.":"Condensação baixa: falta de fluido ou compressor com baixa compressão."}
+    add("tco","Pressão de alta / condensação",pa,un,st,ref+(ref?" · ":"")+"condensação "+num1(tco)+" °C",msg)}
+  // descarga
+  if(tdesc!=null){const r32=gas==="R-32",okHi=r32?100:95,atHi=r32?110:107;const st=tdesc<=okHi?"ok":tdesc<=atHi?"at":"cu";
+    add("td","Temperatura do tubo de descarga",tdesc,"°C",st,"até "+okHi+" °C",st==="ok"?"Compressor trabalhando sem superaquecer.":"Descarga alta: compressor superaquecendo. Causas comuns: falta de fluido (superaquecimento alto), condensadora suja, ar no sistema ou tensão baixa. Acima de "+atHi+" °C o óleo começa a se degradar.")}
+  const order={cu:3,at:2,ok:1};let geral=null;R.forEach(r=>{if(r.st&&(!geral||order[r.st]>order[geral]))geral=r.st});
+  return{R,geral,tev,tco}}
+/* ---------- tela ---------- */
+const MP_DRAFT="boreal_mp_draft";let mpEdit=null;
+function mpGet(){const f={};$$("#pg-mp [data-mp]").forEach(i=>f[i.dataset.mp]=i.value);return f}
+function mpSet(f){$$("#pg-mp [data-mp]").forEach(i=>{const k=i.dataset.mp,v=f&&f[k]!=null?f[k]:"";if(i.tagName==="SELECT"){i.value=v;if(i.selectedIndex<0)i.selectedIndex=0}else i.value=v})}
+function mpDefaults(){mpSet({data:today(),gas:"R-410A",un:"psi",vnom:"220",tec:"Inverter",tipo:"Split hi-wall",tecnico:cfg.tecnico||""});mpEdit=null}
+function mpSave(){LS.set(MP_DRAFT,{f:mpGet(),edit:mpEdit})}
+function mpUnits(){const un=$("#mpUn").value;$$("#pg-mp .mp-un").forEach(e=>e.textContent=un)}
+function mpRender(){const f=mpGet(),c=mpCalc(f);mpUnits();
+  const pill=st=>st?'<span class="pill '+ST[st][1]+'">'+ST[st][0]+"</span>":'<span class="pill">—</span>';
+  $("#mpRes").innerHTML=c.R.length?(c.geral?'<div class="mpg mpg-'+c.geral+'">Diagnóstico geral: <b>'+ST[c.geral][0]+"</b>"+(c.geral==="ok"?" · tudo dentro das referências":c.geral==="at"?" · há pontos para acompanhar":" · há pontos que precisam de correção")+"</div>":"")+
+    c.R.map(r=>'<div class="mpr mpr-'+(r.st||"na")+'"><div class="mpr-h"><span>'+r.lab+'</span><b>'+num1(r.val)+" "+esc(r.unit)+"</b>"+pill(r.st)+'</div><div class="mpr-m">'+(r.ref?"<small>Referência: "+esc(r.ref)+"</small><br>":"")+esc(r.msg)+"</div></div>").join("")
+    :'<p class="hint">Preencha as medições para ver os cálculos e o diagnóstico.</p>';
+  $("#mpTevOut").textContent=c.tev!=null?"Evaporação: "+num1(c.tev)+" °C":"";$("#mpTcoOut").textContent=c.tco!=null?"Condensação: "+num1(c.tco)+" °C":"";
+  const tr=mpN(f.tret),ti=mpN(f.tins);$("#mpDtOut").textContent=tr!=null&&ti!=null?"Delta T: "+num1(tr-ti)+" °C":"";
+  const tx=mpN(f.text),u=f.un||"psi",gs=f.gas||"R-410A";
+  if(tx!=null){const W=mpWork(gs,tx,u);$("#mpRepOut").innerHTML="📘 <b>"+gs+" com "+num1(tx)+" °C lá fora</b> · repouso esperado: <b>≈ "+num1(fromAbs(pSat(gs,tx,"V"),u))+" "+u+"</b> (±10%) · trabalho normal: <b>"+num1(W.plo)+" a "+num1(W.phi)+" "+u+"</b>"}
+  else $("#mpRepOut").innerHTML="📘 Coloque a <b>temperatura ambiente externa</b> para ver a pressão de repouso e de trabalho esperadas para o "+gs+".";
+  mpHist(f)}
+function mpPrev(key,eq,except){return docs.filter(d=>d.type==="mp"&&d.cli===key&&d.id!==except&&norm(((d.payload||{}).f||{}).eqId||"")===norm(eq||"")).sort((a,b)=>(b.data||"").localeCompare(a.data||""))[0]||null}
+function mpHist(f){const key=norm(f.cliNome||""),el=$("#mpHist");if(!key){el.innerHTML="";return}
+  const eqs=[...new Set(docs.filter(d=>d.type==="mp"&&d.cli===key).map(d=>((d.payload||{}).f||{}).eqId||"").filter(Boolean))];
+  $("#mpEqNames").innerHTML=eqs.map(e=>'<option value="'+esc(e)+'">').join("");
+  const p=mpPrev(key,f.eqId,mpEdit&&mpEdit.id);if(!p){el.innerHTML=eqs.length?'<p class="hint">Equipamentos já cadastrados deste cliente: '+eqs.map(esc).join(", ")+".</p>":"";return}
+  const pc=mpCalc(p.payload.f),g=id=>{const r=pc.R.find(x=>x.id===id);return r?num1(r.val)+" "+r.unit:"—"};
+  el.innerHTML='<div class="banner">📋 Último relatório deste equipamento: <b>'+br(p.data)+"</b> · Delta T "+g("dt")+" · superaquecimento "+g("sa")+" · corrente "+g("a")+" · descarga "+g("td")+(pc.geral?" · "+ST[pc.geral][0]:"")+"</div>"}
+$("#pg-mp").addEventListener("input",e=>{if(e.target.closest("[data-mp]")){mpRender();mpSave()}});
+$("#pg-mp").addEventListener("change",e=>{const i=e.target.closest("[data-mp]");if(!i)return;
+  if(i.dataset.mp==="cliNome"){const c=clients.find(x=>x.key===norm(i.value));if(c){i.value=c.cliNome;const s=(k,v)=>{const el=$('#pg-mp [data-mp='+k+']');if(el&&!el.value&&v)el.value=v};s("cliTel",c.cliTel);s("cliEnd",[c.cliEnd,c.cliBairro].filter(Boolean).join(" – "));s("cliCidade",[c.cliCidade,c.cliUf].filter(Boolean).join(" / "))}}
+  if(i.dataset.mp==="eqId"){const key=norm(mpGet().cliNome||"");const p=mpPrev(key,i.value,mpEdit&&mpEdit.id);if(p){const pf=p.payload.f;["tipo","marca","modelo","btus","tec","gas","vnom","inom"].forEach(k=>{const el=$('#pg-mp [data-mp='+k+']');if(el&&pf[k])el.value=pf[k]})}}
+  if(i.dataset.mp==="un"){const old=i.dataset.prev||"psi",nu=i.value;if(old!==nu)["prep","pbaixa","palta"].forEach(k=>{const el=$('#pg-mp [data-mp='+k+']');const v=mpN(el.value);if(v!=null)el.value=String(Math.round(fromAbs(toAbs(v,old),nu)*10)/10).replace(".",",")});i.dataset.prev=nu}
+  mpRender();mpSave()});
+$("#mpClear").onclick=async()=>{if(!(await ask("Limpar o relatório?","Os dados que estão na tela serão apagados.","Limpar")))return;mpDefaults();$("#mpUn").dataset.prev="psi";mpSave();mpRender();window.scrollTo(0,0)};
+function mpOpen(d){mpSet(d.payload.f);mpEdit={id:d.id,criadoEm:d.criadoEm};$("#mpUn").dataset.prev=d.payload.f.un||"psi";mpSave();showTab("mp");mpRender();window.scrollTo(0,0);toast("Editando o relatório de "+br(d.data))}
+$("#mpGen").onclick=async()=>{const f=mpGet();if(!f.cliNome.trim()){toast("Coloque o nome do cliente");$('#pg-mp [data-mp=cliNome]').focus();return}
+  if(!f.eqId.trim()){toast("Identifique o equipamento (ex.: Split da sala)");$('#pg-mp [data-mp=eqId]').focus();return}
+  const c=mpCalc(f);if(!c.R.length){toast("Preencha ao menos uma medição");return}
+  const cli=await upsertClient({cliNome:f.cliNome.trim(),cliTel:f.cliTel});const key=cli?cli.key:norm(f.cliNome);
+  const id=mpEdit?mpEdit.id:"mp_"+uid();
+  const rec={id,type:"mp",num:0,cli:key,cliNome:f.cliNome.trim(),data:f.data||today(),total:0,svc:["Manutenção preventiva"],status:c.geral||"",criadoEm:mpEdit?mpEdit.criadoEm:Date.now(),atualizadoEm:Date.now(),payload:{type:"mp",f,geral:c.geral}};
+  await DB.put("docs",rec);await refresh();mpEdit={id,criadoEm:rec.criadoEm};mpSave();
+  try{await showMpPdf(rec)}catch(err){console.error(err);toast("Relatório salvo, mas houve erro ao gerar o PDF")}
+  $("#revMsg").className="msg ok";$("#revMsg").textContent="✓ Salvo na ficha de "+rec.cliNome+" (aba Clientes).";$("#btnNew2").hidden=false;$("#btnNew2").textContent="Começar novo relatório";review.from="mp"};
+async function showMpPdf(rec){const pages=await renderMpPDF(rec);const f=rec.payload.f;const name="Preventiva_"+slug(f.cliNome)+"_"+slug(f.eqId||"")+"_"+(rec.data||today())+".pdf";
+  const pdf=makePdf(pages,name.replace(".pdf",""));review={pdf,name,from:null,saved:false,rec};
+  $("#revTitle").textContent="Relatório de manutenção preventiva";$("#revPages").innerHTML="";pages.forEach(c=>{const im=new Image();im.src=c.toDataURL("image/jpeg",0.7);im.alt="Página";$("#revPages").appendChild(im)});
+  $("#revInfo").textContent=name+" · "+pages.length+" página"+(pages.length>1?"s":"");$("#revMsg").className="msg";
+  const n=waNum(f.cliTel),fn=first(f.cliNome),emp=cfg.nome||"Boreal Clima";
+  const wa=$("#btnWa");if(n){wa.href=waLink(n,"Olá"+(fn?", "+fn:"")+"! Aqui é da "+emp+". Segue o relatório da manutenção preventiva do seu ar-condicionado ("+(f.eqId||"equipamento")+"), com todas as medições. Qualquer dúvida, estamos à disposição!");wa.target=waTarget();wa.style.display=""}else wa.style.display="none";
+  $("#btnRev").hidden=true;$("#revBack").textContent="Fechar";$("#btnNew2").hidden=true;openM("#mReview")}
+async function renderMpPDF(rec){try{await (document.fonts&&document.fonts.ready)}catch(_){}
+  const f=rec.payload.f,c=mpCalc(f),un=f.un||"psi",nome=cfg.nome||"Boreal Clima",custom=cfg.logo?await loadImg(cfg.logo).catch(()=>null):null;
+  const meta={nome,cnpj:cfg.cnpj,tel:cfg.tel,email:cfg.email,end:cfg.end,site:cfg.site,num:"",numTxt:br(rec.data),title:"RELATÓRIO DE MANUTENÇÃO PREVENTIVA",short:"Preventiva",
+    hdr2:nome+" · Manutenção preventiva · "+f.cliNome,dataTxt:br(rec.data),cliente:f.cliNome,logoImg:custom,lock:custom?null:await loadImg(LOGO_LOCK),showName:!!custom||norm(nome)!=="boreal clima"};
+  const d=new Doc(meta);
+  d.section("Cliente");d.fields([["Nome",f.cliNome],["WhatsApp",f.cliTel],["Endereço",f.cliEnd],["Cidade",f.cliCidade]],2);
+  d.section("Equipamento");d.fields([["Identificação",f.eqId],["Tipo",f.tipo],["Marca / modelo",[f.marca,f.modelo].filter(Boolean).join(" · ")],["Capacidade",f.btus?f.btus+" BTU/h":""],["Tecnologia",f.tec],["Fluido refrigerante",f.gas],["Tensão nominal",f.vnom?f.vnom+" V":""],["Corrente nominal (placa)",f.inom?f.inom+" A":""]],2);
+  d.section("Condições da medição");d.fields([["Data",br(rec.data)],["Temperatura ambiente externa",f.text?f.text+" °C":""],["Temperatura ambiente interno",f.tint?f.tint+" °C":""],["Técnico",f.tecnico]],2);
+  d.section("Medições");
+  const raw=[["Temperatura de retorno (entrada de ar)",f.tret,"°C"],["Temperatura de insuflamento (saída de ar)",f.tins,"°C"],["Tensão de chegada",f.v,"V"],["Corrente do compressor",f.a,"A"],
+    ["Pressão de repouso (desligado)",f.prep,un],["Pressão de trabalho (ligado)",f.pbaixa,un],["Temperatura do tubo de sucção",f.tsuc,"°C"],["Pressão de alta (descarga)",f.palta,un],["Temperatura do tubo de descarga",f.tdesc,"°C"]].filter(x=>mpN(x[1])!=null);
+  d.fields(raw.map(x=>[x[0],String(x[1]).replace(".",",")+" "+x[2]]),2);
+  d.section("Resultados e diagnóstico");
+  if(c.geral){const col={ok:["#E7F6EE","#0E6B3F"],at:["#FFF4E5","#8A5800"],cu:["#FDECEC","#B42318"]}[c.geral];d.ensure(70);d.g.fillStyle=col[0];d.rr(MX,d.y,CW,56,10);d.g.fill();
+    d.text("DIAGNÓSTICO GERAL: "+ST[c.geral][0].toUpperCase(),MX+18,d.y+16,"800",22,col[1]);d.y+=72}
+  c.R.forEach(r=>{const col=r.st?{ok:"#0E6B3F",at:"#8A5800",cu:"#B42318"}[r.st]:C.muted;const ls=d.wrap((r.ref?"Referência: "+r.ref+". ":"")+r.msg,CW-36,"500",17);const h=46+ls.length*24+14;d.ensure(h);
+    d.g.fillStyle=C.ice;d.rr(MX,d.y,CW,h-10,10);d.g.fill();d.g.fillStyle=col;d.g.fillRect(MX,d.y,6,h-10);
+    d.text(r.lab,MX+20,d.y+12,"700",19,C.navy);d.text(num1(r.val)+" "+r.unit+"   "+(r.st?ST[r.st][0].toUpperCase():""),PW-MX-18,d.y+12,"800",19,col,"right");
+    ls.forEach((l,i)=>d.text(l,MX+20,d.y+44+i*24,"500",17,C.text));d.y+=h});
+  if(f.obs||f.rec){d.section("Observações");[["Observações do técnico",f.obs],["Recomendações ao cliente",f.rec]].forEach(([t,v])=>{if(!v)return;d.ensure(70);d.text(t.toUpperCase(),MX,d.y,"700",16,C.muted);d.y+=30;d.para(v,20);d.y+=12})}
+  d.y+=6;d.para("Referências usadas: tabelas de saturação pressão × temperatura do fluido (pressões convertidas de "+un+" manométrico), pressão de repouso = saturação na temperatura ambiente (±10%), pressão de trabalho pela evaporação de 2 a 10 °C (ajustada pela temperatura externa), superaquecimento 4–8 K, Delta T 8–13 °C. Em aparelhos inverter, as medições valem com o compressor em alta rotação (modo teste ou refrigeração máxima por 15 min). Sempre que existir, vale a referência do manual do fabricante.",15);
+  const n=d.pages.length;d.pages.forEach((cv,i)=>{const gg=cv.getContext("2d");gg.textBaseline="top";gg.fillStyle=C.blue;gg.fillRect(MX,PH-FOOT+18,CW,2);
+    gg.font="500 16px "+FONT;gg.fillStyle=C.muted;gg.textAlign="left";gg.fillText(nome+" · Relatório gerado em "+fmtStamp(rec.atualizadoEm||Date.now()),MX,PH-FOOT+36);
+    gg.textAlign="right";gg.fillText("Página "+(i+1)+" de "+n,PW-MX,PH-FOOT+36);gg.textAlign="left"});
+  return d.pages}
+setTimeout(()=>{try{mpInit()}catch(e){console.warn(e)}},0);
+function mpInit(){const dr=LS.get(MP_DRAFT,null);if(dr&&dr.f){mpSet(dr.f);mpEdit=dr.edit||null;$("#mpUn").dataset.prev=dr.f.un||"psi"}else{mpDefaults();$("#mpUn").dataset.prev="psi"}mpRender()}
+
 /* painel */
 function renderPainel(){const cur=ymNow(),months=[];for(let i=11;i>=0;i--)months.push(ymShift(cur,-i));
   const fm=months.map(m=>finMonthBase(m)),tot=fm.reduce((s,r)=>s+r.bruto,0),nOS=fm.reduce((s,r)=>s+r.os.length,0),media=nOS?tot/nOS:0,from=months[0]+"-01";
@@ -3823,7 +4046,7 @@ $("#teamList").addEventListener("click",async e=>{const b=e.target.closest("[dat
 /* ============================================================
    NUVEM (Supabase): login + sincronização
    ============================================================ */
-const APP_VERSION="Versão 28 · 23/11/2026 · Tabela de serviços";
+const APP_VERSION="Versão 30 · 24/11/2026 · Pressões de repouso e trabalho por gás e temperatura";
 const SB_URL="https://xipiemiyvrwfxosbfpvl.supabase.co",SB_KEY="sb_publishable_RtUvyM---ErVKDlMnonTVg_AEy9yL5I";
 let sb=null,appStarted=false;
 function fnv(s){let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(36)+s.length.toString(36)}
