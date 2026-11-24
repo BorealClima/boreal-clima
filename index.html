@@ -119,6 +119,12 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 
 .mpr-h{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.mpr-h>span:first-child{flex:1;min-width:160px;font-weight:700}.mpr-h b{font-size:18px;color:var(--navy)}
 .mpr-m{font-size:14px;color:#3B4A5E;margin-top:4px}.mpr-m small{color:var(--muted)}
 .pill.mp{background:#E2F5F4;color:#0B6F6F}
+.igc.conv{border-left-color:#B7791F}.igtag.conv{background:#FFF4E0;color:#8A5800}
+.bnrow{display:grid;grid-template-columns:28px 76px minmax(0,1fr) minmax(0,1fr) 36px;gap:6px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.bnrow input[type=checkbox]{width:22px;height:22px;grid-column:1;grid-row:1}.bnrow .bn-desc{grid-column:2/6;grid-row:1}
+.bnrow [data-b=pct]{grid-column:2;grid-row:2}.bnrow [data-b=svc]{grid-column:3;grid-row:2}.bnrow [data-b=tipoq]{grid-column:4;grid-row:2}.bnrow .rm{grid-column:5;grid-row:2}
+.bnrow .rm{width:34px;height:34px;border-radius:9px;border:1px solid var(--line);background:#fff;color:#B42318;font-weight:700}
+.igben{margin:6px 0 0;padding-left:18px;font-size:14px}.igben li{margin:3px 0}
 .taxgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin-top:10px}
 .ck{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
 .ck:last-child{border-bottom:0}
@@ -431,7 +437,7 @@ body.func .adm{display:none!important}
       <label class="f">Garantia do serviço<select data-k="garantia"><option>30 dias</option><option>60 dias</option><option>90 dias</option><option>4 meses</option><option>6 meses</option><option>9 meses</option><option>1 ano</option><option>2 anos</option><option>Sem garantia</option></select></label>
       <label class="f">Orçamento válido até<input type="date" data-k="validade"></label>
       <label class="f">Indicado por (grupo)<select data-k="indPor" class="igSel"><option value="">— Nenhum —</option></select></label>
-      <input type="hidden" data-k="descPct"><input type="hidden" data-k="descVal"><input type="hidden" data-k="credUsado"><input type="hidden" data-k="indNome"><input type="hidden" data-k="credGrupo">
+      <input type="hidden" data-k="descPct"><input type="hidden" data-k="descVal"><input type="hidden" data-k="credUsado"><input type="hidden" data-k="indNome"><input type="hidden" data-k="credGrupo"><input type="hidden" data-k="descTxt"><input type="hidden" data-k="valeGrupo"><input type="hidden" data-k="revBen">
       <label class="f wide">Pagamento no cartão (aparece no PDF)<select data-k="mostraCartao"><option value="">Não mostrar para o cliente</option><option value="sim">Mostrar: Pix, débito e crédito à vista sem acréscimo; 2x a 12x com a taxa da maquininha</option></select></label>
     </div>
     <div class="totbox"><div><span class="totMoL">Mão de obra</span><b class="totMo">R$ 0,00</b></div><div>Peças e materiais<b class="totMat">R$ 0,00</b></div><div class="totDescW" hidden><span class="totDescL">Desconto</span><b class="totDesc">− R$ 0,00</b></div><div class="big">Total geral<b class="totGeral">R$ 0,00</b></div></div>
@@ -551,7 +557,7 @@ body.func .adm{display:none!important}
       <label class="f">Garantia do serviço<select data-k="garantia"><option>30 dias</option><option>60 dias</option><option>90 dias</option><option>4 meses</option><option>6 meses</option><option>9 meses</option><option>1 ano</option><option>2 anos</option><option>Sem garantia</option></select></label>
       <label class="f">Próxima manutenção sugerida<input type="date" data-k="proxManut"></label>
       <label class="f">Indicado por (grupo)<select data-k="indPor" class="igSel"><option value="">— Nenhum —</option></select></label>
-      <input type="hidden" data-k="descPct"><input type="hidden" data-k="descVal"><input type="hidden" data-k="credUsado"><input type="hidden" data-k="indNome"><input type="hidden" data-k="credGrupo">
+      <input type="hidden" data-k="descPct"><input type="hidden" data-k="descVal"><input type="hidden" data-k="credUsado"><input type="hidden" data-k="indNome"><input type="hidden" data-k="credGrupo"><input type="hidden" data-k="descTxt"><input type="hidden" data-k="valeGrupo"><input type="hidden" data-k="revBen">
     </div>
     <div class="totbox"><div><span class="totMoL">Mão de obra</span><b class="totMo">R$ 0,00</b></div><div>Peças e materiais<b class="totMat">R$ 0,00</b></div><div class="totDescW" hidden><span class="totDescL">Desconto</span><b class="totDesc">− R$ 0,00</b></div><div class="big"><span class="totLbl">Total geral</span><b class="totGeral">R$ 0,00</b></div></div>
     <div class="cardbox" hidden></div>
@@ -1040,17 +1046,31 @@ body.func .adm{display:none!important}
   <h3 id="igT">Grupo de indicação</h3>
   <p class="hint">Os clientes que você marcar como <b>indicados</b> por este grupo ficam dentro da pasta dele.</p>
   <div class="grid" style="margin-top:12px">
-    <label class="f">Tipo<select id="igTipo"><option value="parc">Parceiro (salão, loja, etc.)</option><option value="cond">Condomínio / prédio</option></select></label>
+    <label class="f">Tipo<select id="igTipo"><option value="parc">Parceiro (salão, loja, etc.)</option><option value="cond">Condomínio / prédio</option><option value="conv">Convênio / banco (benefícios)</option></select></label>
     <label class="f">Nome do grupo<input type="text" id="igNome" placeholder="Ex.: Salão Master"></label>
     <label class="f"><span class="igl-dono">Dono(a) / quem indica</span><input type="text" id="igDono" list="igCliNames" placeholder="Nome (fica cadastrado como cliente)"></label>
     <label class="f">WhatsApp<input type="tel" id="igTel" placeholder="(19) 99999-9999"></label>
-    <label class="f">Desconto para os indicados (%)<input type="number" id="igDesc" min="0" max="100" step="0.5" inputmode="decimal"></label>
+    <label class="f ig-pc">Desconto para os indicados (%)<input type="number" id="igDesc" min="0" max="100" step="0.5" inputmode="decimal"></label>
     <label class="f ig-parc">Crédito por cliente indicado (R$)<input type="text" id="igValor" inputmode="decimal" placeholder="0,00"></label>
     <label class="f ig-parc">Início do prazo<input type="date" id="igIni"></label>
     <label class="f ig-parc">Fim do prazo<input type="date" id="igFim"></label>
     <label class="f wide ig-parc" style="flex-direction:row;align-items:center;gap:10px"><input type="checkbox" id="igAviso" style="width:22px;height:22px"> Avisar pelo WhatsApp quando um indicado concluir o primeiro serviço</label>
   </div>
   <p class="hint ig-parc" style="margin-top:8px">O crédito conta <b>1 vez por cliente</b>, quando a primeira OS dele é concluída dentro do prazo. Ele é descontado na próxima OS do(a) dono(a) e o saldo volta a zero.</p>
+  <div class="ig-conv" style="margin-top:12px">
+    <h3 class="fint">Benefícios para os clientes do convênio</h3>
+    <p class="hint">Marque, edite, apague ou adicione benefícios. O desconto entra sozinho no orçamento e na OS quando o tipo de serviço bate.</p>
+    <div id="igBens"></div>
+    <button class="btn ghost small" type="button" id="igBenAdd">+ Adicionar benefício</button>
+    <h3 class="fint" style="margin-top:14px">Benefício para o convênio (banco)</h3>
+    <div class="grid">
+      <label class="f wide" style="flex-direction:row;align-items:center;gap:10px"><input type="checkbox" id="igRwOn" style="width:22px;height:22px"> Ativar vale para o convênio</label>
+      <label class="f">A cada quantos clientes com OS concluída<input type="number" id="igRwN" min="1" step="1" inputmode="numeric"></label>
+      <label class="f">Desconto do vale (%)<input type="number" id="igRwPct" min="1" max="100" step="1" inputmode="numeric"></label>
+      <label class="f">Em qual serviço<select id="igRwSvc"></select></label>
+    </div>
+    <p class="hint">Cada cliente conta uma vez. Os vales acumulam e são usados sozinhos na OS do convênio com aquele serviço.</p>
+  </div>
   <p class="hint ig-cond" style="margin-top:8px">O desconto vale <b>em todo serviço</b>, para moradores, síndico e o próprio condomínio, sem prazo.</p>
   <datalist id="igCliNames"></datalist>
   <div class="actions"><button class="btn danger" type="button" id="igDel">Excluir grupo</button><span style="flex:1"></span><button class="btn line" data-close>Cancelar</button><button class="btn dark" id="igSave">Salvar grupo</button></div>
@@ -2427,6 +2447,23 @@ async function avisarParceiro(g,c){const cr=gCreditos(g);const primeiro=(String(
   if(!(await ask("Avisar "+(g.donoNome||g.nome)+"?","É o primeiro serviço de "+c.cliNome+", indicado(a) por "+g.nome+". O WhatsApp vai abrir com a mensagem pronta:\n\n"+msg.replace(/\*/g,""),"Abrir WhatsApp")))return;
   window.open(waLink(waNum(g.tel),msg),waTarget());c.indAvisado=Date.now();c.atualizadoEm=Date.now();await DB.put("clients",c)}
 function grupos(){return Array.isArray(cfg.indGrupos)?cfg.indGrupos:[]}
+const SV_HIG="Limpeza / Higienização";
+function convDefaults(nome){return[{id:uid(),on:true,tipo:"desc",desc:"10% de desconto na instalação do aparelho fornecido pelo "+(nome||"convênio"),pct:10,svc:"Instalação",quando:"sempre"},
+  {id:uid(),on:true,tipo:"desc",desc:"20% de desconto na 1ª higienização",pct:20,svc:SV_HIG,quando:"primeira"},
+  {id:uid(),on:true,tipo:"rev",desc:"Revisão técnica completa grátis, com aferição de pressões, temperaturas, correntes e tensões, e relatório do aparelho, na 1ª higienização 6 meses após a instalação",pct:0,svc:SV_HIG,quando:"primeira"}]}
+function convRw(g){const r=g.rw||{};return{on:r.on!==false,n:Math.max(1,Number(r.n)||6),pct:Number(r.pct)||50,svc:r.svc||SV_HIG}}
+function docSvcs(d){return d.svc||((d.payload||{}).svc)||[]}
+function cliTemSvc(key,svc,exceptId){return docs.some(d=>d.type==="os"&&d.cli===key&&d.id!==exceptId&&osDone(d)&&docSvcs(d).includes(svc))}
+function convBenef(g,key,svcs,exceptId,dt){let best=null;const out={pct:0,txt:"",rev:false,revNote:""};
+  (g.bens||[]).forEach(b=>{if(!b.on)return;const hit=b.svc==="qualquer"?svcs.length>0:svcs.includes(b.svc);if(!hit)return;const novo=b.quando!=="primeira"||!cliTemSvc(key,b.svc==="qualquer"?svcs[0]:b.svc,exceptId);if(!novo)return;
+    if(b.tipo==="rev"){const inst=docs.filter(d=>d.type==="os"&&d.cli===key&&osDone(d)&&docSvcs(d).includes("Instalação")).map(d=>d.data||"").sort()[0];
+      if(!inst){out.rev=true;out.revNote="Confirme se a instalação tem 6 meses ou mais."}else{const lim=new Date(inst+"T12:00:00");lim.setMonth(lim.getMonth()+6);lim.setDate(lim.getDate()-15);if((dt||today())>=lim.toISOString().slice(0,10))out.rev=true;else out.revNote="A instalação foi em "+br(inst)+": a revisão grátis vale a partir de 6 meses depois."}
+      out.revTxt=b.desc;return}
+    const p=Number(b.pct)||0;if(p>0&&(!best||p>best.pct))best={pct:p,txt:b.desc}});
+  if(best){out.pct=best.pct;out.txt=best.txt}return out}
+function convDono(key,tel){const tk=telKey(tel);return grupos().find(g=>g.tipo==="conv"&&((g.dono&&g.dono===key)||(tk&&telKey(g.tel)===tk)))||null}
+function convVales(g,exceptId){const rw=convRw(g),ms=gMembros(g),done=ms.filter(c=>docs.some(d=>d.type==="os"&&d.cli===c.key&&osDone(d)));const ganhos=rw.on?Math.floor(done.length/rw.n):0;
+  const usados=docs.filter(d=>d.type==="os"&&d.id!==exceptId&&((d.payload||{}).f||{}).valeGrupo===g.id).length;return{rw,done,ganhos,usados,saldo:Math.max(0,ganhos-usados),falta:rw.n-(done.length%rw.n)}}
 function grupoBy(id){return id?grupos().find(g=>g.id===id):null}
 function gAtivo(g,dt){if(!g)return false;if(g.tipo==="cond")return true;dt=dt||today();return(!g.ini||dt>=g.ini)&&(!g.fim||dt<=g.fim)}
 function gVencido(g){return g&&g.tipo==="parc"&&!!g.fim&&today()>g.fim}
@@ -2438,7 +2475,7 @@ function gCreditos(g,exceptId){if(!g||g.tipo!=="parc")return{saldo:0,ganho:0,usa
   const ganho=r2(lista.length*v),usado=r2(docs.filter(d=>d.type==="os"&&d.id!==exceptId&&(((d.payload||{}).f||{}).credGrupo===g.id||(d.cli===g.dono&&!(((d.payload||{}).f||{}).credGrupo)))).reduce((t,d)=>t+parseMoney(((d.payload||{}).f||{}).credUsado),0));
   return{ganho,usado,saldo:Math.max(0,r2(ganho-usado)),lista,v}}
 function igOpts(sel,cur){if(!sel)return;const v=cur!=null?cur:sel.value;const gs=grupos();
-  sel.innerHTML='<option value="">— Nenhum —</option>'+gs.map(g=>'<option value="'+esc(g.id)+'">'+esc(g.nome)+(g.tipo==="cond"?" (condomínio)":" (parceiro)")+(gVencido(g)?" · prazo vencido":"")+"</option>").join("");
+  sel.innerHTML='<option value="">— Nenhum —</option>'+gs.map(g=>'<option value="'+esc(g.id)+'">'+esc(g.nome)+(g.tipo==="cond"?" (condomínio)":g.tipo==="conv"?" (convênio)":" (parceiro)")+(gVencido(g)?" · prazo vencido":"")+"</option>").join("");
   if(v&&!gs.find(g=>g.id===v)){const o=document.createElement("option");o.value=v;o.textContent="(grupo excluído)";sel.appendChild(o)}sel.value=v||""}
 async function saveCfgGrupos(){cfg.atualizadoEm=Date.now();LS.set("boreal_cfg",cfg);await DB.mark("cfg","main")}
 function taxasCfg(){const t=cfg.taxas||{};return{deb:Number(t.deb)||0,c:Array.from({length:12},(_,i)=>Number((t.c||[])[i])||0)}}
@@ -2696,13 +2733,19 @@ function FormCtl(type){
     const s=qv*p;if(r.classList.contains("serv"))svT+=s;else t+=s;r.querySelector(".sub").textContent="R$ "+fmt(s)});svT=r2(svT);const mo=r2(parseMoney(q('[data-k="valor"]').value)+svT);
     q(".matTotal").textContent=svT?"R$ "+fmt(svT)+" + R$ "+fmt(t):"R$ "+fmt(t);q(".matTotL").textContent=svT?"Serviços + materiais":"Total de materiais";q(".totMat").textContent="R$ "+fmt(t);q(".totMo").textContent="R$ "+fmt(mo);q(".totMoL").textContent=svT?"Serviços e mão de obra":"Mão de obra";const sub=r2(t+mo),dt=(q('[data-k="data"]')||{}).value||today();
     const ip=q('[data-k=indPor]');if(ip&&ip.options.length!==grupos().length+1+(ip.value&&!grupoBy(ip.value)?1:0))igOpts(ip);
-    const gid=ip?ip.value:"",g=grupoBy(gid),pct=g&&gAtivo(g,dt)?(Number(g.desc)||0):0,dv=r2(sub*pct/100);
+    const gid=ip?ip.value:"",g=grupoBy(gid),nk=norm((q('[data-k="cliNome"]')||{}).value||""),svcs=[...st.services];let pct=0,dtxt="",cb=null;
+    if(g&&g.tipo==="conv"){cb=convBenef(g,nk,svcs,st.docId,dt);pct=cb.pct;dtxt=cb.txt}else pct=g&&gAtivo(g,dt)?(Number(g.desc)||0):0;
+    let vg=null;if(isOS&&!pct){const gc=convDono(nk,(q('[data-k="cliTel"]')||{}).value);if(gc){const vv=convVales(gc,st.docId);if(vv.rw.on&&vv.saldo>0&&svcs.includes(vv.rw.svc)){vg=gc;pct=vv.rw.pct;dtxt="Vale do convênio: "+pctFmt(pct)+"% na "+vv.rw.svc.toLowerCase()}}}
+    const dv=r2(sub*pct/100);
     let cred=0;const gd=isOS?grupoDono(norm((q('[data-k="cliNome"]')||{}).value||""),(q('[data-k="cliTel"]')||{}).value):null;if(gd)cred=Math.min(gCreditos(gd,st.docId).saldo,r2(sub-dv));cred=Math.max(0,r2(cred));
-    const sv=(k,v)=>{const e=q('[data-k='+k+']');if(e)e.value=v};sv("descPct",pct?String(pct):"");sv("descVal",dv?fmt(dv):"");sv("credUsado",cred?fmt(cred):"");sv("credGrupo",cred&&gd?gd.id:"");sv("indNome",g?g.nome:(gid?(q('[data-k=indNome]')||{}).value||"":""));
-    const tot=r2(sub-dv-cred),w=q(".totDescW");if(w){w.hidden=!(dv||cred);q(".totDescL").textContent=[dv?"Desconto indicação "+pctFmt(pct)+"%":"",cred?"Crédito de indicações":""].filter(Boolean).join(" + ");q(".totDesc").textContent="− R$ "+fmt(r2(dv+cred))}
+    const sv=(k,v)=>{const e=q('[data-k='+k+']');if(e)e.value=v};sv("descPct",pct?String(pct):"");sv("descVal",dv?fmt(dv):"");sv("credUsado",cred?fmt(cred):"");sv("credGrupo",cred&&gd?gd.id:"");sv("descTxt",dtxt);sv("valeGrupo",vg?vg.id:"");sv("revBen",cb&&cb.rev?"1":"");sv("indNome",g?g.nome:(gid?(q('[data-k=indNome]')||{}).value||"":""));
+    const tot=r2(sub-dv-cred),w=q(".totDescW");if(w){w.hidden=!(dv||cred);q(".totDescL").textContent=[dv?(dtxt?(vg?"Vale do convênio ":"Benefício convênio ")+pctFmt(pct)+"%":"Desconto indicação "+pctFmt(pct)+"%"):"",cred?"Crédito de indicações":""].filter(Boolean).join(" + ");q(".totDesc").textContent="− R$ "+fmt(r2(dv+cred))}
     q(".totGeral").textContent="R$ "+fmt(tot);const nt=q(".ignote");if(nt)nt.remove();
     if(gd){const cr=gCreditos(gd,st.docId);const el=document.createElement("p");el.className="hint ignote";el.style.marginTop="8px";el.innerHTML="🤝 <b>"+esc(gd.nome)+"</b>: crédito de indicações disponível <b>R$ "+fmt(cr.saldo)+"</b>"+(cred?", descontado nesta OS.":isOS?".":". Ele é descontado na OS.");q(".totbox").after(el)}
-    else if(!isOS&&grupoDono(norm((q('[data-k="cliNome"]')||{}).value||""))){}
+    if(g&&g.tipo==="conv"&&cb){const el=document.createElement("p");el.className="hint ignote";el.style.marginTop="8px";
+      el.innerHTML="🏦 <b>"+esc(g.nome)+"</b>: "+(cb.pct?esc(cb.txt)+".":svcs.length?"nenhum desconto para este serviço.":"marque o tipo de serviço para aplicar os benefícios.")+(cb.rev?"<br>🎁 <b>Inclui "+esc(cb.revTxt||"revisão técnica grátis")+".</b> Faça o relatório na aba <b>Manutenção preventiva</b>."+(cb.revNote?" "+esc(cb.revNote):""):cb.revNote&&svcs.includes(SV_HIG)?"<br>"+esc(cb.revNote):"");q(".totbox").after(el)}
+    if(isOS&&!g){const gc=convDono(nk,(q('[data-k="cliTel"]')||{}).value);if(gc){const vv=convVales(gc,st.docId);const el=document.createElement("p");el.className="hint ignote";el.style.marginTop="8px";
+      el.innerHTML="🏦 <b>"+esc(gc.nome)+"</b> · vales: "+vv.saldo+" disponíve"+(vv.saldo===1?"l":"is")+(vg?" · <b>"+pctFmt(pct)+"% aplicado nesta "+esc(vv.rw.svc.toLowerCase())+"</b>":vv.saldo&&!svcs.includes(vv.rw.svc)?" · marque "+esc(vv.rw.svc)+" para usar":"")+" · faltam "+vv.falta+" cliente"+(vv.falta===1?"":"s")+" com OS concluída para o próximo vale.";q(".totbox").after(el)}}
     cardUI(tot);return tot}
   function cardUI(tot){const box=q(".cardbox");if(!box)return;
     if(isOS){const g=k=>q('[data-k='+k+']').value;const f={pgto:g("pgto"),parcelas:g("parcelas"),juros:g("juros")};const cred=f.pgto==="Cartão de crédito",card=/^Cartão/.test(f.pgto);
@@ -2746,7 +2789,7 @@ function FormCtl(type){
 
   /* services */
   function renderChips(){q(".svcChips").innerHTML=SERVICES.map(s=>'<button type="button" class="chip" aria-pressed="'+st.services.has(s)+'">'+s+"</button>").join("");
-    qq(".svcChips .chip").forEach(b=>b.onclick=()=>{const s=b.textContent;st.services.has(s)?st.services.delete(s):st.services.add(s);b.setAttribute("aria-pressed",st.services.has(s));renderChecks();saveDraft()})}
+    qq(".svcChips .chip").forEach(b=>b.onclick=()=>{const s=b.textContent;st.services.has(s)?st.services.delete(s):st.services.add(s);b.setAttribute("aria-pressed",st.services.has(s));renderChecks();recalc();saveDraft()})}
 
   /* checklist (OS) */
   function visSvcs(){return SERVICES.filter(s=>st.services.has(s)&&CHECKLISTS[s])}
@@ -3028,7 +3071,7 @@ async function renderPDF(D){
   const dscV=parseMoney(f.descVal),crV=parseMoney(f.credUsado);
   const moDoc=r2(parseMoney(f.valor)+servTot),totDoc=r2(moDoc+matTot-dscV-crV),ciP=isOS?cardInfo(f,totDoc):null;
   pdfTotals(d,moDoc,matTot,dscV+crV,ciP&&ciP.cli?ciP.acres:0);
-  if(dscV||crV)d.fields([dscV?["Desconto por indicação",(f.indNome||"Indicação")+" · "+pctFmt(Number(f.descPct)||0)+"% = R$ "+fmt(dscV)]:null,crV?["Crédito de indicações usado","R$ "+fmt(crV)]:null].filter(Boolean),2);
+  if(dscV||crV||f.revBen)d.fields([dscV?(f.descTxt?[(f.valeGrupo?"Vale do convênio ":"Benefício ")+(f.indNome||""),f.descTxt+" = − R$ "+fmt(dscV)]:["Desconto por indicação",(f.indNome||"Indicação")+" · "+pctFmt(Number(f.descPct)||0)+"% = R$ "+fmt(dscV)]):null,f.revBen?["Benefício "+(f.indNome||"convênio"),"Revisão técnica completa grátis incluída (relatório do aparelho)"]:null,crV?["Crédito de indicações usado","R$ "+fmt(crV)]:null].filter(Boolean),2);
   if(ciP&&ciP.cli)d.fields([["Pagamento no cartão de crédito",ciP.n>1?ciP.n+"x de R$ "+fmt(ciP.parc)+" (total R$ "+fmt(ciP.total)+")":"À vista · R$ "+fmt(ciP.total)],["Juros da maquininha","Taxa de "+pctFmt(ciP.pct)+"% da operadora = R$ "+fmt(ciP.acres)]],2);
   if(!isOS&&f.mostraCartao==="sim"&&totDoc>0){const rows=parcelTable(totDoc),rh=40;d.ensure(70+rows.length*rh);
     d.text("FORMAS DE PAGAMENTO",MX,d.y,"700",16,C.blue);d.y+=30;
@@ -3208,8 +3251,8 @@ $("#cliSearch").addEventListener("input",renderList);
 let igOpen=new Set();
 function renderGrupos(n){const el=$("#igList");if(!el)return;const gs=grupos();
   const head='<div class="igsec"><h3>🤝 Grupos de indicação'+(isFunc()?"":'<button class="btn ghost small" type="button" id="igNew">+ Novo grupo</button>')+'</h3>';
-  if(!gs.length){el.innerHTML=isFunc()?"":head+'<p class="hint" style="margin:0">Crie um grupo para um parceiro (salão, loja…) ou um condomínio. Os clientes indicados ficam na pasta dele.</p></div>';return}
-  el.innerHTML=head+gs.map(g=>{const ms=gMembros(g),cr=gCreditos(g),venc=gVencido(g),dono=clients.find(c=>c.key===g.dono);
+  if(!gs.length){el.innerHTML=isFunc()?"":head+'<p class="hint" style="margin:0">Crie um grupo para um parceiro (salão, loja…), um condomínio ou um convênio (banco). Os clientes indicados ficam na pasta dele.</p></div>';return}
+  el.innerHTML=head+gs.map(g=>{const ms=gMembros(g),cr=gCreditos(g),venc=gVencido(g),dono=clients.find(c=>c.key===g.dono);if(g.tipo==="conv")return convCard(g,ms,dono);
     const info=g.tipo==="cond"?(Number(g.desc)||0)+"% de desconto · sem prazo":"Crédito <b>R$ "+fmt(cr.saldo)+"</b>"+(Number(g.desc)?" · indicados "+pctFmt(Number(g.desc))+"%":"")+(g.fim?' · <span class="'+(venc?"venc-t":"")+'">'+(venc?"prazo vencido em ":"até ")+br(g.fim)+"</span>":"");
     return'<details class="igc'+(g.tipo==="cond"?" cond":"")+(venc?" venc":"")+'" data-ig="'+esc(g.id)+'"'+(igOpen.has(g.id)?" open":"")+'><summary><span style="font-size:22px">'+(g.tipo==="cond"?"🏢":"🏪")+'</span><span class="ign">'+esc(g.nome)+'<br><span class="igs">'+info+'</span></span><span class="igtag'+(g.tipo==="cond"?" cond":"")+'">'+ms.length+" cliente"+(ms.length===1?"":"s")+'</span></summary><div class="igb">'+
       '<div class="igs">'+(g.tipo==="cond"?"Síndico / responsável":"Dono(a)")+': <b>'+esc(g.donoNome||"—")+"</b>"+(g.tel?" · "+esc(g.tel):"")+(g.ini||g.fim?" · prazo "+(g.ini?br(g.ini):"…")+" a "+(g.fim?br(g.fim):"…"):"")+(g.tipo==="parc"&&cr.v?" · R$ "+fmt(cr.v)+" por cliente":"")+(g.tipo==="parc"?" · aviso no WhatsApp "+(g.aviso?"ligado":"desligado"):"")+"</div>"+
@@ -3217,22 +3260,43 @@ function renderGrupos(n){const el=$("#igList");if(!el)return;const gs=grupos();
       (dono?'<div class="igm" data-cli="'+esc(dono.key)+'"><span>⭐ '+esc(dono.cliNome)+'</span><span class="igs">'+(g.tipo==="cond"?"síndico":"dono(a) · ganha o crédito")+"</span></div>":"")+
       (ms.length?ms.map(c=>{const ok=cr.lista.find(x=>x.c.key===c.key);return'<div class="igm" data-cli="'+esc(c.key)+'"><span>'+esc(c.cliNome)+'</span><span class="igs">'+(g.tipo==="parc"?(ok?"✓ crédito em "+br(ok.data):"aguardando 1ª OS concluída"):esc(c.cliTel||""))+"</span></div>"}).join(""):'<p class="hint">Nenhum cliente indicado ainda. No orçamento ou na OS, escolha este grupo em <b>Indicado por</b>.</p>')+
       (isFunc()?"":'<div style="margin-top:10px"><button class="btn line small" type="button" data-igedit="'+esc(g.id)+'">✎ Editar grupo</button></div>')+"</div></details>"}).join("")+"</div>"}
+function convCard(g,ms,dono){const v=convVales(g),bens=(g.bens||[]).filter(b=>b.on);
+  return'<details class="igc conv" data-ig="'+esc(g.id)+'"'+(igOpen.has(g.id)?" open":"")+'><summary><span style="font-size:22px">🏦</span><span class="ign">'+esc(g.nome)+'<br><span class="igs">Convênio · '+bens.length+" benefício"+(bens.length===1?"":"s")+(v.rw.on?" · vales: <b>"+v.saldo+"</b>":"")+'</span></span><span class="igtag conv">'+ms.length+" cliente"+(ms.length===1?"":"s")+"</span></summary><div class=\"igb\">"+
+    '<div class="igs">Responsável: <b>'+esc(g.donoNome||"—")+"</b>"+(g.tel?" · "+esc(g.tel):"")+"</div>"+
+    (bens.length?'<ul class="igben">'+bens.map(b=>"<li>✅ "+esc(b.desc)+"</li>").join("")+"</ul>":'<p class="hint">Nenhum benefício ativo.</p>')+
+    (v.rw.on?'<div class="igs" style="margin-top:6px">Para o convênio: '+pctFmt(v.rw.pct)+"% na "+esc(v.rw.svc.toLowerCase())+" a cada "+v.rw.n+" clientes com OS concluída · "+v.done.length+" concluído"+(v.done.length===1?"":"s")+" · ganhou "+v.ganhos+", usou "+v.usados+" · <b>"+v.saldo+" vale"+(v.saldo===1?"":"s")+" disponíve"+(v.saldo===1?"l":"is")+"</b> · faltam "+v.falta+" para o próximo</div>":"")+
+    (dono?'<div class="igm" data-cli="'+esc(dono.key)+'"><span>⭐ '+esc(dono.cliNome)+'</span><span class="igs">convênio · usa os vales</span></div>':"")+
+    (ms.length?ms.map(c=>'<div class="igm" data-cli="'+esc(c.key)+'"><span>'+esc(c.cliNome)+'</span><span class="igs">'+(v.done.find(x=>x.key===c.key)?"✓ serviço concluído":"aguardando 1º serviço")+"</span></div>").join(""):'<p class="hint">Nenhum cliente ainda. No orçamento ou na OS, escolha este convênio em <b>Indicado por</b>.</p>')+
+    (isFunc()?"":'<div style="margin-top:10px"><button class="btn line small" type="button" data-igedit="'+esc(g.id)+'">✎ Editar convênio</button></div>')+"</div></details>"}
 $("#igList").addEventListener("toggle",e=>{const d=e.target.closest&&e.target.closest("[data-ig]");if(d){d.open?igOpen.add(d.dataset.ig):igOpen.delete(d.dataset.ig)}},true);
 $("#igList").addEventListener("click",e=>{if(e.target.closest("#igNew"))return openIg(null);const ed=e.target.closest("[data-igedit]");if(ed)return openIg(grupoBy(ed.dataset.igedit));
   const m=e.target.closest(".igm[data-cli]");if(m){cliView=m.dataset.cli;docFilter="all";renderDetail();window.scrollTo(0,0)}});
 let igEdit=null;
-function igTipoUI(){const t=$("#igTipo").value;$$("#mIg .ig-parc").forEach(e=>e.hidden=t!=="parc");$$("#mIg .ig-cond").forEach(e=>e.hidden=t!=="cond");$("#mIg .igl-dono").textContent=t==="cond"?"Síndico / responsável":"Dono(a) / quem indica"}
+function igTipoUI(){const t=$("#igTipo").value;$$("#mIg .ig-parc").forEach(e=>e.hidden=t!=="parc");$$("#mIg .ig-cond").forEach(e=>e.hidden=t!=="cond");$$("#mIg .ig-conv").forEach(e=>e.hidden=t!=="conv");$$("#mIg .ig-pc").forEach(e=>e.hidden=t==="conv");
+  $("#mIg .igl-dono").textContent=t==="cond"?"Síndico / responsável":t==="conv"?"Responsável no convênio (gerente)":"Dono(a) / quem indica";if(t==="conv"&&!$$("#igBens .bnrow").length)convDefaults($("#igNome").value.trim()).forEach(benRow)}
+const SVC_OPTS=()=>'<option value="qualquer">Qualquer serviço</option>'+SERVICES.map(x=>'<option>'+x+'</option>').join("");
+function benRow(b){b=b||{on:true,tipo:"desc",desc:"",pct:10,svc:"Instalação",quando:"sempre"};const r=document.createElement("div");r.className="bnrow";
+  r.innerHTML='<input type="checkbox" data-b="on"><input type="text" class="bn-desc" data-b="desc" placeholder="Descrição do benefício"><input type="number" data-b="pct" min="0" max="100" step="1" placeholder="%" title="Desconto (%)"><select data-b="svc">'+SVC_OPTS()+'</select><select data-b="tipoq"><option value="desc|sempre">Desconto · sempre</option><option value="desc|primeira">Desconto · só na 1ª vez</option><option value="rev|primeira">Revisão grátis · 1ª vez</option></select><button class="rm" type="button" aria-label="Remover">✕</button>';
+  r.querySelector("[data-b=on]").checked=b.on!==false;r.querySelector("[data-b=desc]").value=b.desc||"";r.querySelector("[data-b=pct]").value=b.tipo==="rev"?"":(b.pct||"");r.querySelector("[data-b=svc]").value=b.svc||"Instalação";
+  r.querySelector("[data-b=tipoq]").value=(b.tipo==="rev"?"rev|primeira":"desc|"+(b.quando==="primeira"?"primeira":"sempre"));r.dataset.id=b.id||uid();
+  const sync=()=>{r.querySelector("[data-b=pct]").disabled=r.querySelector("[data-b=tipoq]").value.startsWith("rev")};r.querySelector("[data-b=tipoq]").onchange=sync;sync();
+  r.querySelector(".rm").onclick=()=>r.remove();$("#igBens").appendChild(r)}
+function readBens(){return $$("#igBens .bnrow").map(r=>{const tq=r.querySelector("[data-b=tipoq]").value.split("|");return{id:r.dataset.id,on:r.querySelector("[data-b=on]").checked,desc:r.querySelector("[data-b=desc]").value.trim(),pct:tq[0]==="rev"?0:(Number(r.querySelector("[data-b=pct]").value)||0),svc:r.querySelector("[data-b=svc]").value,tipo:tq[0],quando:tq[1]}}).filter(b=>b.desc)}
+$("#igBenAdd").onclick=()=>{benRow(null);const l=$$("#igBens .bnrow");l[l.length-1].querySelector("[data-b=desc]").focus()};
 function openIg(g){igEdit=g;$("#igT").textContent=g?"Editar grupo":"Novo grupo de indicação";$("#igCliNames").innerHTML=clients.map(c=>'<option value="'+esc(c.cliNome)+'">').join("");
   $("#igTipo").value=g?g.tipo:"parc";$("#igNome").value=g?g.nome:"";$("#igDono").value=g?(g.donoNome||""):"";$("#igTel").value=g?(g.tel||""):"";$("#igDesc").value=g&&g.desc?g.desc:"";
-  $("#igValor").value=g&&g.valor?fmt(parseMoney(g.valor)):"";$("#igIni").value=g?(g.ini||""):today();$("#igFim").value=g?(g.fim||""):"";$("#igAviso").checked=g?!!g.aviso:false;$("#igDel").hidden=!g;igTipoUI();openM("#mIg")}
+  $("#igValor").value=g&&g.valor?fmt(parseMoney(g.valor)):"";$("#igIni").value=g?(g.ini||""):today();$("#igFim").value=g?(g.fim||""):"";$("#igAviso").checked=g?!!g.aviso:false;$("#igDel").hidden=!g;
+  $("#igBens").innerHTML="";if(g&&g.tipo==="conv")(g.bens||[]).forEach(benRow);const rw=convRw(g||{});$("#igRwSvc").innerHTML=SERVICES.map(x=>"<option>"+x+"</option>").join("");$("#igRwOn").checked=rw.on;$("#igRwN").value=rw.n;$("#igRwPct").value=rw.pct;$("#igRwSvc").value=rw.svc;
+  igTipoUI();openM("#mIg")}
 $("#igTipo").addEventListener("change",igTipoUI);
 $("#igDono").addEventListener("change",()=>{const c=clients.find(x=>x.key===norm($("#igDono").value));if(c){$("#igDono").value=c.cliNome;if(!$("#igTel").value&&c.cliTel)$("#igTel").value=c.cliTel}});
 $("#igValor").addEventListener("blur",e=>{if(e.target.value.trim())e.target.value=fmt(parseMoney(e.target.value))});
 $("#igSave").onclick=async()=>{const nome=$("#igNome").value.trim(),dn=$("#igDono").value.trim(),tipo=$("#igTipo").value;
-  if(!nome){toast("Coloque o nome do grupo");return}if(!dn){toast(tipo==="cond"?"Coloque o nome do síndico ou responsável":"Coloque o nome do(a) dono(a)");return}
+  if(!nome){toast("Coloque o nome do grupo");return}if(!dn){toast(tipo==="cond"?"Coloque o nome do síndico ou responsável":tipo==="conv"?"Coloque o nome do responsável no convênio":"Coloque o nome do(a) dono(a)");return}
   const ini=$("#igIni").value,fim=$("#igFim").value;if(tipo==="parc"&&ini&&fim&&fim<ini){toast("O fim do prazo está antes do início");return}
   const g=Object.assign({},igEdit||{id:uid(),criadoEm:Date.now()},{tipo,nome,donoNome:dn,dono:norm(dn),tel:$("#igTel").value.trim(),desc:Number($("#igDesc").value)||0,
     valor:tipo==="parc"?fmt(parseMoney($("#igValor").value)):"",ini:tipo==="parc"?ini:"",fim:tipo==="parc"?fim:"",aviso:tipo==="parc"&&$("#igAviso").checked,atualizadoEm:Date.now()});
+  if(tipo==="conv"){g.desc=0;g.bens=readBens();g.rw={on:$("#igRwOn").checked,n:Math.max(1,Number($("#igRwN").value)||6),pct:Math.min(100,Math.max(1,Number($("#igRwPct").value)||50)),svc:$("#igRwSvc").value}}else{delete g.bens;delete g.rw}
   cfg.indGrupos=grupos().filter(x=>x.id!==g.id).concat([g]);await saveCfgGrupos();
   await upsertClient({cliNome:dn,cliTel:g.tel});await refresh();
   if(tipo==="cond"){const c=clients.find(x=>x.key===g.dono);if(c&&c.grupo!==g.id){c.grupo=g.id;c.atualizadoEm=Date.now();await DB.put("clients",c);await refresh()}}
@@ -4070,7 +4134,7 @@ $("#teamList").addEventListener("click",async e=>{const b=e.target.closest("[dat
 /* ============================================================
    NUVEM (Supabase): login + sincronização
    ============================================================ */
-const APP_VERSION="Versão 32 · 24/11/2026 · Preventiva: corrente da etiqueta e botão novo";
+const APP_VERSION="Versão 33 · 24/11/2026 · Convênio (banco) com benefícios";
 const SB_URL="https://xipiemiyvrwfxosbfpvl.supabase.co",SB_KEY="sb_publishable_RtUvyM---ErVKDlMnonTVg_AEy9yL5I";
 let sb=null,appStarted=false;
 function fnv(s){let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(36)+s.length.toString(36)}
