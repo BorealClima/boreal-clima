@@ -586,10 +586,15 @@ body.func .adm{display:none!important}
   <section class="card">
     <h2><span class="n">1</span>Cliente</h2>
     <div class="grid">
-      <label class="f wide">Nome do cliente<input type="text" data-mp="cliNome" list="cliNames" autocomplete="off" placeholder="Digite ou escolha um cliente"></label>
-      <label class="f">WhatsApp<input type="tel" data-mp="cliTel" placeholder="(19) 99999-9999"></label>
-      <label class="f">Cidade / UF<input type="text" data-mp="cliCidade"></label>
-      <label class="f wide">Endereço<input type="text" data-mp="cliEnd"></label>
+      <label class="f wide">Nome / Razão social<input type="text" data-mp="cliNome" list="cliNames" autocomplete="off" placeholder="Digite o nome: clientes já cadastrados aparecem aqui"></label>
+      <label class="f">CPF / CNPJ<input type="text" data-mp="cliDoc" inputmode="numeric"></label>
+      <label class="f">WhatsApp / Celular<input type="tel" data-mp="cliTel" placeholder="(00) 00000-0000"></label>
+      <label class="f">E-mail<input type="email" data-mp="cliEmail"></label>
+      <label class="f wide">Endereço do serviço<input type="text" data-mp="cliEnd" placeholder="Rua, número, complemento"></label>
+      <label class="f">Bairro<input type="text" data-mp="cliBairro"></label>
+      <label class="f">Cidade<input type="text" data-mp="cliCidade"></label>
+      <label class="f">Estado (UF)<input type="text" data-mp="cliUf" maxlength="2" style="text-transform:uppercase"></label>
+      <label class="f">CEP<input type="text" data-mp="cliCep" inputmode="numeric"></label>
     </div>
   </section>
   <section class="card">
@@ -604,7 +609,6 @@ body.func .adm{display:none!important}
       <label class="f">Marca<input type="text" data-mp="marca"></label>
       <label class="f">Modelo<input type="text" data-mp="modelo"></label>
       <label class="f">Tensão nominal<select data-mp="vnom"><option value="220">220 V</option><option value="127">127 V</option><option value="380">380 V</option></select></label>
-      <label class="f">Corrente nominal da placa (A)<input type="text" inputmode="decimal" data-mp="inom" placeholder="Ex.: 5,2"></label>
     </div>
     <datalist id="mpEqNames"></datalist>
   </section>
@@ -630,20 +634,17 @@ body.func .adm{display:none!important}
       <label class="f">Corrente do compressor (A)<input type="text" inputmode="decimal" data-mp="a" placeholder="Ex.: 4,8"></label>
     </div>
     <h3 class="fint">Pressões e temperaturas do gás</h3>
+    <input type="hidden" data-mp="un" id="mpUn" value="psi">
     <div class="grid">
       <label class="f">Temperatura ambiente externa (°C)<input type="text" inputmode="decimal" data-mp="text" placeholder="Ex.: 30"></label>
-      <label class="f">Unidade do manifold<select data-mp="un" id="mpUn"><option value="psi">psi</option><option value="bar">bar</option></select></label>
+      <label class="f">Temperatura do tubo de sucção (°C)<input type="text" inputmode="decimal" data-mp="tsuc" placeholder="Tubo grosso, na condensadora"></label>
     </div>
     <div class="mpref" id="mpRepOut"></div>
     <div class="grid">
-      <label class="f">Pressão de repouso, desligado (<span class="mp-un">psi</span>)<input type="text" inputmode="decimal" data-mp="prep" placeholder="Com a máquina parada há 15 min"></label>
-      <label class="f">Pressão de trabalho, ligado (<span class="mp-un">psi</span>)<input type="text" inputmode="decimal" data-mp="pbaixa" placeholder="Na válvula de serviço (baixa)"></label>
-      <label class="f">Temperatura do tubo de sucção (°C)<input type="text" inputmode="decimal" data-mp="tsuc" placeholder="Tubo grosso, na condensadora"></label>
-    </div><div class="mpout" id="mpTevOut"></div>
-    <div class="grid">
-      <label class="f">Pressão de alta, opcional (<span class="mp-un">psi</span>)<input type="text" inputmode="decimal" data-mp="palta" placeholder="Se tiver tomada de alta"></label>
-      <label class="f">Temperatura do tubo de descarga (°C)<input type="text" inputmode="decimal" data-mp="tdesc" placeholder="A 5–10 cm do compressor"></label>
-    </div><div class="mpout" id="mpTcoOut"></div>
+      <label class="f">Pressão de repouso (psi)<input type="text" inputmode="decimal" data-mp="prep" placeholder="Máquina desligada há 15 min"></label>
+      <label class="f">Pressão de trabalho (psi)<input type="text" inputmode="decimal" data-mp="pbaixa" placeholder="Máquina ligada"></label>
+    </div>
+    <div class="mpout" id="mpTevOut"></div><div id="mpTcoOut" hidden></div>
   </section>
   <section class="card">
     <h2><span class="n">5</span>Resultados e diagnóstico</h2>
@@ -655,6 +656,9 @@ body.func .adm{display:none!important}
       <label class="f wide">Observações do técnico<textarea data-mp="obs" rows="3" placeholder="O que foi feito: limpeza de filtros, serpentina, dreno…"></textarea></label>
       <label class="f wide">Recomendações ao cliente<textarea data-mp="rec" rows="3"></textarea></label>
     </div>
+    <h3 class="fint" style="margin-top:14px">Assinatura do técnico</h3>
+    <div class="sigwrap"><canvas id="mpSig"></canvas><div class="base"></div><div class="ph-t">Assine aqui</div></div>
+    <div class="sigbar"><span class="hint" style="margin:0;flex:1" id="mpSigHint"></span><button class="btn line small" type="button" id="mpSigSaved">Usar assinatura salva</button><button class="btn line small" type="button" id="mpSigClear">Limpar</button></div>
     <div class="actions" style="margin-top:14px"><button class="btn line" type="button" id="mpClear">Limpar</button><span style="flex:1"></span><button class="btn primary" type="button" id="mpGen">✓ Finalizar e salvar na ficha</button></div>
   </section>
 </main>
@@ -3899,7 +3903,7 @@ const ST={ok:["OK","ok"],at:["Atenção","warn"],cu:["Cuidado","bad"]};
 function band(v,okLo,okHi,atLo,atHi){if(v==null)return null;if(v>=okLo&&v<=okHi)return"ok";if(v>=atLo&&v<=atHi)return"at";return"cu"}
 function mpWork(gas,text,un){let lo=2,hi=10;if(text!=null){if(text<=25){lo=1;hi=8}else if(text>35){lo=3;hi=12}}
   return{lo,hi,plo:fromAbs(pSat(gas,lo,"V"),un),phi:fromAbs(pSat(gas,hi,"V"),un)}}
-function mpCalc(f){const un=f.un||"psi",gas=f.gas||"R-410A",R=[];const n=k=>mpN(f[k]);
+function mpCalc(f,prev){const un=f.un||"psi",gas=f.gas||"R-410A",R=[];const n=k=>mpN(f[k]);
   const tret=n("tret"),tins=n("tins"),V=n("v"),A=n("a"),vnom=n("vnom"),inom=n("inom"),text=n("text");
   const prep=n("prep"),pb=n("pbaixa"),tsuc=n("tsuc"),pa=n("palta"),tdesc=n("tdesc");
   const add=(id,lab,val,unit,st,ref,msg)=>R.push({id,lab,val,unit,st,ref,msg});
@@ -3910,6 +3914,10 @@ function mpCalc(f){const un=f.un||"psi",gas=f.gas||"R-410A",R=[];const n=k=>mpN(
   if(V!=null&&vnom){const d=(V-vnom)/vnom*100,st=band(Math.abs(d),0,5,5,10);
     add("v","Tensão de chegada",V,"V",st,vnom+" V ±5%",st==="ok"?"Tensão dentro do normal.":(d<0?"Tensão baixa ("+num1(d)+"%): ":"Tensão alta (+"+num1(d)+"%): ")+"verifique a rede, o disjuntor e as conexões. Fora de ±10% pode danificar o compressor e a placa.")}
   // corrente
+  if(A!=null&&!inom){let st=null,ref="",msg="Valor medido.";
+    if(prev&&prev.a){const d=(A-prev.a)/prev.a*100;ref="na última preventiva ("+br(prev.data)+"): "+num1(prev.a)+" A ("+(d>0?"+":"")+Math.round(d)+"%)";st=Math.abs(d)<=20?"ok":"at";
+      msg=st==="ok"?"Parecida com a última preventiva desta máquina.":"Mudou mais de 20% desde a última preventiva: vale investigar a carga de fluido, a tensão e o compressor."}
+    add("a","Corrente do compressor",A,"A",st,ref,msg)}
   if(A!=null&&inom){const p=A/inom*100;let st=p<=100?"ok":p<=110?"at":"cu",msg=st==="ok"?"Corrente dentro da nominal ("+Math.round(p)+"% da placa).":"Corrente acima da nominal ("+Math.round(p)+"% da placa): condensadora suja, excesso de fluido, tensão baixa ou compressor forçando.";
     if(p<45&&f.tec!=="Inverter"){st="at";msg="Corrente muito baixa ("+Math.round(p)+"% da placa): possível falta de fluido ou compressor com baixa compressão."}
     add("a","Corrente do compressor",A,"A",st,"até "+num1(inom)+" A (placa)",msg)}
@@ -3935,34 +3943,39 @@ function mpCalc(f){const un=f.un||"psi",gas=f.gas||"R-410A",R=[];const n=k=>mpN(
   const order={cu:3,at:2,ok:1};let geral=null;R.forEach(r=>{if(r.st&&(!geral||order[r.st]>order[geral]))geral=r.st});
   return{R,geral,tev,tco}}
 /* ---------- tela ---------- */
-const MP_DRAFT="boreal_mp_draft";let mpEdit=null;
-function mpGet(){const f={};$$("#pg-mp [data-mp]").forEach(i=>f[i.dataset.mp]=i.value);return f}
-function mpSet(f){$$("#pg-mp [data-mp]").forEach(i=>{const k=i.dataset.mp,v=f&&f[k]!=null?f[k]:"";if(i.tagName==="SELECT"){i.value=v;if(i.selectedIndex<0)i.selectedIndex=0}else i.value=v})}
-function mpDefaults(){mpSet({data:today(),gas:"R-410A",un:"psi",vnom:"220",tec:"Inverter",tipo:"Split hi-wall",tecnico:cfg.tecnico||""});mpEdit=null}
+const MP_DRAFT="boreal_mp_draft";let mpEdit=null;const mpPad=Pad($("#mpSig"));
+$("#mpSig").addEventListener("signed",()=>mpSave());
+$("#mpSigClear").onclick=()=>{mpPad.clear();mpSave()};
+$("#mpSigSaved").onclick=()=>{if(cfg.sig){mpPad.load(cfg.sig);mpSave()}else toast("Nenhuma assinatura salva ainda. Abra ⚙️ Configurações.")};
+function mpGet(){const f={};$$("#pg-mp [data-mp]").forEach(i=>f[i.dataset.mp]=i.value);f.un="psi";f.sig=mpPad?mpPad.toDataURL():"";return f}
+function mpSet(f){$$("#pg-mp [data-mp]").forEach(i=>{const k=i.dataset.mp,v=f&&f[k]!=null?f[k]:"";if(i.tagName==="SELECT"){i.value=v;if(i.selectedIndex<0)i.selectedIndex=0}else i.value=v});$("#mpUn").value="psi";if(mpPad)mpPad.load((f&&f.sig)||cfg.sig||"")}
+function mpDefaults(){mpSet({data:today(),gas:"R-410A",un:"psi",vnom:"220",tec:"Inverter",tipo:"Split hi-wall",tecnico:cfg.tecnico||"",sig:cfg.sig||""});mpEdit=null}
 function mpSave(){LS.set(MP_DRAFT,{f:mpGet(),edit:mpEdit})}
-function mpUnits(){const un=$("#mpUn").value;$$("#pg-mp .mp-un").forEach(e=>e.textContent=un)}
-function mpRender(){const f=mpGet(),c=mpCalc(f);mpUnits();
+function mpUnits(){}
+function mpPrevA(key,eq,except,before){const p=mpPrev(key,eq,except,before);const a=p?mpN(((p.payload||{}).f||{}).a):null;return a!=null?{a,data:p.data}:null}
+function mpRender(){const f=mpGet(),c=mpCalc(f,mpPrevA(norm(f.cliNome||""),f.eqId,mpEdit&&mpEdit.id,f.data));
   const pill=st=>st?'<span class="pill '+ST[st][1]+'">'+ST[st][0]+"</span>":'<span class="pill">—</span>';
   $("#mpRes").innerHTML=c.R.length?(c.geral?'<div class="mpg mpg-'+c.geral+'">Diagnóstico geral: <b>'+ST[c.geral][0]+"</b>"+(c.geral==="ok"?" · tudo dentro das referências":c.geral==="at"?" · há pontos para acompanhar":" · há pontos que precisam de correção")+"</div>":"")+
     c.R.map(r=>'<div class="mpr mpr-'+(r.st||"na")+'"><div class="mpr-h"><span>'+r.lab+'</span><b>'+num1(r.val)+" "+esc(r.unit)+"</b>"+pill(r.st)+'</div><div class="mpr-m">'+(r.ref?"<small>Referência: "+esc(r.ref)+"</small><br>":"")+esc(r.msg)+"</div></div>").join("")
     :'<p class="hint">Preencha as medições para ver os cálculos e o diagnóstico.</p>';
+  $("#mpSigHint").innerHTML=cfg.sig?'<span class="sigok">✓ Sua assinatura salva entra sozinha</span>':"Assine aqui ou salve sua assinatura em ⚙️ Configurações.";
   $("#mpTevOut").textContent=c.tev!=null?"Evaporação: "+num1(c.tev)+" °C":"";$("#mpTcoOut").textContent=c.tco!=null?"Condensação: "+num1(c.tco)+" °C":"";
   const tr=mpN(f.tret),ti=mpN(f.tins);$("#mpDtOut").textContent=tr!=null&&ti!=null?"Delta T: "+num1(tr-ti)+" °C":"";
   const tx=mpN(f.text),u=f.un||"psi",gs=f.gas||"R-410A";
   if(tx!=null){const W=mpWork(gs,tx,u);$("#mpRepOut").innerHTML="📘 <b>"+gs+" com "+num1(tx)+" °C lá fora</b> · repouso esperado: <b>≈ "+num1(fromAbs(pSat(gs,tx,"V"),u))+" "+u+"</b> (±10%) · trabalho normal: <b>"+num1(W.plo)+" a "+num1(W.phi)+" "+u+"</b>"}
   else $("#mpRepOut").innerHTML="📘 Coloque a <b>temperatura ambiente externa</b> para ver a pressão de repouso e de trabalho esperadas para o "+gs+".";
   mpHist(f)}
-function mpPrev(key,eq,except){return docs.filter(d=>d.type==="mp"&&d.cli===key&&d.id!==except&&norm(((d.payload||{}).f||{}).eqId||"")===norm(eq||"")).sort((a,b)=>(b.data||"").localeCompare(a.data||""))[0]||null}
+function mpPrev(key,eq,except,before){return docs.filter(d=>d.type==="mp"&&d.cli===key&&d.id!==except&&(!before||(d.data||"")<=before)&&norm(((d.payload||{}).f||{}).eqId||"")===norm(eq||"")).sort((a,b)=>(b.data||"").localeCompare(a.data||""))[0]||null}
 function mpHist(f){const key=norm(f.cliNome||""),el=$("#mpHist");if(!key){el.innerHTML="";return}
   const eqs=[...new Set(docs.filter(d=>d.type==="mp"&&d.cli===key).map(d=>((d.payload||{}).f||{}).eqId||"").filter(Boolean))];
   $("#mpEqNames").innerHTML=eqs.map(e=>'<option value="'+esc(e)+'">').join("");
   const p=mpPrev(key,f.eqId,mpEdit&&mpEdit.id);if(!p){el.innerHTML=eqs.length?'<p class="hint">Equipamentos já cadastrados deste cliente: '+eqs.map(esc).join(", ")+".</p>":"";return}
   const pc=mpCalc(p.payload.f),g=id=>{const r=pc.R.find(x=>x.id===id);return r?num1(r.val)+" "+r.unit:"—"};
-  el.innerHTML='<div class="banner">📋 Último relatório deste equipamento: <b>'+br(p.data)+"</b> · Delta T "+g("dt")+" · superaquecimento "+g("sa")+" · corrente "+g("a")+" · descarga "+g("td")+(pc.geral?" · "+ST[pc.geral][0]:"")+"</div>"}
+  el.innerHTML='<div class="banner">📋 Último relatório deste equipamento: <b>'+br(p.data)+"</b> · Delta T "+g("dt")+" · repouso "+g("prep")+" · trabalho "+g("pb")+" · superaquecimento "+g("sa")+" · corrente "+g("a")+(pc.geral?" · "+ST[pc.geral][0]:"")+"</div>"}
 $("#pg-mp").addEventListener("input",e=>{if(e.target.closest("[data-mp]")){mpRender();mpSave()}});
 $("#pg-mp").addEventListener("change",e=>{const i=e.target.closest("[data-mp]");if(!i)return;
-  if(i.dataset.mp==="cliNome"){const c=clients.find(x=>x.key===norm(i.value));if(c){i.value=c.cliNome;const s=(k,v)=>{const el=$('#pg-mp [data-mp='+k+']');if(el&&!el.value&&v)el.value=v};s("cliTel",c.cliTel);s("cliEnd",[c.cliEnd,c.cliBairro].filter(Boolean).join(" – "));s("cliCidade",[c.cliCidade,c.cliUf].filter(Boolean).join(" / "))}}
-  if(i.dataset.mp==="eqId"){const key=norm(mpGet().cliNome||"");const p=mpPrev(key,i.value,mpEdit&&mpEdit.id);if(p){const pf=p.payload.f;["tipo","marca","modelo","btus","tec","gas","vnom","inom"].forEach(k=>{const el=$('#pg-mp [data-mp='+k+']');if(el&&pf[k])el.value=pf[k]})}}
+  if(i.dataset.mp==="cliNome"){const c=clients.find(x=>x.key===norm(i.value));if(c){i.value=c.cliNome;["cliDoc","cliTel","cliEmail","cliEnd","cliBairro","cliCidade","cliUf","cliCep"].forEach(k=>{const el=$('#pg-mp [data-mp='+k+']');if(el&&!el.value&&c[k])el.value=c[k]})}}
+  if(i.dataset.mp==="eqId"){const key=norm(mpGet().cliNome||"");const p=mpPrev(key,i.value,mpEdit&&mpEdit.id);if(p){const pf=p.payload.f;["tipo","marca","modelo","btus","tec","gas","vnom"].forEach(k=>{const el=$('#pg-mp [data-mp='+k+']');if(el&&pf[k])el.value=pf[k]})}}
   if(i.dataset.mp==="un"){const old=i.dataset.prev||"psi",nu=i.value;if(old!==nu)["prep","pbaixa","palta"].forEach(k=>{const el=$('#pg-mp [data-mp='+k+']');const v=mpN(el.value);if(v!=null)el.value=String(Math.round(fromAbs(toAbs(v,old),nu)*10)/10).replace(".",",")});i.dataset.prev=nu}
   mpRender();mpSave()});
 $("#mpClear").onclick=async()=>{if(!(await ask("Limpar o relatório?","Os dados que estão na tela serão apagados.","Limpar")))return;mpDefaults();$("#mpUn").dataset.prev="psi";mpSave();mpRender();window.scrollTo(0,0)};
@@ -3970,7 +3983,7 @@ function mpOpen(d){mpSet(d.payload.f);mpEdit={id:d.id,criadoEm:d.criadoEm};$("#m
 $("#mpGen").onclick=async()=>{const f=mpGet();if(!f.cliNome.trim()){toast("Coloque o nome do cliente");$('#pg-mp [data-mp=cliNome]').focus();return}
   if(!f.eqId.trim()){toast("Identifique o equipamento (ex.: Split da sala)");$('#pg-mp [data-mp=eqId]').focus();return}
   const c=mpCalc(f);if(!c.R.length){toast("Preencha ao menos uma medição");return}
-  const cli=await upsertClient({cliNome:f.cliNome.trim(),cliTel:f.cliTel});const key=cli?cli.key:norm(f.cliNome);
+  const cd={cliNome:f.cliNome.trim()};["cliDoc","cliTel","cliEmail","cliEnd","cliBairro","cliCidade","cliUf","cliCep"].forEach(k=>{if(f[k])cd[k]=k==="cliUf"?f[k].toUpperCase():f[k]});const cli=await upsertClient(cd);const key=cli?cli.key:norm(f.cliNome);
   const id=mpEdit?mpEdit.id:"mp_"+uid();
   const rec={id,type:"mp",num:0,cli:key,cliNome:f.cliNome.trim(),data:f.data||today(),total:0,svc:["Manutenção preventiva"],status:c.geral||"",criadoEm:mpEdit?mpEdit.criadoEm:Date.now(),atualizadoEm:Date.now(),payload:{type:"mp",f,geral:c.geral}};
   await DB.put("docs",rec);await refresh();mpEdit={id,criadoEm:rec.criadoEm};mpSave();
@@ -3984,12 +3997,12 @@ async function showMpPdf(rec){const pages=await renderMpPDF(rec);const f=rec.pay
   const wa=$("#btnWa");if(n){wa.href=waLink(n,"Olá"+(fn?", "+fn:"")+"! Aqui é da "+emp+". Segue o relatório da manutenção preventiva do seu ar-condicionado ("+(f.eqId||"equipamento")+"), com todas as medições. Qualquer dúvida, estamos à disposição!");wa.target=waTarget();wa.style.display=""}else wa.style.display="none";
   $("#btnRev").hidden=true;$("#revBack").textContent="Fechar";$("#btnNew2").hidden=true;openM("#mReview")}
 async function renderMpPDF(rec){try{await (document.fonts&&document.fonts.ready)}catch(_){}
-  const f=rec.payload.f,c=mpCalc(f),un=f.un||"psi",nome=cfg.nome||"Boreal Clima",custom=cfg.logo?await loadImg(cfg.logo).catch(()=>null):null;
+  const f=rec.payload.f,c=mpCalc(f,mpPrevA(rec.cli,f.eqId,rec.id,rec.data)),un=f.un||"psi",nome=cfg.nome||"Boreal Clima",custom=cfg.logo?await loadImg(cfg.logo).catch(()=>null):null;
   const meta={nome,cnpj:cfg.cnpj,tel:cfg.tel,email:cfg.email,end:cfg.end,site:cfg.site,num:"",numTxt:br(rec.data),title:"RELATÓRIO DE MANUTENÇÃO PREVENTIVA",short:"Preventiva",
     hdr2:nome+" · Manutenção preventiva · "+f.cliNome,dataTxt:br(rec.data),cliente:f.cliNome,logoImg:custom,lock:custom?null:await loadImg(LOGO_LOCK),showName:!!custom||norm(nome)!=="boreal clima"};
   const d=new Doc(meta);
-  d.section("Cliente");d.fields([["Nome",f.cliNome],["WhatsApp",f.cliTel],["Endereço",f.cliEnd],["Cidade",f.cliCidade]],2);
-  d.section("Equipamento");d.fields([["Identificação",f.eqId],["Tipo",f.tipo],["Marca / modelo",[f.marca,f.modelo].filter(Boolean).join(" · ")],["Capacidade",f.btus?f.btus+" BTU/h":""],["Tecnologia",f.tec],["Fluido refrigerante",f.gas],["Tensão nominal",f.vnom?f.vnom+" V":""],["Corrente nominal (placa)",f.inom?f.inom+" A":""]],2);
+  d.section("Cliente");d.fields([["Nome / Razão social",f.cliNome],["CPF / CNPJ",f.cliDoc],["WhatsApp / Celular",f.cliTel],["E-mail",f.cliEmail],["Endereço do serviço",[f.cliEnd,f.cliBairro].filter(Boolean).join(" – ")],["Cidade / UF",[f.cliCidade,(f.cliUf||"").toUpperCase()].filter(Boolean).join(" / ")],["CEP",f.cliCep]],2);
+  d.section("Equipamento");d.fields([["Identificação",f.eqId],["Tipo",f.tipo],["Marca / modelo",[f.marca,f.modelo].filter(Boolean).join(" · ")],["Capacidade",f.btus?f.btus+" BTU/h":""],["Tecnologia",f.tec],["Fluido refrigerante",f.gas],["Tensão nominal",f.vnom?f.vnom+" V":""]],2);
   d.section("Condições da medição");d.fields([["Data",br(rec.data)],["Temperatura ambiente externa",f.text?f.text+" °C":""],["Temperatura ambiente interno",f.tint?f.tint+" °C":""],["Técnico",f.tecnico]],2);
   d.section("Medições");
   const raw=[["Temperatura de retorno (entrada de ar)",f.tret,"°C"],["Temperatura de insuflamento (saída de ar)",f.tins,"°C"],["Tensão de chegada",f.v,"V"],["Corrente do compressor",f.a,"A"],
@@ -4003,6 +4016,12 @@ async function renderMpPDF(rec){try{await (document.fonts&&document.fonts.ready)
     d.text(r.lab,MX+20,d.y+12,"700",19,C.navy);d.text(num1(r.val)+" "+r.unit+"   "+(r.st?ST[r.st][0].toUpperCase():""),PW-MX-18,d.y+12,"800",19,col,"right");
     ls.forEach((l,i)=>d.text(l,MX+20,d.y+44+i*24,"500",17,C.text));d.y+=h});
   if(f.obs||f.rec){d.section("Observações");[["Observações do técnico",f.obs],["Recomendações ao cliente",f.rec]].forEach(([t,v])=>{if(!v)return;d.ensure(70);d.text(t.toUpperCase(),MX,d.y,"700",16,C.muted);d.y+=30;d.para(v,20);d.y+=12})}
+  {const tecImg=f.sig?await loadImg(f.sig).catch(()=>null):null;const colW=(CW-60)/2,sh=110,top=24;d.ensure(top+sh+110);const y0=d.y+10,x=MX+colW+60;
+    d.text("ASSINATURA DO TÉCNICO",x,y0,"700",16,C.muted);
+    if(tecImg){const sc=Math.min((colW-20)/tecImg.width,(sh-6)/tecImg.height,1.3);const w=tecImg.width*sc,h=tecImg.height*sc;d.g.drawImage(tecImg,x+(colW-w)/2,y0+top+sh-h,w,h)}
+    d.g.fillStyle=C.text;d.g.fillRect(x,y0+top+sh+6,colW,2);
+    d.text(f.tecnico||cfg.tecnico||nome,x+colW/2,y0+top+sh+18,"700",21,C.text,"center");d.text("Técnico responsável · "+nome,x+colW/2,y0+top+sh+46,"500",17,C.muted,"center");
+    d.text("Data: "+br(rec.data),x+colW/2,y0+top+sh+70,"500",15,C.muted,"center");d.y=y0+top+sh+100}
   d.y+=6;d.para("Referências usadas: tabelas de saturação pressão × temperatura do fluido (pressões convertidas de "+un+" manométrico), pressão de repouso = saturação na temperatura ambiente (±10%), pressão de trabalho pela evaporação de 2 a 10 °C (ajustada pela temperatura externa), superaquecimento 4–8 K, Delta T 8–13 °C. Em aparelhos inverter, as medições valem com o compressor em alta rotação (modo teste ou refrigeração máxima por 15 min). Sempre que existir, vale a referência do manual do fabricante.",15);
   const n=d.pages.length;d.pages.forEach((cv,i)=>{const gg=cv.getContext("2d");gg.textBaseline="top";gg.fillStyle=C.blue;gg.fillRect(MX,PH-FOOT+18,CW,2);
     gg.font="500 16px "+FONT;gg.fillStyle=C.muted;gg.textAlign="left";gg.fillText(nome+" · Relatório gerado em "+fmtStamp(rec.atualizadoEm||Date.now()),MX,PH-FOOT+36);
@@ -4046,7 +4065,7 @@ $("#teamList").addEventListener("click",async e=>{const b=e.target.closest("[dat
 /* ============================================================
    NUVEM (Supabase): login + sincronização
    ============================================================ */
-const APP_VERSION="Versão 30 · 24/11/2026 · Pressões de repouso e trabalho por gás e temperatura";
+const APP_VERSION="Versão 31 · 24/11/2026 · Preventiva: cliente completo, assinatura e ajustes";
 const SB_URL="https://xipiemiyvrwfxosbfpvl.supabase.co",SB_KEY="sb_publishable_RtUvyM---ErVKDlMnonTVg_AEy9yL5I";
 let sb=null,appStarted=false;
 function fnv(s){let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(36)+s.length.toString(36)}
