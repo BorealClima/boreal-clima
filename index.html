@@ -608,6 +608,7 @@ body.func .adm{display:none!important}
       <label class="f">Capacidade (BTU/h)<select data-mp="btus"><option value="">—</option><option>7.000</option><option>9.000</option><option>12.000</option><option>18.000</option><option>22.000</option><option>24.000</option><option>30.000</option><option>36.000</option><option>48.000</option><option>58.000</option><option>60.000</option></select></label>
       <label class="f">Marca<input type="text" data-mp="marca"></label>
       <label class="f">Modelo<input type="text" data-mp="modelo"></label>
+      <label class="f">Corrente do compressor – etiqueta (A)<input type="text" inputmode="decimal" data-mp="inom" placeholder="Valor da etiqueta"></label>
       <label class="f">Tensão nominal<select data-mp="vnom"><option value="220">220 V</option><option value="127">127 V</option><option value="380">380 V</option></select></label>
     </div>
     <datalist id="mpEqNames"></datalist>
@@ -3381,14 +3382,14 @@ function setDockLabel(){$("#btnGen").textContent=tab==="orc"?"Gerar orçamento":
 function showTab(t){if(isFunc()&&["fin","pn"].includes(t))t="cli";tab=t;LS.set("boreal_tab",t);
   $$(".tab").forEach(b=>{b.classList.toggle("on",b.dataset.tab===t);b.setAttribute("aria-selected",b.dataset.tab===t)});
   $$(".page").forEach(p=>p.classList.toggle("on",p.id==="pg-"+t));
-  const noDock=["cli","fin","ag","pn","mp"].includes(t);$(".dock").hidden=noDock;$("#hdrNum").hidden=noDock;$("#btnNew").hidden=t==="fin"||t==="pn"||t==="mp";
+  const noDock=["cli","fin","ag","pn","mp"].includes(t);$(".dock").hidden=noDock;$("#hdrNum").hidden=noDock;$("#btnNew").hidden=t==="fin"||t==="pn";
   $("#hdrSub").textContent={cli:"Clientes",orc:"Orçamento",os:"Ordem de Serviço",fin:"Financeiro",ag:"Agenda",pn:"Painel",mp:"Manutenção preventiva"}[t];if(t==="mp")mpRender();
-  if(t!=="fin"&&t!=="pn")$("#btnNew").title=$("#btnNew").ariaLabel={cli:"Novo cliente",orc:"Novo orçamento",os:"Nova OS",ag:"Agendar serviço"}[t];
+  if(t!=="fin"&&t!=="pn")$("#btnNew").title=$("#btnNew").ariaLabel={cli:"Novo cliente",orc:"Novo orçamento",os:"Nova OS",ag:"Agendar serviço",mp:"Novo relatório de preventiva"}[t];
   setDockLabel();
   if(t==="cli")renderClientes();else if(t==="fin"){renderFin();renderFinEditors()}else if(t==="ag")renderAgenda();else if(t==="pn")renderPainel();else if(t==="mp")mpRender();else if(ctl[t])requestAnimationFrame(()=>ctl[t].onShow());
   window.scrollTo(0,0)}
 $$(".tab").forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
-$("#btnNew").onclick=()=>{if(tab==="cli")openClientModal(null);else if(tab==="ag")openAg(null);else if(ctl[tab])ctl[tab].newDoc(true)};
+$("#btnNew").onclick=()=>{if(tab==="mp")return mpNew();if(tab==="cli")openClientModal(null);else if(tab==="ag")openAg(null);else if(ctl[tab])ctl[tab].newDoc(true)};
 $("#btnGen").onclick=()=>{if(ctl[tab])ctl[tab].generate()};
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")Object.values(ctl).forEach(c=>c.flush())});
 window.addEventListener("pagehide",()=>Object.values(ctl).forEach(c=>c.flush()));
@@ -3918,9 +3919,9 @@ function mpCalc(f,prev){const un=f.un||"psi",gas=f.gas||"R-410A",R=[];const n=k=
     if(prev&&prev.a){const d=(A-prev.a)/prev.a*100;ref="na última preventiva ("+br(prev.data)+"): "+num1(prev.a)+" A ("+(d>0?"+":"")+Math.round(d)+"%)";st=Math.abs(d)<=20?"ok":"at";
       msg=st==="ok"?"Parecida com a última preventiva desta máquina.":"Mudou mais de 20% desde a última preventiva: vale investigar a carga de fluido, a tensão e o compressor."}
     add("a","Corrente do compressor",A,"A",st,ref,msg)}
-  if(A!=null&&inom){const p=A/inom*100;let st=p<=100?"ok":p<=110?"at":"cu",msg=st==="ok"?"Corrente dentro da nominal ("+Math.round(p)+"% da placa).":"Corrente acima da nominal ("+Math.round(p)+"% da placa): condensadora suja, excesso de fluido, tensão baixa ou compressor forçando.";
-    if(p<45&&f.tec!=="Inverter"){st="at";msg="Corrente muito baixa ("+Math.round(p)+"% da placa): possível falta de fluido ou compressor com baixa compressão."}
-    add("a","Corrente do compressor",A,"A",st,"até "+num1(inom)+" A (placa)",msg)}
+  if(A!=null&&inom){const p=A/inom*100;let st=p<=100?"ok":p<=110?"at":"cu",msg=st==="ok"?"Dentro do permitido pela etiqueta ("+Math.round(p)+"% da etiqueta).":"Acima da etiqueta ("+Math.round(p)+"%): condensadora suja, excesso de fluido, tensão baixa ou compressor forçando.";
+    if(p<45&&f.tec!=="Inverter"){st="at";msg="Corrente muito baixa ("+Math.round(p)+"% da etiqueta): possível falta de fluido ou compressor com baixa compressão."}
+    add("a","Corrente do compressor",A,"A",st,"até "+num1(inom)+" A (etiqueta)"+(prev&&prev.a?" · na última preventiva: "+num1(prev.a)+" A":""),msg)}
   // repouso
   if(prep!=null){const kp=toAbs(prep,un);let st=null,msg="Sem a temperatura ambiente externa não dá para comparar.",ref="";
     if(text!=null){const ps=pSat(gas,text,"V");const d=(kp-ps)/ps*100;st=band(Math.abs(d),0,10,10,20);ref="≈ "+num1(fromAbs(ps,un))+" "+un+" ("+gas+" a "+num1(text)+" °C)";
@@ -3972,21 +3973,25 @@ function mpHist(f){const key=norm(f.cliNome||""),el=$("#mpHist");if(!key){el.inn
   const p=mpPrev(key,f.eqId,mpEdit&&mpEdit.id);if(!p){el.innerHTML=eqs.length?'<p class="hint">Equipamentos já cadastrados deste cliente: '+eqs.map(esc).join(", ")+".</p>":"";return}
   const pc=mpCalc(p.payload.f),g=id=>{const r=pc.R.find(x=>x.id===id);return r?num1(r.val)+" "+r.unit:"—"};
   el.innerHTML='<div class="banner">📋 Último relatório deste equipamento: <b>'+br(p.data)+"</b> · Delta T "+g("dt")+" · repouso "+g("prep")+" · trabalho "+g("pb")+" · superaquecimento "+g("sa")+" · corrente "+g("a")+(pc.geral?" · "+ST[pc.geral][0]:"")+"</div>"}
-$("#pg-mp").addEventListener("input",e=>{if(e.target.closest("[data-mp]")){mpRender();mpSave()}});
+let mpDirty=false;
+$("#pg-mp").addEventListener("input",e=>{if(e.target.closest("[data-mp]")){mpDirty=true;mpRender();mpSave()}});
+async function mpNew(){const f=mpGet();const has=["cliNome","eqId","tret","tins","v","a","prep","pbaixa","tsuc","obs"].some(k=>String(f[k]||"").trim());
+  if(has&&mpDirty&&!(await ask("Começar um novo relatório?","O relatório que está na tela ainda não foi finalizado. Os dados dele serão apagados.","Começar novo")))return;
+  mpDefaults();mpDirty=false;mpSave();mpRender();window.scrollTo(0,0);toast("Novo relatório de preventiva")}
 $("#pg-mp").addEventListener("change",e=>{const i=e.target.closest("[data-mp]");if(!i)return;
   if(i.dataset.mp==="cliNome"){const c=clients.find(x=>x.key===norm(i.value));if(c){i.value=c.cliNome;["cliDoc","cliTel","cliEmail","cliEnd","cliBairro","cliCidade","cliUf","cliCep"].forEach(k=>{const el=$('#pg-mp [data-mp='+k+']');if(el&&!el.value&&c[k])el.value=c[k]})}}
-  if(i.dataset.mp==="eqId"){const key=norm(mpGet().cliNome||"");const p=mpPrev(key,i.value,mpEdit&&mpEdit.id);if(p){const pf=p.payload.f;["tipo","marca","modelo","btus","tec","gas","vnom"].forEach(k=>{const el=$('#pg-mp [data-mp='+k+']');if(el&&pf[k])el.value=pf[k]})}}
+  if(i.dataset.mp==="eqId"){const key=norm(mpGet().cliNome||"");const p=mpPrev(key,i.value,mpEdit&&mpEdit.id);if(p){const pf=p.payload.f;["tipo","marca","modelo","btus","tec","gas","vnom","inom"].forEach(k=>{const el=$('#pg-mp [data-mp='+k+']');if(el&&pf[k])el.value=pf[k]})}}
   if(i.dataset.mp==="un"){const old=i.dataset.prev||"psi",nu=i.value;if(old!==nu)["prep","pbaixa","palta"].forEach(k=>{const el=$('#pg-mp [data-mp='+k+']');const v=mpN(el.value);if(v!=null)el.value=String(Math.round(fromAbs(toAbs(v,old),nu)*10)/10).replace(".",",")});i.dataset.prev=nu}
   mpRender();mpSave()});
 $("#mpClear").onclick=async()=>{if(!(await ask("Limpar o relatório?","Os dados que estão na tela serão apagados.","Limpar")))return;mpDefaults();$("#mpUn").dataset.prev="psi";mpSave();mpRender();window.scrollTo(0,0)};
-function mpOpen(d){mpSet(d.payload.f);mpEdit={id:d.id,criadoEm:d.criadoEm};$("#mpUn").dataset.prev=d.payload.f.un||"psi";mpSave();showTab("mp");mpRender();window.scrollTo(0,0);toast("Editando o relatório de "+br(d.data))}
+function mpOpen(d){mpSet(d.payload.f);mpEdit={id:d.id,criadoEm:d.criadoEm};mpDirty=false;$("#mpUn").dataset.prev=d.payload.f.un||"psi";mpSave();showTab("mp");mpRender();window.scrollTo(0,0);toast("Editando o relatório de "+br(d.data))}
 $("#mpGen").onclick=async()=>{const f=mpGet();if(!f.cliNome.trim()){toast("Coloque o nome do cliente");$('#pg-mp [data-mp=cliNome]').focus();return}
   if(!f.eqId.trim()){toast("Identifique o equipamento (ex.: Split da sala)");$('#pg-mp [data-mp=eqId]').focus();return}
   const c=mpCalc(f);if(!c.R.length){toast("Preencha ao menos uma medição");return}
   const cd={cliNome:f.cliNome.trim()};["cliDoc","cliTel","cliEmail","cliEnd","cliBairro","cliCidade","cliUf","cliCep"].forEach(k=>{if(f[k])cd[k]=k==="cliUf"?f[k].toUpperCase():f[k]});const cli=await upsertClient(cd);const key=cli?cli.key:norm(f.cliNome);
   const id=mpEdit?mpEdit.id:"mp_"+uid();
   const rec={id,type:"mp",num:0,cli:key,cliNome:f.cliNome.trim(),data:f.data||today(),total:0,svc:["Manutenção preventiva"],status:c.geral||"",criadoEm:mpEdit?mpEdit.criadoEm:Date.now(),atualizadoEm:Date.now(),payload:{type:"mp",f,geral:c.geral}};
-  await DB.put("docs",rec);await refresh();mpEdit={id,criadoEm:rec.criadoEm};mpSave();
+  await DB.put("docs",rec);await refresh();mpEdit={id,criadoEm:rec.criadoEm};mpDirty=false;mpSave();
   try{await showMpPdf(rec)}catch(err){console.error(err);toast("Relatório salvo, mas houve erro ao gerar o PDF")}
   $("#revMsg").className="msg ok";$("#revMsg").textContent="✓ Salvo na ficha de "+rec.cliNome+" (aba Clientes).";$("#btnNew2").hidden=false;$("#btnNew2").textContent="Começar novo relatório";review.from="mp"};
 async function showMpPdf(rec){const pages=await renderMpPDF(rec);const f=rec.payload.f;const name="Preventiva_"+slug(f.cliNome)+"_"+slug(f.eqId||"")+"_"+(rec.data||today())+".pdf";
@@ -4002,7 +4007,7 @@ async function renderMpPDF(rec){try{await (document.fonts&&document.fonts.ready)
     hdr2:nome+" · Manutenção preventiva · "+f.cliNome,dataTxt:br(rec.data),cliente:f.cliNome,logoImg:custom,lock:custom?null:await loadImg(LOGO_LOCK),showName:!!custom||norm(nome)!=="boreal clima"};
   const d=new Doc(meta);
   d.section("Cliente");d.fields([["Nome / Razão social",f.cliNome],["CPF / CNPJ",f.cliDoc],["WhatsApp / Celular",f.cliTel],["E-mail",f.cliEmail],["Endereço do serviço",[f.cliEnd,f.cliBairro].filter(Boolean).join(" – ")],["Cidade / UF",[f.cliCidade,(f.cliUf||"").toUpperCase()].filter(Boolean).join(" / ")],["CEP",f.cliCep]],2);
-  d.section("Equipamento");d.fields([["Identificação",f.eqId],["Tipo",f.tipo],["Marca / modelo",[f.marca,f.modelo].filter(Boolean).join(" · ")],["Capacidade",f.btus?f.btus+" BTU/h":""],["Tecnologia",f.tec],["Fluido refrigerante",f.gas],["Tensão nominal",f.vnom?f.vnom+" V":""]],2);
+  d.section("Equipamento");d.fields([["Identificação",f.eqId],["Tipo",f.tipo],["Marca / modelo",[f.marca,f.modelo].filter(Boolean).join(" · ")],["Capacidade",f.btus?f.btus+" BTU/h":""],["Tecnologia",f.tec],["Fluido refrigerante",f.gas],["Tensão nominal",f.vnom?f.vnom+" V":""],["Corrente do compressor (etiqueta)",f.inom?String(f.inom).replace(".",",")+" A":""]],2);
   d.section("Condições da medição");d.fields([["Data",br(rec.data)],["Temperatura ambiente externa",f.text?f.text+" °C":""],["Temperatura ambiente interno",f.tint?f.tint+" °C":""],["Técnico",f.tecnico]],2);
   d.section("Medições");
   const raw=[["Temperatura de retorno (entrada de ar)",f.tret,"°C"],["Temperatura de insuflamento (saída de ar)",f.tins,"°C"],["Tensão de chegada",f.v,"V"],["Corrente do compressor",f.a,"A"],
@@ -4065,7 +4070,7 @@ $("#teamList").addEventListener("click",async e=>{const b=e.target.closest("[dat
 /* ============================================================
    NUVEM (Supabase): login + sincronização
    ============================================================ */
-const APP_VERSION="Versão 31 · 24/11/2026 · Preventiva: cliente completo, assinatura e ajustes";
+const APP_VERSION="Versão 32 · 24/11/2026 · Preventiva: corrente da etiqueta e botão novo";
 const SB_URL="https://xipiemiyvrwfxosbfpvl.supabase.co",SB_KEY="sb_publishable_RtUvyM---ErVKDlMnonTVg_AEy9yL5I";
 let sb=null,appStarted=false;
 function fnv(s){let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(36)+s.length.toString(36)}
